@@ -1,0 +1,6 @@
+[submodule "02_module/lef"]
+	path = 02_module/lef
+	url = https://github.com/The-OpenROAD-Project/lef
+[submodule "02_module/def"]
+	path = 02_module/def
+	url = https://github.com/The-OpenROAD-Project/def

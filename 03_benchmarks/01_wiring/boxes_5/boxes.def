@@ -1,0 +1,45 @@
+VERSION 5.7 ;
+DIVIDERCHAR "/" ;
+BUSBITCHARS "[]" ;
+DESIGN inverter_chain ;
+UNITS DISTANCE MICRONS 2000 ;
+DIEAREA ( 0 0 ) ( 12000 12000 ) ;
+
+ROW ROW_0 CoreSite 0 0 FS DO 236 by 1 STEP 760 0 ;
+ROW ROW_1 CoreSite 0 3420 N DO 236 by 1 STEP 760 0 ;
+ROW ROW_2 CoreSite 0 6840 FS DO 236 by 1 STEP 760 0 ;
+ROW ROW_3 CoreSite 0 10260 N DO 236 by 1 STEP 760 0 ;
+ROW ROW_4 CoreSite 0 13680 FS DO 236 by 1 STEP 760 0 ;
+ROW ROW_5 CoreSite 0 17100 N DO 236 by 1 STEP 760 0 ;
+ROW ROW_6 CoreSite 0 20520 FS DO 236 by 1 STEP 760 0 ;
+ROW ROW_7 CoreSite 0 23940 N DO 236 by 1 STEP 760 0 ;
+ROW ROW_8 CoreSite 0 27360 FS DO 236 by 1 STEP 760 0 ;
+ROW ROW_9 CoreSite 0 30780 N DO 236 by 1 STEP 760 0 ;
+ROW ROW_10 CoreSite 0 34200 FS DO 236 by 1 STEP 760 0 ;
+
+TRACKS X 380 DO 526 STEP 380 LAYER metal1 ;
+
+COMPONENTS 5 ;
+- _square01_ typeB ;
+- _square02_ typeA ;
+- _square03_ typeA ;
+- _square04_ typeA ;
+- _square05_ typeA ;
+END COMPONENTS
+
+
+PINS 2 ;
+- in1_i + NET in1_i + DIRECTION INPUT ;
+- out_o + NET out_o + DIRECTION OUTPUT ;
+END PINS
+
+NETS 6 ;
+- in1_i ( PIN in1_i ) ( _square01_ a ) ;
+- connect_0 ( _square01_ o ) ( _square02_ a ) ;
+- connect_1 ( _square02_ o ) ( _square03_ a ) ;
+- connect_2 ( _square03_ o ) ( _square04_ a ) ;
+- connect_3 ( _square04_ o ) ( _square05_ a ) ;
+- out_o ( PIN out_o ) ( _square05_ o ) ;
+END NETS
+
+END DESIGN

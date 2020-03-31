@@ -1,0 +1,201 @@
+VERSION 5.7 ;
+BUSBITCHARS "[]" ;
+DIVIDERCHAR "/" ;
+
+UNITS
+  DATABASE MICRONS 2000 ;
+END UNITS
+
+MANUFACTURINGGRID 0.0025 ;
+
+LAYER poly
+  TYPE MASTERSLICE ;
+END poly
+
+LAYER contact
+  TYPE CUT ;
+  SPACING 0.075 ;
+  PROPERTY contactResistance 10.5 ;
+END contact
+
+LAYER metal1
+  TYPE ROUTING ;
+  DIRECTION HORIZONTAL ;
+  PITCH 0.19 ;
+  WIDTH 0.065 ;
+  SPACING 0.065 ;
+  RESISTANCE RPERSQ 0.38 ;
+END metal1
+
+SITE CoreSite
+  CLASS CORE ;
+  SIZE 0.38 BY 1.71 ;
+END CoreSite
+
+MACRO dummy
+    CLASS CORE ;
+    FOREIGN dummy 0.000 0.000 ;
+    ORIGIN 0.000 0.000 ;
+    SIZE 15.00 BY 3.00 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN o
+        DIRECTION OUTPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.695 0.150 0.825 1.255 ;
+        RECT 0.625 0.150 0.885 0.28 ;
+        END
+    END o
+    PIN a
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.315 0.340 0.51 0.405 ;
+        END
+    END a
+END dummy
+
+MACRO typeA
+    CLASS CORE ;
+    FOREIGN typeA 0.000 0.000 ;
+    ORIGIN 0.000 0.000 ;
+    SIZE 3.00 BY 3.00 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN o
+        DIRECTION OUTPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.695 0.150 0.825 1.255 ;
+        RECT 0.625 0.150 0.885 0.28 ;
+        END
+    END o
+    PIN a
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.315 0.340 0.51 0.405 ;
+        END
+    END a
+END typeA
+
+MACRO typeB
+    CLASS CORE ;
+    FOREIGN typeB 0.000 0.000 ;
+    ORIGIN 0.000 0.000 ;
+    SIZE 3.00 BY 6.00 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN o
+        DIRECTION OUTPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.695 0.150 0.825 1.255 ;
+        RECT 0.625 0.150 0.885 0.28 ;
+        END
+    END o
+    PIN a
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.315 0.340 0.51 0.405 ;
+        END
+    END a
+END typeB
+
+MACRO typeC
+    CLASS CORE ;
+    FOREIGN typeC 0.000 0.000 ;
+    ORIGIN 0.000 0.000 ;
+    SIZE 3.00 BY 3.00 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN o_1
+        DIRECTION OUTPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.695 0.150 0.825 1.255 ;
+        RECT 0.625 0.150 0.885 0.28 ;
+        END
+    END o_1
+    PIN o_2
+        DIRECTION OUTPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.695 0.150 0.825 1.255 ;
+        RECT 0.625 0.150 0.885 0.28 ;
+        END
+    END o_2
+    PIN a
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.315 0.340 0.51 0.405 ;
+        END
+    END a
+END typeC
+
+MACRO typeD
+    CLASS CORE ;
+    FOREIGN typeD 0.000 0.000 ;
+    ORIGIN 0.000 0.000 ;
+    SIZE 3.00 BY 3.00 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN o
+        DIRECTION OUTPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.695 0.150 0.825 1.255 ;
+        RECT 0.625 0.150 0.885 0.28 ;
+        END
+    END o
+    PIN a
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.315 0.340 0.51 0.405 ;
+        END
+    END a
+    PIN b
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 0.315 0.340 0.51 0.405 ;
+        END
+    END b
+END typeD
+
+MACRO na02f80
+    CLASS CORE ;
+    FOREIGN na02f80 0.000 0.000 ;
+    ORIGIN 0.000 0.000 ;
+    SIZE 30.400 BY 1.71 ;
+    SYMMETRY X Y ;
+    SITE CoreSite ;
+    PIN o
+        DIRECTION OUTPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 12.000 0.110 14.6 1.215 ;
+        RECT 11.400 0.725 16.795 1.245 ;
+        RECT 12.000 0.110 24.025 0.175 ;
+        RECT 21.400 0.110 24.0 0.5 ;
+        END
+    END o
+    PIN a
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 1.800 0.535 9.405 0.665 ;
+        END
+    END a
+    PIN b
+        DIRECTION INPUT ;
+        PORT
+        LAYER metal1 ;
+        RECT 17.200 0.540 24.09 0.67 ;
+        END
+    END b
+END na02f80

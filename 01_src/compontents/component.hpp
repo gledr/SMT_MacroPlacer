@@ -28,6 +28,12 @@ class Component: public virtual Object {
 public: 
     ~Component();
     
+    z3::expr get_lx(eOrientation const orientation);
+    z3::expr get_ly(eOrientation const orientation);
+    z3::expr get_ux(eOrientation const orientation);
+    z3::expr get_uy(eOrientation const orientation);
+    
+    
     z3::expr& get_lx();
     z3::expr& get_ly();
     z3::expr& get_orientation();

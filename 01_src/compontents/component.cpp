@@ -35,7 +35,7 @@ Component::~Component()
 }
 
 /**
- * @brief .
+ * @brief Get lx coordinate Clauses
  * 
  * @return z3::expr&
  */
@@ -45,7 +45,7 @@ z3::expr& Component::get_lx()
 }
 
 /**
- * @brief 
+ * @brief Get ly coordinate Clauses
  * 
  * @return z3::expr&
  */
@@ -55,9 +55,9 @@ z3::expr& Component::get_ly()
 }
 
 /**
- * @brief 
+ * @brief Get Orientation Clauses
  * 
- * @return std::string
+ * @return z3::expr&
  */
 z3::expr& Component::get_orientation()
 {
@@ -65,9 +65,7 @@ z3::expr& Component::get_orientation()
 }
 
 /**
- * @brief 
- * 
- * @param ly 
+ * @brief Get Component height (vertical)
  */
 z3::expr& Component::get_height()
 {
@@ -75,7 +73,7 @@ z3::expr& Component::get_height()
 }
 
 /**
- * @brief 
+ * @brief Get Component Widht (horizontal)
  *
  * @return z3::expr&
  */
@@ -86,7 +84,7 @@ z3::expr& Component::get_width()
 
 
 /**
- * @brief 
+ * @brief Get Component Name
  * 
  * @return std::string
  */
@@ -96,7 +94,7 @@ std::string Component::get_name()
 }
 
 /**
- * @brief 
+ * @brief Get Component ID
  *
  * @return std::string
  */
@@ -106,9 +104,9 @@ std::string Component::get_id()
 }
 
 /**
- * @brief 
+ * @brief Add Component lx coordinate for next solution
  * 
- * @param lx
+ * @param lx Lx coordinate
  */
 void Component::add_solution_lx(size_t const lx)
 {
@@ -116,9 +114,9 @@ void Component::add_solution_lx(size_t const lx)
 }
 
 /**
- * @brief 
+ * @brief Add Component ly coordinate for next solution
  * 
- * @param ly 
+ * @param ly Ly coordinate
  */
 void Component::add_solution_ly(size_t const ly)
 {
@@ -126,11 +124,95 @@ void Component::add_solution_ly(size_t const ly)
 }
 
 /**
- * @brief 
+ * @brief Add Component orientation for next solution
  * 
- * @param orientation 
+ * @param orientation Orientation of next solution
  */
 void Component::add_solution_orientation(eOrientation const orientation)
 {
     m_sol_orientation.push_back(orientation);
+}
+
+/**
+ * @brief Get lx coordinate depdending on component rotation
+ * 
+ * @param orientation Orientation of the Component
+ * @return z3::expr
+ */
+z3::expr Component::get_lx(eOrientation const orientation)
+{
+    if (orientation == eNorth){
+        return m_lx;
+    } else if (orientation == eWest){
+        return  m_lx - m_height;
+    } else if (orientation == eSouth){
+        return m_lx - m_width;
+    } else if (orientation == eEast){
+        return m_lx;
+    } else {
+        assert (0);
+    }
+}
+
+/**
+ * @brief Get lxy coordinate depdending on component rotation
+ * 
+ * @param orientation Orientation of the Component
+ * @return z3::expr
+ */
+z3::expr Component::get_ly(eOrientation const orientation)
+{
+    if (orientation == eNorth){
+        return m_ly;
+    } else if (orientation == eWest){
+        return m_ly;
+    } else if (orientation == eSouth){
+        return m_ly - m_height;
+    } else if (orientation == eEast){
+        return m_ly - m_width;
+    } else {
+        assert (0);
+    }
+}
+
+/**
+ * @brief Get ux coordinate depdending on component rotation
+ * 
+ * @param orientation Orientation of the Component
+ * @return z3::expr
+ */
+z3::expr Component::get_ux(eOrientation const orientation)
+{
+    if (orientation == eNorth){
+        return m_lx + m_width;
+    } else if (orientation == eWest){
+        return m_lx;
+    } else if (orientation == eSouth){
+        return m_lx;
+    } else if (orientation == eEast){
+        return m_lx + m_height;
+    } else {
+        assert (0);
+    }
+}
+
+/**
+ * @brief Get uy coordinate depdending on component rotation
+ * 
+ * @param orientation Orientation of the Component
+ * @return z3::expr
+ */
+z3::expr Component::get_uy(eOrientation const orientation)
+{
+    if (orientation == eNorth){
+        return m_ly + m_height;
+    } else if (orientation == eWest){
+        return m_ly + m_width;
+    } else if (orientation == eSouth){
+        return m_ly;
+    } else if (orientation == eEast){
+        return m_ly;
+    } else {
+        assert (0);
+    }
 }

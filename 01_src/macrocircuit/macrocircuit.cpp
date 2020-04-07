@@ -1433,3 +1433,8 @@ void MacroCircuit::best_result()
    }
    std::cout << "Min Die Area: " << results.second << std::endl;
 }
+
+void MacroCircuit::encode_single_grid()
+{
+    
+}

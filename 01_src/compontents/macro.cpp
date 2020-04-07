@@ -396,3 +396,40 @@ void Macro::encode_pins_center_of_macro()
     }
     m_encode_pins_center_of_macro = z3::mk_and(clauses);
 }
+
+z3::expr Placer::Macro::get_pin_constraints()
+{
+}
+
+std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_north()
+{
+    z3::expr_vector x_vec(*m_z3_ctx);
+    z3::expr_vector y_vec(*m_z3_ctx);
+    
+    for (size_t x =0; x < m_width.get_numeral_uint(); ++x){
+        for (size_t y = 0; y < m_height.get_numeral_int(); ++y){
+            z3::expr _x = m_lx + m_z3_ctx->int_val(x);
+            z3::expr _y = m_lx + m_z3_ctx->int_val(y);
+            
+            x_vec.push_back(_x);
+            y_vec.push_back(_y);
+        }
+    }
+    
+    return std::make_pair(x_vec, y_vec);
+}
+
+std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_west()
+{
+    assert (0);
+}
+
+std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_south()
+{
+    assert (0);
+}
+
+std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_east()
+{
+    assert (0);
+}

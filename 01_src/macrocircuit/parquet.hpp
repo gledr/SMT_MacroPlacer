@@ -28,23 +28,27 @@
 
 namespace Placer {
 
+/**
+ * @class ParquetFrontend
+ * @brief Utilize Parquet Floorplanner alternative solutions
+ */
 class ParquetFrontend: public virtual Object {
 public:
     ParquetFrontend();
-    
+
     virtual ~ParquetFrontend();
-    
+
     void set_macros(std::vector<Macro*> & macros);
     void set_terminals(std::vector<Terminal*> & terminals);
     void set_tree(Tree* tree);
     void set_layout(Layout* layout);
-    
+
     void build_db();
-    
+
     void run_parquet();
-    
+
     void data_from_parquet();
-    
+
     void store_bookshelf_results();
 
 private:
@@ -53,11 +57,11 @@ private:
     std::vector<Terminal*> m_terminals;
     Tree* m_tree;
     Layout* m_layout;
-    
+
     parquetfp::DB* m_db;
     parquetfp::Nodes* m_nodes;
     parquetfp::Nets* m_nets;
-    
+
     Macro* find_macro(std::string const & name);
 };
 

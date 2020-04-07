@@ -24,12 +24,18 @@
 
 namespace Placer {
 
+/**
+ * @class Layout
+ * @brief Layout for MacroCircuit
+ */
 class Layout: public virtual Object {
 public:
-    
+
     Layout (z3::context* z3_ctx);
-    
+
     virtual ~Layout ();
+    
+    void generate_grid(size_t const w, size_t const h);
     
     void free_ux();
     void free_uy();
@@ -47,7 +53,7 @@ public:
     void set_ux(size_t const val);
     void set_uy(size_t const val);
     void set_units(size_t const val);
-    
+
     void set_formula_ux(z3::expr const & formula);
     void set_formula_uy(z3::expr const & formula);
 
@@ -56,36 +62,38 @@ public:
 
     size_t get_solution_ux(size_t const idx);
     size_t get_solution_uy(size_t const idx);
-    
+
     bool is_free_lx();
     bool is_free_ly();
     bool is_free_uy();
     bool is_free_ux();
-    
+
     size_t get_idx_best_solution();
-    
+
     void set_min_die_predition(double const & val);
     double get_min_die_prediction();
 
 private:
-  
+
     Utils::Logger* m_logger;
     double m_min_die_size;
-   
+
     bool m_free_lx;
     bool m_free_ly;
     bool m_free_ux;
     bool m_free_uy;
-    
+
     std::vector<size_t> m_solutions_ux;
     std::vector<size_t> m_solutions_uy;
-    
+
     z3::context* m_z3_ctx;
     z3::expr    m_lx;
     z3::expr    m_ly;
     z3::expr    m_ux;
     z3::expr    m_uy;
     z3::expr    m_units;
+
+    std::vector<std::vector<z3::expr>> tmp;
 };
 
 }

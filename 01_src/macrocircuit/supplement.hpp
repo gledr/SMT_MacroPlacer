@@ -22,6 +22,10 @@
 
 namespace Placer {
 
+/**
+ * @class Supplement
+ * @brief Add Additional Information not Supported by LEF/DEF Standard
+ */
 class Supplement: public virtual Object{
 public:
 
@@ -30,11 +34,11 @@ public:
     ~Supplement();
 
     void read_supplement_file();
-    
+
     bool has_supplement();
-    
+
     bool has_macro(std::string const & id);
-    
+
     SupplementMacro* get_macro(std::string const & id);
 
 private:

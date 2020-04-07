@@ -60,6 +60,11 @@ public:
     void encode_pins();
     z3::expr get_pin_constraints();
     
+    std::pair<z3::expr_vector, z3::expr_vector> covered_north();
+    std::pair<z3::expr_vector, z3::expr_vector> covered_west();
+    std::pair<z3::expr_vector, z3::expr_vector> covered_south();
+    std::pair<z3::expr_vector, z3::expr_vector> covered_east();
+    
 private:
     std::map<std::string, Pin*> m_pins;
     Pin* m_active_pin;

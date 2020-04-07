@@ -84,13 +84,13 @@ void ParquetFrontend::build_db()
 {
     m_layout->set_lx(0);
     m_layout->set_ly(0);
-    
+
     m_nodes = m_db->getNodes();
     m_nets = m_db->getNets();
-    
+
     std::vector<std::pair<int, int> > netStor;
     std::vector<int> costStor;
-    
+
     for (size_t i = 0; i < m_macros.size(); ++i){
         Macro* macro = m_macros[i];
         float area = static_cast<float>(macro->get_area());

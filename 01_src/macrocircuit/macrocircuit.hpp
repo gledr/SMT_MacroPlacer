@@ -49,6 +49,10 @@ class Evaluate;
 class Partitioning;
 class ParquetFrontend;
 
+/**
+ * @class MacroCircuit
+ * @brief Top Class for MacroCircuit Placement
+ */
 class MacroCircuit: public virtual Object {
 public:
     
@@ -57,38 +61,38 @@ public:
     virtual ~MacroCircuit();
 
     size_t get_solutions();
-    
+
     void build_circuit();
     void partitioning();
     void encode();
     void place();
-    
+
     Circuit::Circuit* get_circuit();
-    
+
     void dump_all();
     void dump_best();
-    
+
     void save_all();
     void save_best();
-    
+
     void best_result();
-    
+
     void dump(std::ostream & stream = std::cout);
-    
+
     void store_results();
 
     std::vector<Macro*>& get_macros();
     std::vector<Partition*>& get_partitions();
     std::vector<Terminal*> get_terminals();
     std::vector<Component*> get_components();
-    
+
     Tree* get_tree();
     Layout* get_layout();
 
     size_t get_minimal_die_size_prediction();
 
     std::pair<size_t, size_t> biggest_macro();
-   
+
 private:
     // Microsoft Z3
     z3::context* m_z3_ctx;
@@ -109,7 +113,7 @@ private:
     Partitioning* m_partitioning;
     ParquetFrontend* m_parquet;
     EncodingUtils* m_z3_utils;
-    
+
     std::map<std::string, Macro*> m_id2macro;
     std::map<std::string, Terminal*> m_id2terminal;
     std::map<std::string, Cell*> m_id2cell;
@@ -138,33 +142,32 @@ private:
 
     void create_image(size_t const solution);
     void write_def(std::string const & name, size_t const solution);
-    
-    
+
     /**
      * SMT Encoding
      */
     void encode_smt();
     void encode_parquet();
-    
+
     void config_z3();
     void run_encoding();
-    
+
     void encode_components_inside_die(eRotation const type);
     void encode_components_non_overlapping(eRotation const type);
     void encode_terminals_on_frontier();
     void encode_terminals_non_overlapping();
+    void encode_single_grid();
 
     z3::expr m_components_non_overlapping;
     z3::expr m_components_inside_die;
     z3::expr m_terminals_on_frontier;
     z3::expr m_terminals_non_overlapping;
-    
+
     /**
      * SMT Solving
      */ 
     void solve();
     void dump_smt_instance();
-    
 };
 
 }

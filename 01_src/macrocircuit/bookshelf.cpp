@@ -594,6 +594,9 @@ void Bookshelf::write_placement()
     this->write_pl();
 }
 
+/**
+ * @brief Write Blocks File
+ */
 void Bookshelf::write_blocks()
 {
     std::string filename = "export_" + this->get_design_name() + ".blk";
@@ -629,6 +632,9 @@ void Bookshelf::write_blocks()
     feed.clear();
 }
 
+/**
+ * @brief Write Nets File
+ */
 void Bookshelf::write_nets()
 {
      std::string filename = "export_" + this->get_design_name() + ".nets";
@@ -653,6 +659,9 @@ void Bookshelf::write_nets()
     netsFile.close();
 }
 
+/**
+ * @brief Write Placement File
+ */
 void Bookshelf::write_pl()
 {
      std::string filename = "export_" + this->get_design_name() + ".pl";

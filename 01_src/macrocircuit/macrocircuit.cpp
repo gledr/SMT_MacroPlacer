@@ -149,6 +149,9 @@ void MacroCircuit::build_circuit()
     }
 }
 
+/**
+ * @brief Run Partitioning
+ */
 void MacroCircuit::partitioning()
 {
     if(this->get_partitioning()){
@@ -164,7 +167,7 @@ void MacroCircuit::partitioning()
 }
 
 /**
- * @brief 
+ * @brief Run Encoding
  */
 void MacroCircuit::encode()
 {
@@ -183,7 +186,7 @@ void MacroCircuit::encode()
 }
 
 /**
- * @brief 
+ * @brief Encode for Running Parquet Backend
  */
 void MacroCircuit::encode_parquet()
 {
@@ -195,7 +198,7 @@ void MacroCircuit::encode_parquet()
 }
 
 /**
- * @brief 
+ * @brief Encode for Solving SMT
  */
 void MacroCircuit::encode_smt()
 {
@@ -208,6 +211,9 @@ void MacroCircuit::encode_smt()
     this->run_encoding();
 }
 
+/**
+ * @brief Run Placement
+ */
 void MacroCircuit::place()
 {
     m_timer->start_timer("total");
@@ -224,6 +230,9 @@ void MacroCircuit::place()
     m_timer->stop_timer("total");
 }
 
+/**
+ * @brief Add Macros using worker thread
+ */
 void MacroCircuit::add_macros()
 {
     m_logger->start_macro_thread();
@@ -236,6 +245,9 @@ void MacroCircuit::add_macros()
     m_logger->end_macro_thread();
 }
 
+/**
+ * @brief Add Standard-Cells using worker thread
+ */
 void MacroCircuit::add_cells()
 {
     m_logger->start_cell_thread();
@@ -248,6 +260,9 @@ void MacroCircuit::add_cells()
     m_logger->end_cell_thread();
 }
 
+/**
+ * @brief Add Terminals using worker thread
+ */
 void MacroCircuit::add_terminals()
 {
     m_logger->start_terminal_thread();
@@ -273,6 +288,9 @@ void MacroCircuit::add_terminals()
     m_logger->end_terminal_thread();
 }
 
+/**
+ * @brief Dump solutions to filesystem as image
+ */
 void MacroCircuit::dump_all()
 {
     m_logger->dump_all();
@@ -282,6 +300,9 @@ void MacroCircuit::dump_all()
     }
 }
 
+/**
+ * @brief Dump best solution to filesystem as image
+ */
 void MacroCircuit::dump_best()
 {
     std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
@@ -289,6 +310,11 @@ void MacroCircuit::dump_best()
     std::cout << "Best Solution: HPWL = " << best_hpwl.second << std::endl;
 }
 
+/**
+ * @brief Create image for particular found solution
+ * 
+ * @param solution Solution to dump as image
+ */
 void MacroCircuit::create_image(size_t const solution)
 {
     if(!boost::filesystem::exists(this->get_image_directory())){
@@ -422,6 +448,9 @@ void MacroCircuit::create_image(size_t const solution)
         system(cmd.c_str());
 }
 
+/**
+ * @brief Save all found solutions as DEF file
+ */
 void MacroCircuit::save_all()
 {
     for(size_t i = 0; i < m_solutions; ++i){
@@ -430,6 +459,9 @@ void MacroCircuit::save_all()
     }
 }
 
+/**
+ * @brief Save best solution as DEF file
+ */
 void MacroCircuit::save_best()
 {
     std::cout << "in save best" << std::endl;
@@ -438,6 +470,9 @@ void MacroCircuit::save_best()
     this->write_def(name, best_hpwl.first);
 }
 
+/**
+ * @brief Build Connectivity Tree from DEF file
+ */
 void MacroCircuit::build_tree()
 {
     for(auto itor: m_circuit->defNetStor){
@@ -537,6 +572,11 @@ void MacroCircuit::build_tree()
     m_tree->construct_tree();
 }
 
+/**
+ * @brief Add single macro to macrocircuit
+ * 
+ * @param cmp Macro to add
+ */
 void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
 {
     std::string name = cmp.name();
@@ -564,6 +604,11 @@ void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
     m_id2macro[id] = m;
 }
 
+/**
+ * @brief Add single cell to macrocircuit
+ * 
+ * @param cmp Cell to add
+ */
 void MacroCircuit::add_cell(LefDefParser::defiComponent const & cmp)
 {
     std::string name = cmp.name();
@@ -574,6 +619,12 @@ void MacroCircuit::add_cell(LefDefParser::defiComponent const & cmp)
     m_id2cell[id] = c;
 }
 
+/**
+ * @brief Export Solution as DEF file
+ * 
+ * @param name Filename to be used
+ * @param solution Solution to be exported
+ */
 void MacroCircuit::write_def(std::string const & name, size_t const solution)
 {
     for(auto itor: m_macros){
@@ -612,6 +663,12 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
     fclose(fp);
 }
 
+/**
+ * @brief Check if component is macro
+ * 
+ * @param macro Component to check
+ * @return bool
+ */
 bool MacroCircuit::is_macro(LefDefParser::defiComponent const & macro)
 {
     auto idx = m_circuit->lefMacroMap.find(macro.name());
@@ -620,6 +677,12 @@ bool MacroCircuit::is_macro(LefDefParser::defiComponent const & macro)
     return lef_data.sizeY() != m_standard_cell_height;
 }
 
+/**
+ * @brief Check if component is standard cell
+ * 
+ * @param cell Cell to check
+ * @return bool
+ */
 bool MacroCircuit::is_standard_cell(LefDefParser::defiComponent const & cell)
 {
     auto idx = m_circuit->lefMacroMap.find(cell.name());
@@ -628,6 +691,11 @@ bool MacroCircuit::is_standard_cell(LefDefParser::defiComponent const & cell)
     return lef_data.sizeY() == m_standard_cell_height;
 }
 
+/**
+ * @brief Dump macro circuit information to given stream
+ * 
+ * @param stream Stream to dump to
+ */
 void MacroCircuit::dump(std::ostream& stream)
 {
     stream << std::string(30, '+') << std::endl;
@@ -646,12 +714,20 @@ void MacroCircuit::dump(std::ostream& stream)
     stream << std::string(30, '+') << std::endl;
 }
 
+/**
+ * @brief Get minimal needed die area possible for given problem
+ * 
+ * @return size_t
+ */
 size_t MacroCircuit::get_minimal_die_size_prediction()
 {
     return m_estimated_area;
 }
 
-void MacroCircuit::area_estimator() 
+/**
+ * @brief Calculate the minimum possible die are for given problem
+ */
+void MacroCircuit::area_estimator()
 {
     m_estimated_area = 0;
 
@@ -669,6 +745,9 @@ void MacroCircuit::area_estimator()
     m_layout->set_min_die_predition(m_estimated_area);
 }
 
+/**
+ * @brief Store generated results to filesystem
+ */
 void MacroCircuit::store_results()
 {
     if(!m_layout->get_ux().is_const()){
@@ -691,6 +770,11 @@ void MacroCircuit::store_results()
     }
 }
 
+/**
+ * @brief Calcualte the biggest used macro
+ * 
+ * @return std::pair< size_t, size_t >
+ */
 std::pair<size_t, size_t> MacroCircuit::biggest_macro()
 {
     size_t w = 0;
@@ -707,53 +791,88 @@ std::pair<size_t, size_t> MacroCircuit::biggest_macro()
     return std::make_pair(w,h);
 }
 
+/**
+ * @brief Get access to the used macros
+ * 
+ * @return std::vector< Placer::Macro* >&
+ */
 std::vector<Macro*>& MacroCircuit::get_macros()
 {
     return m_macros;
 }
 
+/**
+ * @brief Get access to the used partitions
+ * 
+ * @return std::vector< Placer::Partition* >&
+ */
 std::vector<Partition *> & MacroCircuit::get_partitions()
 {
     return m_partitons;
 }
 
+/**
+ * @brief Get access to the used terminals
+ * 
+ * @return std::vector< Placer::Terminal* >
+ */
 std::vector<Terminal*> MacroCircuit::get_terminals()
 {
     return m_terminals;
 }
 
+/**
+ * @brief Get access to the used components
+ * 
+ * @return std::vector< Placer::Component* >
+ */
 std::vector<Component*> MacroCircuit::get_components()
 {
     return m_components;
 }
 
+/**
+ * @brief Get access to the connectivity tree
+ * 
+ * @return Placer::Tree*
+ */
 Tree* MacroCircuit::get_tree()
 {
     return m_tree;
 }
 
+/**
+ * @brief Get access to the layout
+ * 
+ * @return Placer::Layout*
+ */
 Layout* MacroCircuit::get_layout()
 {
     return m_layout;
 }
 
+/**
+ * @brief Get access to the parser circuit class
+ * 
+ * @return Circuit::Circuit*
+ */
 Circuit::Circuit* MacroCircuit::get_circuit()
 {
     return m_circuit;
 }
 
-void MacroCircuit::set_solutions(size_t const solutions)
-{
-    m_solutions = solutions;
-}
-
+/**
+ * @brief Get number of found solutions
+ * 
+ * @return size_t
+ */
 size_t MacroCircuit::get_solutions()
 {
     return m_solutions;
 }
 
 /**
- * @brief 
+ * @brief Configure Z3 backend
  */
 void MacroCircuit::config_z3()
 {
@@ -786,7 +905,7 @@ void MacroCircuit::config_z3()
 }
 
 /**
- * @brief 
+ * @brief Run SMT encoding
  */
 void MacroCircuit::run_encoding()
 {
@@ -805,6 +924,11 @@ void MacroCircuit::run_encoding()
     }
 }
 
+/**
+ * @brief Ensure all Components are placed within the die
+ * 
+ * @param type Rotation degree of freedom
+ */
 void MacroCircuit::encode_components_inside_die(eRotation const type)
 {
     try {
@@ -879,6 +1003,11 @@ void MacroCircuit::encode_components_inside_die(eRotation const type)
     }
 }
 
+/**
+ * @brief Ensure all Components are placed non overlapping
+ * 
+ * @param type Rotation degree of freedom
+ */
 void MacroCircuit::encode_components_non_overlapping(eRotation const type)
 {
      try {
@@ -1193,6 +1322,9 @@ void MacroCircuit::encode_terminals_non_overlapping()
     }
 }
 
+/**
+ * @brief Solve encoded SMT problem
+ */
 void MacroCircuit::solve()
 {
     try {
@@ -1262,6 +1394,9 @@ void MacroCircuit::solve()
     }
 }
 
+/**
+ * @brief Dump encoded SMT problem as *.smt2 to the filesystem
+ */
 void MacroCircuit::dump_smt_instance()
 {
     std::string smt_file = "top_" + this->get_design_name() + ".smt2";
@@ -1278,6 +1413,9 @@ void MacroCircuit::dump_smt_instance()
     out_file.close();
 }
 
+/**
+ * @brief Search for best result in terms of die area
+ */
 void MacroCircuit::best_result()
 {
     std::pair<size_t, size_t> results;

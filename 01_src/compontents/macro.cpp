@@ -65,6 +65,7 @@ Macro::Macro(z3::context* z3_ctx,
     
     this->get_verbose() && std::cout << "[Info]: Adding Fixed Macro " << id << std::endl;
 }
+
 Macro::~Macro()
 {
     for(auto itor: m_pins){

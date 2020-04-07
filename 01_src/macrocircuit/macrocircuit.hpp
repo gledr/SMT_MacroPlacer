@@ -55,8 +55,7 @@ public:
     MacroCircuit(z3::context* z3_ctx);
     
     virtual ~MacroCircuit();
-    
-    void set_solutions(size_t const solutions);
+
     size_t get_solutions();
     
     void build_circuit();

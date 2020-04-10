@@ -16,15 +16,14 @@ using namespace Placer;
 /**
  * @brief Constructor
  */
-Component::Component(z3::context* z3_ctx):
-    m_z3_ctx(z3_ctx),
-    m_lx(z3_ctx->int_val(0)),
-    m_ly(z3_ctx->int_val(0)),
-    m_orientation(z3_ctx->int_val(0)),
-    m_width(z3_ctx->int_val(0)),
-    m_height(z3_ctx->int_val(0))
+Component::Component():
+    m_encode(new EncodingUtils()),
+    m_lx(m_encode->get_value(0)),
+    m_ly(m_encode->get_value(0)),
+    m_orientation(m_encode->get_value(0)),
+    m_width(m_encode->get_value(0)),
+    m_height(m_encode->get_value(0))
 {
-    assert (z3_ctx != nullptr);
 }
 
 /**
@@ -32,6 +31,7 @@ Component::Component(z3::context* z3_ctx):
  */
 Component::~Component()
 {
+    delete m_encode; m_encode = nullptr;
 }
 
 /**
@@ -81,7 +81,6 @@ z3::expr& Component::get_width()
 {
     return m_width;
 }
-
 
 /**
  * @brief Get Component Name
@@ -144,9 +143,9 @@ z3::expr Component::get_lx(eOrientation const orientation)
     if (orientation == eNorth){
         return m_lx;
     } else if (orientation == eWest){
-        return  m_lx - m_height;
+        return  m_encode->sub(m_lx, m_height);
     } else if (orientation == eSouth){
-        return m_lx - m_width;
+        return m_encode->sub(m_lx, m_width);
     } else if (orientation == eEast){
         return m_lx;
     } else {
@@ -167,9 +166,9 @@ z3::expr Component::get_ly(eOrientation const orientation)
     } else if (orientation == eWest){
         return m_ly;
     } else if (orientation == eSouth){
-        return m_ly - m_height;
+        return m_encode->sub(m_ly, m_height);
     } else if (orientation == eEast){
-        return m_ly - m_width;
+        return m_encode->sub(m_ly, m_width);
     } else {
         assert (0);
     }
@@ -184,13 +183,13 @@ z3::expr Component::get_ly(eOrientation const orientation)
 z3::expr Component::get_ux(eOrientation const orientation)
 {
     if (orientation == eNorth){
-        return m_lx + m_width;
+        return m_encode->add(m_lx, m_width);
     } else if (orientation == eWest){
         return m_lx;
     } else if (orientation == eSouth){
         return m_lx;
     } else if (orientation == eEast){
-        return m_lx + m_height;
+        return m_encode->add(m_lx, m_height);
     } else {
         assert (0);
     }
@@ -205,9 +204,9 @@ z3::expr Component::get_ux(eOrientation const orientation)
 z3::expr Component::get_uy(eOrientation const orientation)
 {
     if (orientation == eNorth){
-        return m_ly + m_height;
+        return m_encode->add(m_ly, m_height);
     } else if (orientation == eWest){
-        return m_ly + m_width;
+        return m_encode->add(m_ly, m_width);
     } else if (orientation == eSouth){
         return m_ly;
     } else if (orientation == eEast){

@@ -20,27 +20,24 @@ std::string Partition::m_partition_keyword = "partition";
  * 
  * @param z3_ctx Z3 Context
  */
-Partition::Partition(z3::context* z3_ctx):
-    Component(z3_ctx),
-    m_z3_ctx(z3_ctx),
-    m_ux(z3_ctx->int_val(0)),
-    m_uy(z3_ctx->int_val(0)),
-    m_components_in_partition(z3_ctx->int_val(0))
+Partition::Partition():
+    Component(),
+    m_ux(m_encode->get_value(0)),
+    m_uy(m_encode->get_value(0)),
+    m_components_in_partition(m_encode->get_value(0))
 {
-    assert (z3_ctx != nullptr);
-
     m_id = std::to_string(this->get_partition_id());
-    m_ly_id = std::string(m_partition_keyword + "_" + m_id + "_ly");
-    m_lx_id = std::string(m_partition_keyword + "_" + m_id + "_lx");
-    m_uy_id = std::string(m_partition_keyword + "_" + m_id + "_uy");
-    m_ux_id = std::string(m_partition_keyword + "_" + m_id + "_ux");
-    m_orientation_id = std::string(m_partition_keyword + "_" + m_id + "_orientation");
-    
-    m_lx = z3_ctx->int_const(m_lx_id.c_str());
-    m_ly = z3_ctx->int_const(m_ly_id.c_str());
-    m_ux = z3_ctx->int_const(m_ux_id.c_str());
-    m_uy = z3_ctx->int_const(m_uy_id.c_str());
-    m_orientation = z3_ctx->int_const(m_orientation_id.c_str());
+    m_ly_id = m_partition_keyword + "_" + m_id + "_ly";
+    m_lx_id = m_partition_keyword + "_" + m_id + "_lx";
+    m_uy_id = m_partition_keyword + "_" + m_id + "_uy";
+    m_ux_id = m_partition_keyword + "_" + m_id + "_ux";
+    m_orientation_id = m_partition_keyword + "_" + m_id + "_orientation";
+
+    m_lx = m_encode->get_constant(m_lx_id);
+    m_ly = m_encode->get_constant(m_ly_id);
+    m_ux = m_encode->get_constant(m_ux_id);
+    m_uy = m_encode->get_constant(m_uy_id);
+    m_orientation = m_encode->get_constant(m_orientation_id);
 
     m_has_value_lx = false;
     m_has_value_ly = false;
@@ -53,7 +50,6 @@ Partition::Partition(z3::context* z3_ctx):
  */
 Partition::~Partition()
 {
-    m_z3_ctx = nullptr;
 }
 
 /**
@@ -87,7 +83,7 @@ void Partition::add_macros(std::vector<Macro *> macros)
 void Partition::add_subpartition(Partition* subpartition)
 {
     assert (subpartition != nullptr);
-    
+
     m_components.push_back(subpartition);
 }
 
@@ -128,7 +124,7 @@ void Partition::calculate_white_space()
 double Partition::get_white_space_percentage()
 {
     this->calculate_white_space();
-    
+
     //std::cout << "Minimum Size: " << m_macro_area << std::endl;
     //std::cout << "Partition Size: " << m_partion_area << std::endl;
 
@@ -181,7 +177,7 @@ z3::expr Partition::get_uy()
  */
 void Partition::free_lx()
 {
-    m_lx = m_z3_ctx->int_const(m_lx_id.c_str());
+    m_lx = m_encode->get_constant(m_lx_id);
     m_has_value_lx = false;
 }
 
@@ -190,7 +186,7 @@ void Partition::free_lx()
  */
 void Partition::free_ly()
 {
-    m_ly = m_z3_ctx->int_const(m_ly_id.c_str());
+    m_ly = m_encode->get_constant(m_ly_id);
     m_has_value_ly = false;
 }
 
@@ -199,7 +195,7 @@ void Partition::free_ly()
  */
 void Partition::free_ux()
 {
-    m_ux = m_z3_ctx->int_const(m_ux_id.c_str());
+    m_ux = m_encode->get_constant(m_ux_id);
     m_has_value_ux = false;
 }
 
@@ -208,7 +204,7 @@ void Partition::free_ux()
  */
 void Partition::free_uy()
 {
-    m_uy = m_z3_ctx->int_const(m_uy_id.c_str());
+    m_uy = m_encode->get_constant(m_uy_id);
     m_has_value_uy = false;
 }
 
@@ -219,7 +215,7 @@ void Partition::free_uy()
  */
 void Partition::set_lx(size_t const val)
 {
-    m_lx = m_z3_ctx->int_val(val);
+    m_lx = m_encode->get_value(val);
     m_has_value_lx = true;
 }
 
@@ -230,7 +226,7 @@ void Partition::set_lx(size_t const val)
  */
 void Partition::set_ly(size_t const val)
 {
-    m_ly = m_z3_ctx->int_val(val);
+    m_ly = m_encode->get_value(val);
     m_has_value_ly = true;
 }
 
@@ -241,7 +237,7 @@ void Partition::set_ly(size_t const val)
  */
 void Partition::set_ux(size_t const val)
 {
-    m_ux = m_z3_ctx->int_val(val);
+    m_ux = m_encode->get_value(val);
     m_has_value_ux = true;
 }
 
@@ -252,7 +248,7 @@ void Partition::set_ux(size_t const val)
  */
 void Partition::set_uy(size_t const val)
 {
-    m_uy = m_z3_ctx->int_val(val);
+    m_uy = m_encode->get_value(val);
     m_has_value_uy = true;
 }
 
@@ -263,7 +259,7 @@ void Partition::set_uy(size_t const val)
  */
 void Partition::set_height(size_t const val)
 {
-    m_height = m_z3_ctx->int_val(val);
+    m_height = m_encode->get_value(val);
 }
 
 /**
@@ -273,7 +269,7 @@ void Partition::set_height(size_t const val)
  */
 void Partition::set_witdh(size_t const val)
 {
-    m_width = m_z3_ctx->int_val(val);
+    m_width = m_encode->get_value(val);
 }
 
 /**
@@ -281,7 +277,7 @@ void Partition::set_witdh(size_t const val)
  */
 void Partition::free_orientation()
 {
-    m_orientation = m_z3_ctx->int_const(m_orientation_id.c_str());
+    m_orientation = m_encode->get_constant(m_orientation_id);
 }
 
 /**
@@ -291,7 +287,7 @@ void Partition::free_orientation()
  */
 void Partition::set_orientation(size_t const val)
 {
-    m_orientation = m_z3_ctx->int_val(val);
+    m_orientation = m_encode->get_value(val);
 }
 
 /**

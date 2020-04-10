@@ -21,7 +21,6 @@ MacroPlacer::MacroPlacer(int const argc, char ** argv):
 
     m_argc = argc;
     m_argv = argv;
-    m_z3_ctx = new z3::context();
 }
 
 MacroPlacer::~MacroPlacer()
@@ -179,7 +178,7 @@ void MacroPlacer::read_configuration()
                 }
             }
         }
-        
+        this->set_logic(eBitVector);
         this->set_working_directory(boost::filesystem::current_path().string());
         this->set_results_directory("results");
         this->set_results_id(this->existing_results() + 1);
@@ -193,7 +192,7 @@ void MacroPlacer::read_configuration()
         // Create Logger Singleton once the Commandline Information is known!
         m_logger = Utils::Logger::getInstance();
         m_timer  = new Placer::Utils::Timer();
-        m_mckt = new Placer::MacroCircuit(m_z3_ctx);
+        m_mckt = new Placer::MacroCircuit();
         
     } catch (std::exception const & exp){
         std::cerr << std::endl;

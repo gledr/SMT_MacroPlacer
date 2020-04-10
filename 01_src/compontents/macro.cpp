@@ -13,51 +13,46 @@
 
 using namespace Placer;
 
-Macro::Macro(z3::context* z3_ctx,
-             std::string const & name,
+Macro::Macro(std::string const & name,
              std::string const & id,
-             size_t const widht,
+             size_t const width,
              size_t const height):
-    Component(z3_ctx),
-    m_encode_pin_macro_frontier(z3_ctx->int_val(0)),
-    m_encode_pins_not_overlapping(z3_ctx->int_val(0)),
-    m_encode_pins_center_of_macro(z3_ctx->int_val(0))
+    Component(),
+    m_encode_pin_macro_frontier(m_encode->get_value(0)),
+    m_encode_pins_not_overlapping(m_encode->get_value(0)),
+    m_encode_pins_center_of_macro(m_encode->get_value(0))
 {
-    assert (z3_ctx != nullptr);
-    
     m_free = true;
     m_supplement = nullptr;
     m_name = name;
     m_id = id;
-    m_lx = z3_ctx->int_const(std::string(id + "_lx").c_str());
-    m_ly = z3_ctx->int_const(std::string(id + "_ly").c_str());
-    //m_orientation = z3_ctx->int_const(std::string(id + "_orientation").c_str());
-    m_width = z3_ctx->int_val(widht);
-    m_height = z3_ctx->int_val(height);
-    m_orientation = z3_ctx->int_val(eNorth);
+    m_lx = m_encode->get_constant(id + "_lx");
+    m_ly = m_encode->get_constant(id + "_ly");
+    m_width = m_encode->get_value(width);
+    m_height = m_encode->get_value(height);
+    m_orientation = m_encode->get_value(eNorth);
     
     this->get_verbose() && std::cout << "[Info]: Adding Free Macro " 
-                       << id << " (" << widht << "x" << height << ")"<< std::endl;
+                       << id << " (" << width << "x" << height << ")"<< std::endl;
 }
 
-Macro::Macro(z3::context* z3_ctx,
-             std::string const & name,
+Macro::Macro(std::string const & name,
              std::string const & id,
              size_t const width,
              size_t const height,
              size_t const pos_lx,
              size_t const pos_ly,
              size_t const orientation):
-    Component(z3_ctx),
-    m_encode_pin_macro_frontier(z3_ctx->int_val(0)),
-    m_encode_pins_not_overlapping(z3_ctx->int_val(0)),
-    m_encode_pins_center_of_macro(z3_ctx->int_val(0))
+    Component(),
+    m_encode_pin_macro_frontier(m_encode->get_value(0)),
+    m_encode_pins_not_overlapping(m_encode->get_value(0)),
+    m_encode_pins_center_of_macro(m_encode->get_value(0))
 {
-    m_lx = z3_ctx->int_val(pos_lx);
-    m_ly = z3_ctx->int_val(pos_ly);
-    m_width = z3_ctx->int_val(width);
-    m_height = z3_ctx->int_val(height);
-    m_orientation = z3_ctx->int_val(orientation);
+    m_lx = m_encode->get_value(pos_lx);
+    m_ly = m_encode->get_value(pos_ly);
+    m_width = m_encode->get_value(width);
+    m_height = m_encode->get_value(height);
+    m_orientation = m_encode->get_value(orientation);
     m_name = name;
     m_id = id;
     m_free = false;
@@ -186,10 +181,10 @@ void Macro::encode_pins_on_macro_frontier()
     try {
         z3::expr_vector clauses(*m_z3_ctx);
         
-        z3::expr is_N = z3::expr(m_orientation == m_z3_ctx->int_val(eNorth));
-        z3::expr is_W = z3::expr(m_orientation == m_z3_ctx->int_val(eWest));
-        z3::expr is_S = z3::expr(m_orientation == m_z3_ctx->int_val(eSouth));
-        z3::expr is_E = z3::expr(m_orientation == m_z3_ctx->int_val(eEast));
+        z3::expr is_N = z3::expr(m_orientation == m_encode->get_value(eNorth));
+        z3::expr is_W = z3::expr(m_orientation == m_encode->get_value(eWest));
+        z3::expr is_S = z3::expr(m_orientation == m_encode->get_value(eSouth));
+        z3::expr is_E = z3::expr(m_orientation == m_encode->get_value(eEast));
 
         
         for(auto pin: m_pins){
@@ -358,10 +353,10 @@ void Macro::encode_pins_center_of_macro()
 {
     z3::expr_vector clauses(*m_z3_ctx);
     
-    z3::expr is_N = z3::expr(m_orientation == m_z3_ctx->int_val(eNorth));
-    z3::expr is_W = z3::expr(m_orientation == m_z3_ctx->int_val(eWest));
-    z3::expr is_S = z3::expr(m_orientation == m_z3_ctx->int_val(eSouth));
-    z3::expr is_E = z3::expr(m_orientation == m_z3_ctx->int_val(eEast));
+    z3::expr is_N = z3::expr(m_orientation == m_encode->get_value(eNorth));
+    z3::expr is_W = z3::expr(m_orientation == m_encode->get_value(eWest));
+    z3::expr is_S = z3::expr(m_orientation == m_encode->get_value(eSouth));
+    z3::expr is_E = z3::expr(m_orientation == m_encode->get_value(eEast));
 
     for(auto _pin: m_pins){
         Pin* pin = _pin.second;

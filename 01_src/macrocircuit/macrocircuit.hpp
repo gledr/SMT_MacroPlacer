@@ -56,7 +56,7 @@ class ParquetFrontend;
 class MacroCircuit: public virtual Object {
 public:
     
-    MacroCircuit(z3::context* z3_ctx);
+    MacroCircuit();
     
     virtual ~MacroCircuit();
 
@@ -112,7 +112,7 @@ private:
     Bookshelf* m_bookshelf;
     Partitioning* m_partitioning;
     ParquetFrontend* m_parquet;
-    EncodingUtils* m_z3_utils;
+    EncodingUtils* m_encode;
 
     std::map<std::string, Macro*> m_id2macro;
     std::map<std::string, Terminal*> m_id2terminal;

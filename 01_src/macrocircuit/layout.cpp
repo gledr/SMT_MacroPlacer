@@ -19,21 +19,19 @@ using namespace Placer::Utils;
  *  
  * @param z3_ctx Z3 Context
  */
-Layout::Layout (z3::context* z3_ctx):
+Layout::Layout ():
     Object(),
+    m_encode(new EncodingUtils()),
     m_free_lx(true),
     m_free_ly(true),
     m_free_ux(true),
     m_free_uy(true),
-    m_lx(z3_ctx->int_const("die_lx")),
-    m_ly(z3_ctx->int_const("die_uy")),
-    m_ux(z3_ctx->int_const("die_ux")),
-    m_uy(z3_ctx->int_const("die_uy")),
-    m_units(z3_ctx->int_const("die_units"))
+    m_lx(m_encode->get_constant("die_lx")),
+    m_ly(m_encode->get_constant("die_uy")),
+    m_ux(m_encode->get_constant("die_ux")),
+    m_uy(m_encode->get_constant("die_uy")),
+    m_units(m_encode->get_constant("die_units"))
 {
-    assert(z3_ctx != nullptr);
-    m_z3_ctx = z3_ctx;
-
     m_logger = Logger::getInstance();
 }
 
@@ -42,7 +40,7 @@ Layout::Layout (z3::context* z3_ctx):
  */
 Layout::~Layout ()
 {
-    m_z3_ctx = nullptr;
+    delete m_encode; m_encode = nullptr;
 }
 
 /**
@@ -120,7 +118,7 @@ z3::expr& Layout::get_units()
  */
 void Layout::free_ux ()
 {
-    m_ux = m_z3_ctx->int_const("die_ux");
+    m_ux = m_encode->get_constant("die_ux");
     m_free_ux = true;
 }
 
@@ -129,7 +127,7 @@ void Layout::free_ux ()
  */
 void Layout::free_uy ()
 {
-    m_uy = m_z3_ctx->int_const("die_uy");
+    m_uy = m_encode->get_constant("die_uy");
     m_free_uy = true;
 }
 
@@ -138,7 +136,7 @@ void Layout::free_uy ()
  */
 void Layout::free_lx ()
 {
-    m_lx = m_z3_ctx->int_const("die_lx");
+    m_lx =m_encode->get_constant("die_lx");
     m_free_lx = true;
 }
 
@@ -147,7 +145,7 @@ void Layout::free_lx ()
  */
 void Layout::free_ly ()
 {
-    m_ly = m_z3_ctx->int_const("die_ly");
+    m_ly = m_encode->get_constant("die_ly");
     m_free_ly = true;
 }
 
@@ -159,7 +157,7 @@ void Layout::free_ly ()
 void Layout::set_lx(size_t const val)
 {
     m_free_lx = false;
-    m_lx = m_z3_ctx->int_val(val);
+    m_lx = m_encode->get_value(val);
 }
 
 /**
@@ -170,7 +168,7 @@ void Layout::set_lx(size_t const val)
 void Layout::set_ly(size_t const val)
 {
     m_free_ly = false;
-    m_ly = m_z3_ctx->int_val(val);
+    m_ly = m_encode->get_value(val);
 }
 
 /**
@@ -182,7 +180,7 @@ void Layout::set_ux(size_t const val)
 {
     m_logger->set_die_ux(val);
     m_free_ux = false;
-    m_ux = m_z3_ctx->int_val(val);
+    m_ux = m_encode->get_value(val);
 }
 
 /**
@@ -194,7 +192,7 @@ void Layout::set_uy(size_t const val)
 {
     m_logger->set_die_uy(val);
     m_free_uy = false;
-    m_uy = m_z3_ctx->int_val(val);
+    m_uy = m_encode->get_value(val);
 }
 
 /**
@@ -204,7 +202,7 @@ void Layout::set_uy(size_t const val)
  */
 void Layout::set_units(size_t const val)
 {
-    m_units = m_z3_ctx->int_val(val);
+    m_units = m_encode->get_value(val);
 }
 
 /**

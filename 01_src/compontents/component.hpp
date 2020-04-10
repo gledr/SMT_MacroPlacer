@@ -13,6 +13,7 @@
 #define COMPONENT_HPP
 
 #include <object.hpp>
+#include <encoding_utils.hpp>
 
 #include <cassert>
 #include <z3++.h>
@@ -51,10 +52,10 @@ public:
     virtual void dump(std::ostream & stream = std::cout) = 0;
     
 protected:
-    Component (z3::context* z3_ctx);
-    
-    z3::context* m_z3_ctx;
-    
+    Component ();
+
+    EncodingUtils* m_encode;
+
     std::string m_name;
     std::string m_id;
 

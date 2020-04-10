@@ -16,10 +16,13 @@
 #include <string>
 #include <cassert>
 
+#include <z3++.h>
+
 namespace Placer {
 
 enum eEncodingProblem { eMacroCircuit, ePartition, eInit };
 enum eRotation { eFixed, e2D, e4D };
+enum eLogic { eInt, eBitVector };
 
 enum eOrientation {
      eNorth     = 0,
@@ -138,12 +141,20 @@ protected:
     size_t get_results_id() const;
 
     void set_partitioning(bool const val);
-    bool get_partitioning();
+    bool get_partitioning() const;
 
     void set_partition_size(size_t const val);
-    size_t get_partition_size();
+    size_t get_partition_size() const;
 
     size_t get_partition_id();
+    
+    void set_logic(eLogic const logic);
+    eLogic get_logic() const;
+    
+    void store_constraint(z3::expr const & constraint);
+    z3::expr_vector get_stored_constraints();
+
+    static z3::context* m_z3_ctx;
 
 private:
     static std::vector<std::string> m_lef;
@@ -180,6 +191,8 @@ private:
     static size_t m_partition_size;
     static size_t m_solutions;
     static size_t m_results_id;
+    static eLogic m_logic;
+    static z3::expr_vector m_stored_constraints;
 };
 
 }

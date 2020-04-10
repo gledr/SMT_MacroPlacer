@@ -16,7 +16,7 @@ using namespace Placer;
 Cell::Cell(z3::context* z3_ctx,
            std::string const & _name,
            std::string const & _id):
-    Component(z3_ctx)
+    Component()
 {
     m_name = _name;
     m_id = _id;

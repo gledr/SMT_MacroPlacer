@@ -25,7 +25,7 @@ namespace Placer {
  */ 
 class Partition: public virtual Component {
 public:
-    Partition(z3::context* z3_ctx);
+    Partition();
     
     virtual ~Partition();
     
@@ -68,7 +68,6 @@ public:
 
 
 private:
-    z3::context* m_z3_ctx;
     std::vector<Component*> m_components;
     z3::expr m_ux;
     z3::expr m_uy;

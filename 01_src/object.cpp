@@ -47,6 +47,9 @@ size_t Object::m_solutions = 1;
 size_t Object::m_results_id = 0;
 size_t Object::m_partition_id = 0;
 size_t Object::m_partition_size = 1;
+eLogic Object::m_logic = eInt;
+z3::context* Object::m_z3_ctx = new z3::context();
+z3::expr_vector Object::m_stored_constraints(*m_z3_ctx);
 
 Object::Object()
 {
@@ -372,7 +375,7 @@ void Object::set_results_id(size_t const id)
     m_results_id = id;
 }
 
-bool Object::get_partitioning()
+bool Object::get_partitioning() const
 {
     return m_partitioning;
 }
@@ -390,7 +393,7 @@ size_t Object::get_partition_id()
     return id;
 }
 
-size_t Object::get_partition_size()
+size_t Object::get_partition_size() const
 {
     return m_partition_size;
 }
@@ -398,4 +401,24 @@ size_t Object::get_partition_size()
 void Object::set_partition_size(size_t const val)
 {
     m_partition_size = val;
+}
+
+eLogic Object::get_logic() const
+{
+    return m_logic;
+}
+
+void Object::set_logic(eLogic const logic)
+{
+    m_logic = logic;
+}
+
+void Object::store_constraint(z3::expr const & constraint)
+{
+    m_stored_constraints.push_back(constraint);
+}
+
+z3::expr_vector Object::get_stored_constraints()
+{
+    return m_stored_constraints;
 }

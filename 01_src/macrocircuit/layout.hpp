@@ -14,6 +14,7 @@
 
 #include <object.hpp>
 #include <logger.hpp>
+#include <encoding_utils.hpp>
 
 #include <string>
 #include <iostream>
@@ -31,7 +32,7 @@ namespace Placer {
 class Layout: public virtual Object {
 public:
 
-    Layout (z3::context* z3_ctx);
+    Layout ();
 
     virtual ~Layout ();
 
@@ -75,6 +76,7 @@ private:
 
     Utils::Logger* m_logger;
     double m_min_die_size;
+    EncodingUtils* m_encode;
 
     bool m_free_lx;
     bool m_free_ly;

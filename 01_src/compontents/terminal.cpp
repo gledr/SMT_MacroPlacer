@@ -48,16 +48,16 @@ Terminal::Terminal(std::string const & name,
  * @param direction Terminal Direction
  */
 Terminal::Terminal(std::string const & name,
-                           size_t const pos_x,
-                           size_t const pos_y,
-                           z3::context* z3_ctx,
-                           e_pin_direction const direction):
-    m_name(name),
+                   size_t const pos_x,
+                   size_t const pos_y,
+                   z3::context* z3_ctx,
+                   e_pin_direction const direction):
     m_z3_ctx(z3_ctx),
+    m_name(name),
+    m_free(false),
     m_direction(direction),
     m_pin_pos_x(z3_ctx->int_val(pos_x)),
-    m_pin_pos_y(z3_ctx->int_val(pos_y)),
-    m_free(false)
+    m_pin_pos_y(z3_ctx->int_val(pos_y))
 {
     assert(z3_ctx != nullptr);
     m_free = false;

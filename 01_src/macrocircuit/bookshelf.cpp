@@ -350,12 +350,12 @@ void Bookshelf::read_pl()
             
             // Placed Macro
             if(force_free) {
-                m_macros.push_back(new Macro(m_z3_ctx, name, name, width, heigth));
+                m_macros.push_back(new Macro(name, name, width, heigth));
             } else if((x != 0) || (y != 0)){
-                m_macros.push_back(new Macro(m_z3_ctx, name,name, width, heigth, x, y, 0));
+                m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
             // Free Macro
             } else {
-                m_macros.push_back(new Macro(m_z3_ctx, name, name, width, heigth));
+                m_macros.push_back(new Macro(name, name, width, heigth));
             }
             
         } else if(m_terminal_definitions.find(token[0]) != m_terminal_definitions.end()){
@@ -560,7 +560,7 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
         if (m){
             // Pin does not yet exist
             if (!m->get_pin(pin)){
-                p = new Pin(pin, macro, dir, m_z3_ctx);
+                p = new Pin(pin, macro, dir);
                 assert (p != nullptr);
                 
                 if (!rel_pos_x.empty()){

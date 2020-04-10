@@ -16,18 +16,13 @@ using namespace Placer;
 
 /**
  * @brief Constructor
- * 
- * @param z3_ctx Z3 Context
  */
-Partitioning::Partitioning(z3::context* z3_ctx):
-    m_components_in_partition(z3_ctx->int_val(0)),
-    m_components_non_overlapping(z3_ctx->int_val(0)),
-    m_hpwl_cost_function(z3_ctx->int_val(0))
+Partitioning::Partitioning():
+    m_encode(new EncodingUtils()),
+    m_components_in_partition(m_encode->get_value(0)),
+    m_components_non_overlapping(m_encode->get_value(0)),
+    m_hpwl_cost_function(m_encode->get_value(0))
 {
-    assert (z3_ctx != nullptr);
-    
-    m_z3_ctx = z3_ctx;
-    m_z3_utils = new EncodingUtils(z3_ctx);
     m_kmeans = new KMeans();
 }
 
@@ -36,8 +31,7 @@ Partitioning::Partitioning(z3::context* z3_ctx):
  */
 Partitioning::~Partitioning()
 {
-    m_z3_ctx = nullptr;
-    delete m_z3_utils; m_z3_utils = nullptr;
+    delete m_encode; m_encode = nullptr;
     delete m_kmeans; m_kmeans = nullptr;
 }
 
@@ -59,7 +53,7 @@ void Partitioning::run()
         std::cout << "Cluster: " << cluster->get_id() << " in progress..." << std::endl;
         
         if (partitions.size() > 0){
-            Partition* next_partition = new Partition(m_z3_ctx);
+            Partition* next_partition = new Partition();
             m_z3_opt = new z3::optimize(*m_z3_ctx);
             next_partition->add_subparititions(partitions);
             this->encode(next_partition);
@@ -112,7 +106,7 @@ void Partitioning::create_initial_partitions()
     
     for (auto itor: sorted){
         for (size_t j = 0; j < itor.second.size(); j+= m_partition_size){
-            Partition* next_partition = new Partition(m_z3_ctx);
+            Partition* next_partition = new Partition();
     
             for (size_t k = j; (k < (m_partition_size+j)) && (k < itor.second.size()); ++k){
                 next_partition->add_macro(itor.second[k]);
@@ -124,7 +118,6 @@ void Partitioning::create_initial_partitions()
             size_t w = next_partition->get_ux().get_numeral_uint();
             size_t h = next_partition->get_uy().get_numeral_uint();
             delete m_z3_opt; m_z3_opt = nullptr;
-           
 
             next_partition->set_height(h);
             next_partition->set_witdh(w);
@@ -213,28 +206,28 @@ void Partitioning::encode_components_in_partition(Partition* next_partition,
             z3::expr is_E = itor->get_orientation() == m_z3_ctx->int_val(eEast);
             
             z3::expr_vector case_N(*m_z3_ctx);
-            case_N.push_back(m_z3_utils->ge(itor->get_lx(eNorth), die_lx)); ///< LX
-            case_N.push_back(m_z3_utils->ge(itor->get_ly(eNorth), die_ly)); ///< LY
-            case_N.push_back(m_z3_utils->le(itor->get_ux(eNorth), die_ux)); ///< UX
-            case_N.push_back(m_z3_utils->le(itor->get_uy(eNorth), die_uy)); ///< UY
+            case_N.push_back(m_encode->ge(itor->get_lx(eNorth), die_lx)); ///< LX
+            case_N.push_back(m_encode->ge(itor->get_ly(eNorth), die_ly)); ///< LY
+            case_N.push_back(m_encode->le(itor->get_ux(eNorth), die_ux)); ///< UX
+            case_N.push_back(m_encode->le(itor->get_uy(eNorth), die_uy)); ///< UY
 
             z3::expr_vector case_W(*m_z3_ctx);
-            case_W.push_back(m_z3_utils->ge(itor->get_lx(eWest), die_lx)); ///< LX
-            case_W.push_back(m_z3_utils->ge(itor->get_ly(eWest), die_ly)); ///< LY
-            case_W.push_back(m_z3_utils->le(itor->get_ux(eWest), die_ux)); ///< UX
-            case_W.push_back(m_z3_utils->le(itor->get_uy(eWest), die_uy)); ///< UY
+            case_W.push_back(m_encode->ge(itor->get_lx(eWest), die_lx)); ///< LX
+            case_W.push_back(m_encode->ge(itor->get_ly(eWest), die_ly)); ///< LY
+            case_W.push_back(m_encode->le(itor->get_ux(eWest), die_ux)); ///< UX
+            case_W.push_back(m_encode->le(itor->get_uy(eWest), die_uy)); ///< UY
 
             z3::expr_vector case_S(*m_z3_ctx);
-            case_S.push_back(m_z3_utils->ge(itor->get_lx(eSouth), die_lx)); ///< LX
-            case_S.push_back(m_z3_utils->ge(itor->get_ly(eSouth), die_ly)); ///< LY
-            case_S.push_back(m_z3_utils->le(itor->get_ux(eSouth), die_ux)); ///< UX
-            case_S.push_back(m_z3_utils->le(itor->get_uy(eSouth), die_uy)); ///< UY
+            case_S.push_back(m_encode->ge(itor->get_lx(eSouth), die_lx)); ///< LX
+            case_S.push_back(m_encode->ge(itor->get_ly(eSouth), die_ly)); ///< LY
+            case_S.push_back(m_encode->le(itor->get_ux(eSouth), die_ux)); ///< UX
+            case_S.push_back(m_encode->le(itor->get_uy(eSouth), die_uy)); ///< UY
 
             z3::expr_vector case_E(*m_z3_ctx);
-            case_E.push_back(m_z3_utils->ge(itor->get_lx(eEast), die_lx)); ///< LX
-            case_E.push_back(m_z3_utils->ge(itor->get_ly(eEast), die_ly)); ///< LY
-            case_E.push_back(m_z3_utils->le(itor->get_ux(eEast), die_ux)); ///< UX
-            case_E.push_back(m_z3_utils->le(itor->get_uy(eEast), die_uy)); ///< UY
+            case_E.push_back(m_encode->ge(itor->get_lx(eEast), die_lx)); ///< LX
+            case_E.push_back(m_encode->ge(itor->get_ly(eEast), die_ly)); ///< LY
+            case_E.push_back(m_encode->le(itor->get_ux(eEast), die_ux)); ///< UX
+            case_E.push_back(m_encode->le(itor->get_uy(eEast), die_uy)); ///< UY
             
             if(type == eRotation::e2D){
                 z3::expr ite = z3::ite(is_N, z3::mk_and(case_N),
@@ -252,8 +245,8 @@ void Partitioning::encode_components_in_partition(Partition* next_partition,
             }
 
             if(type == eRotation::e2D){
-                clauses.push_back(m_z3_utils->ge(itor->get_orientation(), m_z3_ctx->int_val(eNorth)));
-                clauses.push_back(m_z3_utils->le(itor->get_orientation(), m_z3_ctx->int_val(eWest)));
+                clauses.push_back(m_encode->ge(itor->get_orientation(), m_z3_ctx->int_val(eNorth)));
+                clauses.push_back(m_encode->le(itor->get_orientation(), m_z3_ctx->int_val(eWest)));
             } else if (type == eRotation::e4D){
                 clauses.push_back(itor->get_orientation() >= m_z3_ctx->int_val(eNorth));
                 clauses.push_back(itor->get_orientation() <= m_z3_ctx->int_val(eEast));
@@ -302,115 +295,115 @@ void Partitioning::encode_components_non_overlapping(Partition* next_partition,
 
 //{{{           Case North North
                 z3::expr_vector case_nn(*m_z3_ctx);
-                case_nn.push_back(m_z3_utils->ge(free->get_lx(eNorth), fixed->get_ux(eNorth))); ///< Right
-                case_nn.push_back(m_z3_utils->le(free->get_ux(eNorth), fixed->get_lx(eNorth))); ///< Left
-                case_nn.push_back(m_z3_utils->ge(free->get_ly(eNorth), fixed->get_uy(eNorth))); ///< Upper
-                case_nn.push_back(m_z3_utils->le(free->get_uy(eNorth), fixed->get_ly(eNorth))); ///< Below
+                case_nn.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eNorth))); ///< Right
+                case_nn.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eNorth))); ///< Left
+                case_nn.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eNorth))); ///< Upper
+                case_nn.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case West North
                 z3::expr_vector case_wn(*m_z3_ctx);
-                case_wn.push_back(m_z3_utils->ge(free->get_lx(eWest), fixed->get_ux(eNorth))); ///< Right
-                case_wn.push_back(m_z3_utils->le(free->get_ux(eWest), fixed->get_lx(eNorth))); ///< Left
-                case_wn.push_back(m_z3_utils->ge(free->get_ly(eWest), fixed->get_uy(eNorth))); ///< Upper
-                case_wn.push_back(m_z3_utils->le(free->get_uy(eWest), fixed->get_ly(eNorth))); ///< Below
+                case_wn.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eNorth))); ///< Right
+                case_wn.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eNorth))); ///< Left
+                case_wn.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eNorth))); ///< Upper
+                case_wn.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case South North
                 z3::expr_vector case_sn(*m_z3_ctx);
-                case_sn.push_back(m_z3_utils->ge(free->get_lx(eSouth), fixed->get_ux(eNorth))); ///< Right
-                case_sn.push_back(m_z3_utils->le(free->get_ux(eSouth), fixed->get_lx(eNorth))); ///< Left
-                case_sn.push_back(m_z3_utils->ge(free->get_ly(eSouth), fixed->get_uy(eNorth))); ///< Upper
-                case_sn.push_back(m_z3_utils->le(free->get_uy(eSouth), fixed->get_ly(eNorth))); ///< Below
+                case_sn.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eNorth))); ///< Right
+                case_sn.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eNorth))); ///< Left
+                case_sn.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eNorth))); ///< Upper
+                case_sn.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case East North
                 z3::expr_vector case_en(*m_z3_ctx);
-                case_en.push_back(m_z3_utils->ge(free->get_lx(eEast), fixed->get_ux(eNorth))); ///< Right
-                case_en.push_back(m_z3_utils->le(free->get_ux(eEast), fixed->get_lx(eNorth))); ///< Left
-                case_en.push_back(m_z3_utils->ge(free->get_ly(eEast), fixed->get_uy(eNorth))); ///< Upper
-                case_en.push_back(m_z3_utils->le(free->get_uy(eEast), fixed->get_ly(eNorth))); ///< Below
+                case_en.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eNorth))); ///< Right
+                case_en.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eNorth))); ///< Left
+                case_en.push_back(m_encode->ge(free->get_ly(eEast), fixed->get_uy(eNorth))); ///< Upper
+                case_en.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case North West
                 z3::expr_vector case_nw(*m_z3_ctx);
-                case_nw.push_back(m_z3_utils->ge(free->get_lx(eNorth), fixed->get_ux(eWest))); ///< Right
-                case_nw.push_back(m_z3_utils->le(free->get_ux(eNorth), fixed->get_lx(eWest))); ///< Left
-                case_nw.push_back(m_z3_utils->ge(free->get_ly(eNorth), fixed->get_uy(eWest))); ///< Upper
-                case_nw.push_back(m_z3_utils->le(free->get_uy(eNorth), fixed->get_ly(eWest))); ///< Below
+                case_nw.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eWest))); ///< Right
+                case_nw.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eWest))); ///< Left
+                case_nw.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eWest))); ///< Upper
+                case_nw.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eWest))); ///< Below
 //}}}                
 //{{{           Case West West
                 z3::expr_vector case_ww(*m_z3_ctx);
-                case_ww.push_back(m_z3_utils->ge(free->get_lx(eWest), fixed->get_ux(eWest))); ///< Right
-                case_ww.push_back(m_z3_utils->le(free->get_ux(eWest), fixed->get_lx(eWest))); ///< Left
-                case_ww.push_back(m_z3_utils->ge(free->get_ly(eWest), fixed->get_uy(eWest))); ///< Upper
-                case_ww.push_back(m_z3_utils->le(free->get_uy(eWest), fixed->get_ly(eWest))); ///< Below
+                case_ww.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eWest))); ///< Right
+                case_ww.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eWest))); ///< Left
+                case_ww.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eWest))); ///< Upper
+                case_ww.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eWest))); ///< Below
 //}}}
 //{{{           Case South West
                 z3::expr_vector case_sw(*m_z3_ctx);
-                case_sw.push_back(m_z3_utils->ge(free->get_lx(eSouth), fixed->get_ux(eWest))); ///< Right
-                case_sw.push_back(m_z3_utils->le(free->get_ux(eSouth), fixed->get_lx(eWest))); ///< Left
-                case_sw.push_back(m_z3_utils->ge(free->get_ly(eSouth), fixed->get_uy(eWest))); ///< Upper
-                case_sw.push_back(m_z3_utils->le(free->get_uy(eSouth), fixed->get_ly(eWest))); ///< Below
+                case_sw.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eWest))); ///< Right
+                case_sw.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eWest))); ///< Left
+                case_sw.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eWest))); ///< Upper
+                case_sw.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eWest))); ///< Below
 //}}}
 //{{{           Case East West
                 z3::expr_vector case_ew(*m_z3_ctx);
-                case_ew.push_back(m_z3_utils->ge(free->get_lx(eEast), fixed->get_ux(eWest))); ///< Right
-                case_ew.push_back(m_z3_utils->le(free->get_ux(eEast), fixed->get_lx(eWest))); ///< Left
-                case_ew.push_back(m_z3_utils->ge(free->get_ly(eWest), fixed->get_uy(eWest))); ///< Upper
-                case_ew.push_back(m_z3_utils->le(free->get_uy(eEast), fixed->get_ly(eWest))); ///< Below
+                case_ew.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eWest))); ///< Right
+                case_ew.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eWest))); ///< Left
+                case_ew.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eWest))); ///< Upper
+                case_ew.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eWest))); ///< Below
 //}}}
 //{{{           Case North South
                 z3::expr_vector case_ns(*m_z3_ctx);
-                case_ns.push_back(m_z3_utils->ge(free->get_lx(eNorth), fixed->get_ux(eSouth))); ///< Right
-                case_ns.push_back(m_z3_utils->le(free->get_ux(eNorth), fixed->get_lx(eSouth))); ///< Left
-                case_ns.push_back(m_z3_utils->ge(free->get_ly(eNorth), fixed->get_uy(eSouth))); ///< Upper
-                case_ns.push_back(m_z3_utils->le(free->get_uy(eNorth), fixed->get_ly(eSouth))); ///< Below
+                case_ns.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eSouth))); ///< Right
+                case_ns.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eSouth))); ///< Left
+                case_ns.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eSouth))); ///< Upper
+                case_ns.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eSouth))); ///< Below
 //}}}
 //{{{           Case West South
                 z3::expr_vector case_ws(*m_z3_ctx);
-                case_ws.push_back(m_z3_utils->ge(free->get_lx(eWest), fixed->get_ux(eSouth))); ///< Right
-                case_ws.push_back(m_z3_utils->le(free->get_ux(eWest), fixed->get_lx(eSouth))); ///< Left
-                case_ws.push_back(m_z3_utils->ge(free->get_ly(eWest), fixed->get_uy(eSouth))); ///< Upper
-                case_ws.push_back(m_z3_utils->le(free->get_uy(eWest), fixed->get_ly(eSouth))); ///< Below
+                case_ws.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eSouth))); ///< Right
+                case_ws.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eSouth))); ///< Left
+                case_ws.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eSouth))); ///< Upper
+                case_ws.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eSouth))); ///< Below
 //}}}
 //{{{           Case South South
                 z3::expr_vector case_ss(*m_z3_ctx);
-                case_ss.push_back(m_z3_utils->ge(free->get_lx(eSouth), fixed->get_ux(eSouth))); ///< Right
-                case_ss.push_back(m_z3_utils->le(free->get_ux(eSouth), fixed->get_lx(eSouth))); ///< Left
-                case_ss.push_back(m_z3_utils->ge(free->get_ly(eSouth), fixed->get_uy(eSouth))); ///< Upper
-                case_ss.push_back(m_z3_utils->le(free->get_uy(eSouth), fixed->get_ly(eSouth))); ///< Below
+                case_ss.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eSouth))); ///< Right
+                case_ss.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eSouth))); ///< Left
+                case_ss.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eSouth))); ///< Upper
+                case_ss.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eSouth))); ///< Below
 //}}} 
 //{{{           Case East South
                 z3::expr_vector case_es(*m_z3_ctx);
-                case_es.push_back(m_z3_utils->ge(free->get_lx(eEast), fixed->get_ux(eSouth))); ///< Right
-                case_es.push_back(m_z3_utils->le(free->get_ux(eEast), fixed->get_lx(eSouth))); ///< Left
-                case_es.push_back(m_z3_utils->ge(free->get_ly(eEast), fixed->get_uy(eSouth))); ///< Upper
-                case_es.push_back(m_z3_utils->le(free->get_uy(eEast), fixed->get_ly(eSouth))); ///< Below
+                case_es.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eSouth))); ///< Right
+                case_es.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eSouth))); ///< Left
+                case_es.push_back(m_encode->ge(free->get_ly(eEast), fixed->get_uy(eSouth))); ///< Upper
+                case_es.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eSouth))); ///< Below
 //}}}
 //{{{           Case North East
                 z3::expr_vector case_ne(*m_z3_ctx);
-                case_ne.push_back(m_z3_utils->ge(free->get_lx(eNorth), fixed->get_ux(eEast))); ///< Right
-                case_ne.push_back(m_z3_utils->le(free->get_ux(eNorth), fixed->get_lx(eEast))); ///< Left
-                case_ne.push_back(m_z3_utils->ge(free->get_ly(eNorth), fixed->get_uy(eEast))); ///< Upper
-                case_ne.push_back(m_z3_utils->le(free->get_uy(eNorth), fixed->get_ly(eEast))); ///< Below
+                case_ne.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eEast))); ///< Right
+                case_ne.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eEast))); ///< Left
+                case_ne.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eEast))); ///< Upper
+                case_ne.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{           Case West East
                 z3::expr_vector case_we(*m_z3_ctx);
-                case_we.push_back(m_z3_utils->ge(free->get_lx(eWest), fixed->get_ux(eEast))); ///< Right
-                case_we.push_back(m_z3_utils->le(free->get_ux(eWest), fixed->get_lx(eEast))); ///< Left
-                case_we.push_back(m_z3_utils->ge(free->get_ly(eWest), fixed->get_uy(eEast))); ///< Upper
-                case_we.push_back(m_z3_utils->le(free->get_uy(eWest), fixed->get_ly(eEast))); ///< Below
+                case_we.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eEast))); ///< Right
+                case_we.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eEast))); ///< Left
+                case_we.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eEast))); ///< Upper
+                case_we.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{           Case South East
                 z3::expr_vector case_se(*m_z3_ctx);
-                case_se.push_back(m_z3_utils->ge(free->get_lx(eSouth), fixed->get_ux(eEast))); ///< Right
-                case_se.push_back(m_z3_utils->le(free->get_ux(eSouth), fixed->get_lx(eEast))); ///< Left
-                case_se.push_back(m_z3_utils->ge(free->get_ly(eSouth), fixed->get_uy(eEast))); ///< Upper
-                case_se.push_back(m_z3_utils->le(free->get_uy(eSouth), fixed->get_ly(eEast))); ///< Below
+                case_se.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eEast))); ///< Right
+                case_se.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eEast))); ///< Left
+                case_se.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eEast))); ///< Upper
+                case_se.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{           Case East East
                 z3::expr_vector case_ee(*m_z3_ctx);
-                case_ee.push_back(m_z3_utils->ge(free->get_lx(eEast), fixed->get_ux(eEast))); ///< Right
-                case_ee.push_back(m_z3_utils->le(free->get_ux(eEast), fixed->get_lx(eEast))); ///< Left
-                case_ee.push_back(m_z3_utils->ge(free->get_ly(eEast), fixed->get_uy(eEast))); ///< Upper
-                case_ee.push_back(m_z3_utils->le(free->get_uy(eEast), fixed->get_ly(eEast))); ///< Below
+                case_ee.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eEast))); ///< Right
+                case_ee.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eEast))); ///< Left
+                case_ee.push_back(m_encode->ge(free->get_ly(eEast), fixed->get_uy(eEast))); ///< Upper
+                case_ee.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{
                 assert (case_nn.size() == 4);

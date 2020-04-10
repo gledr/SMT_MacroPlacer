@@ -25,14 +25,12 @@ namespace Placer {
 class Macro: public virtual Component {
 public:
 
-    Macro(z3::context* z3_ctx,
-          std::string const & name,
+    Macro(std::string const & name,
           std::string const & id,
           size_t const widht,
           size_t const height);
    
-   Macro(z3::context* z3_ctx,
-          std::string const & name,
+   Macro(std::string const & name,
           std::string const & id,
           size_t const width,
           size_t const height, 

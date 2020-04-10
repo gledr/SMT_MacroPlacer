@@ -32,7 +32,7 @@ namespace Placer {
  */
 class Partitioning: public virtual Object {
 public:
-    Partitioning(z3::context* z3_ctx);
+    Partitioning();
     
     virtual ~Partitioning();
     
@@ -46,9 +46,8 @@ public:
     std::vector<Component*> get_partitions();
 
 private:
-    z3::context* m_z3_ctx;
     z3::optimize* m_z3_opt;
-    EncodingUtils* m_z3_utils;
+    EncodingUtils* m_encode;
     KMeans* m_kmeans;
     
     std::vector<Component*> m_components;

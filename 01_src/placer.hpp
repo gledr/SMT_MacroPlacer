@@ -49,8 +49,6 @@ private:
     int m_argc;
     char** m_argv;
     
-    z3::context* m_z3_ctx;
-
     boost::program_options::options_description* m_options_functions;
     boost::program_options::variables_map m_vm;
 

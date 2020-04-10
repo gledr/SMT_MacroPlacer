@@ -14,59 +14,54 @@
 using namespace Placer;
 
 /**
- * @brief ...
+ * @brief Constructor
  * 
- * @param name p_name:...
- * @param direction p_direction:...
- * @param z3_ctx p_z3_ctx:...
- * @param x p_x:...
- * @param y p_y:...
+ * @param name Pinname
+ * @param direction Pin Direction
+ * @param x Pin Location X
+ * @param y Pin Location Y
  */
 Pin::Pin(std::string const & name,
          e_pin_direction const direction,
-         z3::context* z3_ctx,
          size_t const & x,
          size_t const & y):
     Object(),
-    m_z3_ctx(z3_ctx),
+    m_encode(new EncodingUtils()),
     m_pin_name(name),
     m_direction(direction),
-    m_pin_pos_x(z3_ctx->int_val(x)),
-    m_pin_pos_y(z3_ctx->int_val(y))
+    m_pin_pos_x(m_encode->get_value(x)),
+    m_pin_pos_y(m_encode->get_value(y))
 {
-    assert(z3_ctx != nullptr);
     this->get_verbose() && std::cout << "[Info]: Adding Placed Pin " << name << std::endl;
 }
 
 /**
- * @brief ...
+ * @brief Pin Name
  * 
  * @param pin_name p_pin_name:...
  * @param macro_name p_macro_name:...
  * @param direction p_direction:...
- * @param z3_ctx p_z3_ctx:...
  */
 Pin::Pin(std::string const & pin_name,
          std::string const & macro_name,
-         e_pin_direction const direction,
-         z3::context* z3_ctx):
+         e_pin_direction const direction):
     Object(),
-    m_z3_ctx(z3_ctx),
+    m_encode(new EncodingUtils()),
     m_pin_name(pin_name),
     m_macro_name(macro_name),
     m_direction(direction),
-    m_pin_pos_x(z3_ctx->int_const(std::string(macro_name + pin_name + "_pos_x").c_str())),
-    m_pin_pos_y(z3_ctx->int_const(std::string(macro_name + pin_name + "_pos_y").c_str()))
+    m_pin_pos_x(m_encode->get_constant(macro_name + pin_name + "_pos_x")),
+    m_pin_pos_y(m_encode->get_constant(macro_name + pin_name + "_pos_y"))
 {
-    assert(z3_ctx != nullptr);
     this->get_verbose() && std::cout << "[Info]: Adding Free Pin " << macro_name << "_" << pin_name << std::endl;
 }
 
 /**
- * @brief ...
+ * @brief Destructor
  */
 Pin::~Pin()
 {
+    delete m_encode; m_encode = nullptr;
 }
 
 /**

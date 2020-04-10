@@ -19,6 +19,7 @@
 #include <z3++.h>
 
 #include <object.hpp>
+#include <encoding_utils.hpp>
 
 namespace Placer {
 
@@ -32,14 +33,12 @@ public:
    
     Pin(std::string const & pin_name,
         e_pin_direction const direction,
-        z3::context* z3_ctx,
         size_t const & x,
         size_t const & y);
     
     Pin(std::string const & pin_name,
         std::string const & macro_name,
-        e_pin_direction const direction,
-        z3::context* z3_ctx);
+        e_pin_direction const direction);
     
     virtual ~Pin();
     
@@ -74,10 +73,10 @@ public:
     static std::string enum2string(e_pin_direction const direction);
     
 private:
-    z3::context* m_z3_ctx;
-    
     size_t m_bitwidht;
     size_t m_frequency;
+    
+    EncodingUtils* m_encode;
     
     std::string m_pin_name;
     std::string m_macro_name;

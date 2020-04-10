@@ -12,6 +12,8 @@
 #ifndef ENCODINGUTILS_HPP
 #define ENCODINGUTILS_HPP
 
+#include <object.hpp>
+
 #include <z3++.h>
 
 namespace Placer {
@@ -20,41 +22,62 @@ namespace Placer {
  * @class EncodingUtils
  * @brief Class offering inline functions for abstracting Z3 encoding
  */
-class EncodingUtils {
+class EncodingUtils: public virtual Object {
 public:
 
-    EncodingUtils(z3::context * z3_ctx)
+    EncodingUtils():
+        Object()
     {
-        assert (z3_ctx != nullptr);
-        m_z3_ctx = z3_ctx;
     }
 
     inline z3::expr add(z3::expr a, z3::expr b)
     {
-        return a + b;
+        z3::expr ret_val(*m_z3_ctx);
+
+        if (this->get_logic() == eInt){
+            ret_val = a + b;
+        } else if (this->get_logic() == eBitVector){
+            this->store_constraint(z3::bvadd_no_overflow(a, b, false) == this->get_flag(true));
+            this->store_constraint(z3::bvadd_no_underflow(a,b) == this->get_flag(true));
+            ret_val = a + b;
+            
+        } else {
+            assert (0);
+        }
+
+        return ret_val;
     }
 
-    inline z3::expr sub(z3::expr a, z3::expr b)
+    inline z3::expr sub(z3::expr const & a, z3::expr const & b)
     {
-        return a - b;
+        z3::expr ret_val(*m_z3_ctx);
+
+        if (this->get_logic() == eInt){
+            ret_val = a - b;
+        } else if (this->get_logic() == eBitVector){
+            this->store_constraint(z3::bvsub_no_overflow(a, b) == this->get_flag(true));
+            this->store_constraint(z3::bvsub_no_underflow(a,b, false) == this->get_flag(true));
+            ret_val = a - b;
+        }
+        return ret_val;
     }
 
-   inline z3::expr ge(z3::expr a, z3::expr b)
+   inline z3::expr ge(z3::expr const & a, z3::expr const & b)
     {
         return a >= b;
     }
 
-    inline z3::expr le(z3::expr a, z3::expr b)
+    inline z3::expr le(z3::expr const & a, z3::expr const & b)
     {
         return a <= b;
     }
 
-    inline z3::expr gt(z3::expr a, z3::expr b)
+    inline z3::expr gt(z3::expr const &a, z3::expr const & b)
     {
         return a > b;
     }
 
-    inline z3::expr lt(z3::expr a, z3::expr b)
+    inline z3::expr lt(z3::expr const & a, z3::expr const & b)
     {
         return a < b;
     }
@@ -83,6 +106,41 @@ public:
             std::cout << exp.msg() << std::endl;
             assert (0);
         }
+    }
+    
+    inline z3::expr get_constant(std::string const & id)
+    {
+        z3::expr ret_val (*m_z3_ctx);
+
+        if (this->get_logic() == eInt){
+            ret_val = m_z3_ctx->int_const(id.c_str());
+        } else if (this->get_logic() == eBitVector){
+            ret_val = m_z3_ctx->bv_const(id.c_str(), 32);
+        } else {
+            assert (0);
+        }
+        
+        return ret_val;
+    }
+
+    inline z3::expr get_value(size_t const value)
+    {
+        z3::expr ret_val(*m_z3_ctx);
+
+        if (this->get_logic() == eInt){
+            ret_val = m_z3_ctx->int_val(value);
+        } else if (this->get_logic() == eBitVector){
+            ret_val = m_z3_ctx->bv_val(value, 32);
+        } else {
+            assert (0);
+        }
+
+        return ret_val;
+    }
+
+    inline z3::expr get_flag(bool const val)
+    {
+        return m_z3_ctx->bool_val(val);
     }
 
 private:

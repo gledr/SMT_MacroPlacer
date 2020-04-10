@@ -27,7 +27,7 @@ Partitioning::Partitioning(z3::context* z3_ctx):
     assert (z3_ctx != nullptr);
     
     m_z3_ctx = z3_ctx;
-    m_z3_utils = new EncodingUtils();
+    m_z3_utils = new EncodingUtils(z3_ctx);
     m_kmeans = new KMeans();
 }
 

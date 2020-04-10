@@ -31,10 +31,10 @@ Macro::Macro(z3::context* z3_ctx,
     m_id = id;
     m_lx = z3_ctx->int_const(std::string(id + "_lx").c_str());
     m_ly = z3_ctx->int_const(std::string(id + "_ly").c_str());
-    m_orientation = z3_ctx->int_const(std::string(id + "_orientation").c_str());
+    //m_orientation = z3_ctx->int_const(std::string(id + "_orientation").c_str());
     m_width = z3_ctx->int_val(widht);
     m_height = z3_ctx->int_val(height);
-    //m_orientation = z3_ctx->int_val(0);
+    m_orientation = z3_ctx->int_val(eNorth);
     
     this->get_verbose() && std::cout << "[Info]: Adding Free Macro " 
                        << id << " (" << widht << "x" << height << ")"<< std::endl;
@@ -399,37 +399,4 @@ void Macro::encode_pins_center_of_macro()
 
 z3::expr Placer::Macro::get_pin_constraints()
 {
-}
-
-std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_north()
-{
-    z3::expr_vector x_vec(*m_z3_ctx);
-    z3::expr_vector y_vec(*m_z3_ctx);
-    
-    for (size_t x =0; x < m_width.get_numeral_uint(); ++x){
-        for (size_t y = 0; y < m_height.get_numeral_int(); ++y){
-            z3::expr _x = m_lx + m_z3_ctx->int_val(x);
-            z3::expr _y = m_lx + m_z3_ctx->int_val(y);
-            
-            x_vec.push_back(_x);
-            y_vec.push_back(_y);
-        }
-    }
-    
-    return std::make_pair(x_vec, y_vec);
-}
-
-std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_west()
-{
-    assert (0);
-}
-
-std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_south()
-{
-    assert (0);
-}
-
-std::pair<z3::expr_vector, z3::expr_vector> Macro::covered_east()
-{
-    assert (0);
 }

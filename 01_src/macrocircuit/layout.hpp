@@ -34,20 +34,18 @@ public:
     Layout (z3::context* z3_ctx);
 
     virtual ~Layout ();
-    
-    void generate_grid(size_t const w, size_t const h);
-    
+
     void free_ux();
     void free_uy();
     void free_lx();
     void free_ly();
-    
+
     z3::expr& get_lx();
     z3::expr& get_ux();
     z3::expr& get_ly();
     z3::expr& get_uy();
     z3::expr& get_units();
-    
+
     void set_lx(size_t const val);
     void set_ly(size_t const val);
     void set_ux(size_t const val);
@@ -92,8 +90,6 @@ private:
     z3::expr    m_ux;
     z3::expr    m_uy;
     z3::expr    m_units;
-
-    std::vector<std::vector<z3::expr>> tmp;
 };
 
 }

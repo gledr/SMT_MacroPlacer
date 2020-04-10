@@ -25,15 +25,15 @@ Layout::Layout (z3::context* z3_ctx):
     m_free_ly(true),
     m_free_ux(true),
     m_free_uy(true),
-    m_lx(z3_ctx->int_const(std::string("die_lx").c_str())),
-    m_ly(z3_ctx->int_const(std::string("die_uy").c_str())),
-    m_ux(z3_ctx->int_const(std::string("die_ux").c_str())),
-    m_uy(z3_ctx->int_const(std::string("die_uy").c_str())),
-    m_units(z3_ctx->int_const(std::string("die_units").c_str()))
+    m_lx(z3_ctx->int_const("die_lx")),
+    m_ly(z3_ctx->int_const("die_uy")),
+    m_ux(z3_ctx->int_const("die_ux")),
+    m_uy(z3_ctx->int_const("die_uy")),
+    m_units(z3_ctx->int_const("die_units"))
 {
     assert(z3_ctx != nullptr);
     m_z3_ctx = z3_ctx;
-    
+
     m_logger = Logger::getInstance();
 }
 
@@ -120,7 +120,7 @@ z3::expr& Layout::get_units()
  */
 void Layout::free_ux ()
 {
-    m_ux = m_z3_ctx->int_const(std::string("die_ux").c_str());
+    m_ux = m_z3_ctx->int_const("die_ux");
     m_free_ux = true;
 }
 
@@ -129,7 +129,7 @@ void Layout::free_ux ()
  */
 void Layout::free_uy ()
 {
-    m_uy = m_z3_ctx->int_const(std::string("die_uy").c_str());
+    m_uy = m_z3_ctx->int_const("die_uy");
     m_free_uy = true;
 }
 
@@ -138,7 +138,7 @@ void Layout::free_uy ()
  */
 void Layout::free_lx ()
 {
-    m_lx = m_z3_ctx->int_const(std::string("die_lx").c_str());
+    m_lx = m_z3_ctx->int_const("die_lx");
     m_free_lx = true;
 }
 
@@ -147,7 +147,7 @@ void Layout::free_lx ()
  */
 void Layout::free_ly ()
 {
-    m_ly = m_z3_ctx->int_const(std::string("die_ly").c_str());
+    m_ly = m_z3_ctx->int_const("die_ly");
     m_free_ly = true;
 }
 
@@ -299,7 +299,7 @@ void Layout::set_solution_uy(size_t const val)
 size_t Layout::get_idx_best_solution()
 {
     assert (m_solutions_uy.size() == m_solutions_ux.size());
-    
+
     size_t idx = 0;
     double best_area  = std::numeric_limits<double>::max();
     
@@ -308,11 +308,11 @@ size_t Layout::get_idx_best_solution()
         size_t y = m_solutions_uy[i];
         
         double tmp = ((double)x * (double)y)/1000000;
-	
-	if(tmp < best_area){
-	    best_area = tmp;
-	    idx = i;
-	}
+
+        if(tmp < best_area){
+            best_area = tmp;
+            idx = i;
+        }
     }
     return idx;
 }
@@ -335,15 +335,4 @@ void Layout::set_formula_ux (z3::expr const & formula)
 void Layout::set_formula_uy (z3::expr const & formula)
 {
     m_uy = formula;
-}
-
-/**
- * @brief Init Internal Grid
- * 
- * @param w Grid Width
- * @param h Gridh Height
- */
-void Layout::generate_grid(size_t const w, size_t const h)
-{
-    assert (0);
 }

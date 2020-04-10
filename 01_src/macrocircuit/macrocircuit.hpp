@@ -156,7 +156,6 @@ private:
     void encode_components_non_overlapping(eRotation const type);
     void encode_terminals_on_frontier();
     void encode_terminals_non_overlapping();
-    void encode_single_grid();
 
     z3::expr m_components_non_overlapping;
     z3::expr m_components_inside_die;

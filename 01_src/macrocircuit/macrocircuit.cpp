@@ -23,7 +23,8 @@ MacroCircuit::MacroCircuit(z3::context* z3_ctx):
     m_components_non_overlapping(z3_ctx->int_val(0)),
     m_components_inside_die(z3_ctx->int_val(0)),
     m_terminals_on_frontier(z3_ctx->int_val(0)),
-    m_terminals_non_overlapping(z3_ctx->int_val(0))
+    m_terminals_non_overlapping(z3_ctx->int_val(0)),
+    m_single_grid(z3_ctx->int_val(0))
 {
     m_z3_opt = new z3::optimize(*z3_ctx);
     m_layout = new Layout(z3_ctx);
@@ -33,7 +34,7 @@ MacroCircuit::MacroCircuit(z3::context* z3_ctx):
     m_timer = new Utils::Timer();
     m_partitioning = new Partitioning(z3_ctx);
     m_parquet = new ParquetFrontend();
-    m_z3_utils = new EncodingUtils();
+    m_z3_utils = new EncodingUtils(z3_ctx);
 
     m_circuit = nullptr;
     m_solutions = 0;
@@ -911,9 +912,12 @@ void MacroCircuit::run_encoding()
 {
     this->encode_components_inside_die(e2D);
     this->encode_components_non_overlapping(e2D);
+    this->encode_single_grid();
     
     m_z3_opt->add(m_components_inside_die);
-    m_z3_opt->add(m_components_non_overlapping);
+   // m_z3_opt->add(m_components_non_overlapping);
+    m_z3_opt->add(m_single_grid);
+    
     
     m_z3_opt->minimize(m_layout->get_ux());
     m_z3_opt->minimize(m_layout->get_uy());
@@ -1436,5 +1440,5 @@ void MacroCircuit::best_result()
 
 void MacroCircuit::encode_single_grid()
 {
-    
+  
 }

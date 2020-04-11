@@ -15,15 +15,11 @@ using namespace Placer;
 
 /**
  * @brief Constructor
- * 
- * @param ctx Z3 Context
  */
-Bookshelf::Bookshelf(z3::context* ctx):
+Bookshelf::Bookshelf():
     Object()
 {
-    assert (ctx != nullptr);
-    m_z3_ctx = ctx;
-    m_tree = new Tree(m_z3_ctx);
+    m_tree = new Tree();
 }
 
 /**
@@ -31,7 +27,6 @@ Bookshelf::Bookshelf(z3::context* ctx):
  */
 Bookshelf::~Bookshelf()
 {
-    m_z3_ctx = nullptr;
     m_tree = nullptr;
 }
 
@@ -366,11 +361,11 @@ void Bookshelf::read_pl()
             
             // Placed Terminal
             if((x != 0) || (y != 0)){
-                Terminal* tmp = new Terminal(name, x, y, m_z3_ctx, e_pin_direction::eUnknown);
+                Terminal* tmp = new Terminal(name, x, y, e_pin_direction::eUnknown);
                 m_terminals.push_back(tmp);
             // Free Terminal
             } else {
-                Terminal* tmp = new Terminal(name, m_z3_ctx, e_pin_direction::eUnknown);
+                Terminal* tmp = new Terminal(name, e_pin_direction::eUnknown);
                 m_terminals.push_back(tmp);
             }
         } else {

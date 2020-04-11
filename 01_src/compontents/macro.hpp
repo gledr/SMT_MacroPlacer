@@ -29,7 +29,7 @@ public:
           std::string const & id,
           size_t const widht,
           size_t const height);
-   
+
    Macro(std::string const & name,
           std::string const & id,
           size_t const width,
@@ -37,24 +37,24 @@ public:
           size_t const pos_x,
           size_t const pos_y,
           size_t const orientation);
-    
+
     virtual ~Macro();
-  
+
     void set_supplement(Supplement* supplement);
-    
+
     void add_pin(Pin* const pin);
     Pin* get_pin(std::string const & id);
-    
+
     virtual size_t get_area();
     virtual void dump(std::ostream & stream = std::cout);
-    
+
     std::vector<Pin*> get_pins();
     bool is_free();
-    
+
     size_t get_solution_lx(size_t const id);
     size_t get_solution_ly(size_t const id);
     size_t get_solution_orientation(size_t const id);
-    
+
     void encode_pins();
     z3::expr get_pin_constraints();
 
@@ -64,7 +64,7 @@ private:
     Supplement* m_supplement;
 
     bool m_free;
-    
+
     void handle_supplement();
     
     /**

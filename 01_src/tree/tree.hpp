@@ -35,7 +35,7 @@ class Edge;
 class Tree: public virtual Object {
 public:
 
-    Tree(z3::context* ctx);
+    Tree();
 
     virtual ~Tree();
 
@@ -61,7 +61,6 @@ public:
     void visualize();
 
 private:
-    z3::context* m_z3_ctx;
     Utils::Logger* m_logger;
 
     std::vector<Node*> m_terminals;

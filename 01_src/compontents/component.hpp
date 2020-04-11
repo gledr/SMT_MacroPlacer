@@ -28,29 +28,28 @@ namespace Placer {
 class Component: public virtual Object {
 public: 
     ~Component();
-    
+
     z3::expr get_lx(eOrientation const orientation);
     z3::expr get_ly(eOrientation const orientation);
     z3::expr get_ux(eOrientation const orientation);
     z3::expr get_uy(eOrientation const orientation);
-    
-    
+
     z3::expr& get_lx();
     z3::expr& get_ly();
     z3::expr& get_orientation();
     z3::expr& get_width();
     z3::expr& get_height();
-    
+
     std::string get_name();
     std::string get_id();
-    
+
     void add_solution_lx(size_t const lx);
     void add_solution_ly(size_t const ly);
     void add_solution_orientation(Placer::eOrientation const orientation);
-    
+
     virtual size_t get_area() = 0;
     virtual void dump(std::ostream & stream = std::cout) = 0;
-    
+
 protected:
     Component ();
 

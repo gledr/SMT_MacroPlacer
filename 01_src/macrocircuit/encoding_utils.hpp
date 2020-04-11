@@ -32,13 +32,13 @@ public:
 
     inline z3::expr add(z3::expr a, z3::expr b)
     {
-        z3::expr ret_val(*m_z3_ctx);
+        z3::expr ret_val(m_z3_ctx);
 
         if (this->get_logic() == eInt){
             ret_val = a + b;
         } else if (this->get_logic() == eBitVector){
             this->store_constraint(z3::bvadd_no_overflow(a, b, false) == this->get_flag(true));
-            this->store_constraint(z3::bvadd_no_underflow(a,b) == this->get_flag(true));
+            //this->store_constraint(z3::bvadd_no_underflow(a,b) == this->get_flag(true));
             ret_val = a + b;
             
         } else {
@@ -50,12 +50,12 @@ public:
 
     inline z3::expr sub(z3::expr const & a, z3::expr const & b)
     {
-        z3::expr ret_val(*m_z3_ctx);
+        z3::expr ret_val(m_z3_ctx);
 
         if (this->get_logic() == eInt){
             ret_val = a - b;
         } else if (this->get_logic() == eBitVector){
-            this->store_constraint(z3::bvsub_no_overflow(a, b) == this->get_flag(true));
+            //this->store_constraint(z3::bvsub_no_overflow(a, b) == this->get_flag(true));
             this->store_constraint(z3::bvsub_no_underflow(a,b, false) == this->get_flag(true));
             ret_val = a - b;
         }
@@ -64,12 +64,20 @@ public:
 
    inline z3::expr ge(z3::expr const & a, z3::expr const & b)
     {
-        return a >= b;
+        if (this->get_logic() == eInt){
+            return a >= b;
+        } else {
+            return z3::uge(a ,b);
+        }
     }
 
     inline z3::expr le(z3::expr const & a, z3::expr const & b)
     {
-        return a <= b;
+        if (this->get_logic() == eInt){
+            return a <= b;
+        } else {
+            return z3::ule(a, b);
+        }
     }
 
     inline z3::expr gt(z3::expr const &a, z3::expr const & b)
@@ -110,12 +118,12 @@ public:
     
     inline z3::expr get_constant(std::string const & id)
     {
-        z3::expr ret_val (*m_z3_ctx);
+        z3::expr ret_val (m_z3_ctx);
 
         if (this->get_logic() == eInt){
-            ret_val = m_z3_ctx->int_const(id.c_str());
+            ret_val = m_z3_ctx.int_const(id.c_str());
         } else if (this->get_logic() == eBitVector){
-            ret_val = m_z3_ctx->bv_const(id.c_str(), 32);
+            ret_val = m_z3_ctx.bv_const(id.c_str(), 16);
         } else {
             assert (0);
         }
@@ -125,12 +133,12 @@ public:
 
     inline z3::expr get_value(size_t const value)
     {
-        z3::expr ret_val(*m_z3_ctx);
+        z3::expr ret_val(m_z3_ctx);
 
         if (this->get_logic() == eInt){
-            ret_val = m_z3_ctx->int_val(value);
+            ret_val = m_z3_ctx.int_val(value);
         } else if (this->get_logic() == eBitVector){
-            ret_val = m_z3_ctx->bv_val(value, 32);
+            ret_val = m_z3_ctx.bv_val(value, 16);
         } else {
             assert (0);
         }
@@ -140,11 +148,8 @@ public:
 
     inline z3::expr get_flag(bool const val)
     {
-        return m_z3_ctx->bool_val(val);
+        return m_z3_ctx.bool_val(val);
     }
-
-private:
-    z3::context* m_z3_ctx;
 };
 
 }

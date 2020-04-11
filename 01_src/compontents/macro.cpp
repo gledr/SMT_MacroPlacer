@@ -30,7 +30,8 @@ Macro::Macro(std::string const & name,
     m_ly = m_encode->get_constant(id + "_ly");
     m_width = m_encode->get_value(width);
     m_height = m_encode->get_value(height);
-    m_orientation = m_encode->get_value(eNorth);
+    //m_orientation = m_encode->get_value(eNorth);
+    m_orientation = m_encode->get_constant(id + "_orientation");
     
     this->get_verbose() && std::cout << "[Info]: Adding Free Macro " 
                        << id << " (" << width << "x" << height << ")"<< std::endl;
@@ -179,7 +180,7 @@ void Macro::encode_pins()
 void Macro::encode_pins_on_macro_frontier()
 {
     try {
-        z3::expr_vector clauses(*m_z3_ctx);
+        z3::expr_vector clauses(m_z3_ctx);
         
         z3::expr is_N = z3::expr(m_orientation == m_encode->get_value(eNorth));
         z3::expr is_W = z3::expr(m_orientation == m_encode->get_value(eWest));
@@ -192,31 +193,31 @@ void Macro::encode_pins_on_macro_frontier()
             z3::expr y = pin.second->get_pin_pos_y();
                 
 ///{{{      Case N
-            z3::expr_vector case_n(*m_z3_ctx);
+            z3::expr_vector case_n(m_z3_ctx);
 {
             //LEFT PLANE
-            z3::expr_vector case_n1(*m_z3_ctx);
+            z3::expr_vector case_n1(m_z3_ctx);
             case_n1.push_back(x == m_lx);
             case_n1.push_back(y > m_ly);
             case_n1.push_back(y < (m_ly + m_height));
             case_n.push_back(z3::mk_and(case_n1));
 
             //RIGHT PLANE
-            z3::expr_vector case_n2(*m_z3_ctx);
+            z3::expr_vector case_n2(m_z3_ctx);
             case_n2.push_back(x == (m_lx + m_width));
             case_n2.push_back(y > m_ly);
             case_n2.push_back(y < (m_ly + m_height));
             case_n.push_back(z3::mk_and(case_n2));
 
             //LOWER PLANE
-            z3::expr_vector case_n3(*m_z3_ctx);
+            z3::expr_vector case_n3(m_z3_ctx);
             case_n3.push_back(y == m_ly);
             case_n3.push_back(x > m_lx);
             case_n3.push_back(x < (m_lx + m_width));
             case_n.push_back(z3::mk_and(case_n3));
 
             //UPPER PLANE
-            z3::expr_vector case_n4(*m_z3_ctx);
+            z3::expr_vector case_n4(m_z3_ctx);
             case_n4.push_back(y == (m_ly + m_height));
             case_n4.push_back(x > m_lx);
             case_n4.push_back(x < (m_lx + m_width));
@@ -224,31 +225,31 @@ void Macro::encode_pins_on_macro_frontier()
 }
 ///}}}
 ///{{{      Case W
-            z3::expr_vector case_w(*m_z3_ctx);
+            z3::expr_vector case_w(m_z3_ctx);
 {
             // Case 1 x = moveable, y = ly LEFT PLANE
-            z3::expr_vector case_w1(*m_z3_ctx);
+            z3::expr_vector case_w1(m_z3_ctx);
             case_w1.push_back(y == (m_ly - m_width));
             case_w1.push_back(x < m_lx);
             case_w1.push_back(x > (m_lx - m_height));
             case_w.push_back(z3::mk_and(case_w1));
 
             // Case 2 x = moveable, y = uy RIGHT PLANE
-            z3::expr_vector case_w2(*m_z3_ctx);
+            z3::expr_vector case_w2(m_z3_ctx);
             case_w2.push_back(y == m_ly);
             case_w2.push_back(x < m_lx);
             case_w2.push_back(x > (m_lx - m_height));
             case_w.push_back(z3::mk_and(case_w2));
 
             // Case 3 x = lx, y = moveable LOWER PLANE
-            z3::expr_vector case_w3(*m_z3_ctx);
+            z3::expr_vector case_w3(m_z3_ctx);
             case_w3.push_back(x == m_lx);
             case_w3.push_back(y > m_ly);
             case_w3.push_back(y < (m_ly + m_width));
             case_w.push_back(z3::mk_and(case_w3));
 
             // Case 4 x = ux, y = moveable UPPER PLANE
-            z3::expr_vector case_w4(*m_z3_ctx);
+            z3::expr_vector case_w4(m_z3_ctx);
             case_w4.push_back(x == (m_lx + m_height));
             case_w4.push_back(y > m_ly);
             case_w4.push_back(y < (m_ly + m_width));
@@ -256,31 +257,31 @@ void Macro::encode_pins_on_macro_frontier()
 }
 ///}}}
 ///{{{      Case S
-            z3::expr_vector case_s(*m_z3_ctx);
+            z3::expr_vector case_s(m_z3_ctx);
 {
             // Case 1 x = moveable, y = ly LEFT PLANE
-            z3::expr_vector case_s1(*m_z3_ctx);
+            z3::expr_vector case_s1(m_z3_ctx);
             case_s1.push_back(y == (m_ly - m_height));
             case_s1.push_back(x < m_lx);
             case_s1.push_back(x > (m_lx - m_width));
             case_s.push_back(z3::mk_and(case_s1));
 
             // Case 2 x = moveable, y = uy RIGHT PLANE
-            z3::expr_vector case_s2(*m_z3_ctx);
+            z3::expr_vector case_s2(m_z3_ctx);
             case_s2.push_back(y == (m_ly + m_height)); 
             case_s2.push_back(x < m_lx);
             case_s2.push_back(x > (m_lx - m_width));
             case_s.push_back(z3::mk_and(case_s2));
 
             // Case 3 x = lx, y = moveable LOWER PLANE
-            z3::expr_vector case_s3(*m_z3_ctx);
+            z3::expr_vector case_s3(m_z3_ctx);
             case_s3.push_back(x == (m_lx - m_width));
             case_s3.push_back(y < m_ly);
             case_s3.push_back(y > (m_ly - m_height));
             case_s.push_back(z3::mk_and(case_s3));
             
             // Case 4 x = ux, y = moveable UPPER PLANE
-            z3::expr_vector case_s4(*m_z3_ctx);
+            z3::expr_vector case_s4(m_z3_ctx);
             case_s4.push_back(x == m_lx);
             case_s4.push_back(y < m_ly);
             case_s4.push_back(y > (m_ly - m_height));
@@ -288,31 +289,31 @@ void Macro::encode_pins_on_macro_frontier()
 }
 ///}}}
 ///{{{      Case E
-            z3::expr_vector case_e(*m_z3_ctx);
+            z3::expr_vector case_e(m_z3_ctx);
 {
             // Case 1 x = moveable, y = ly LEFT PLANE
-            z3::expr_vector case_e1(*m_z3_ctx);
+            z3::expr_vector case_e1(m_z3_ctx);
             case_e1.push_back(y == m_ly);
             case_e1.push_back(x > m_lx);
             case_e1.push_back(x < (m_lx + m_height));
             case_e.push_back(z3::mk_and(case_e1));
 
             // Case 2 x = moveable, y = uy RIGHT PLANE
-            z3::expr_vector case_e2(*m_z3_ctx);
+            z3::expr_vector case_e2(m_z3_ctx);
             case_e2.push_back(y == (m_ly + m_width));
             case_e2.push_back(x > m_lx);
             case_e2.push_back(x < (m_lx + m_height));
             case_e.push_back(z3::mk_and(case_e2));
 
             // Case 3 x = lx, y = moveable LOWER PLANE
-            z3::expr_vector case_e3(*m_z3_ctx);
+            z3::expr_vector case_e3(m_z3_ctx);
             case_e3.push_back(x == (m_lx - m_height));
             case_e3.push_back(y > m_ly);
             case_e3.push_back(y < (m_ly + m_width));
             case_e.push_back(z3::mk_and(case_e3));
 
             // Case 4 x = ux, y = moveable UPPER PLANE
-            z3::expr_vector case_e4(*m_z3_ctx);
+            z3::expr_vector case_e4(m_z3_ctx);
             case_e4.push_back(x == (m_lx + m_height));
             case_e4.push_back(y > m_ly);
             case_e4.push_back(y < (m_ly + m_width));
@@ -323,7 +324,7 @@ void Macro::encode_pins_on_macro_frontier()
             z3::expr clause = z3::ite(is_N, z3::mk_or(case_n),
                               z3::ite(is_W, z3::mk_or(case_w),
                               z3::ite(is_S, z3::mk_or(case_s),
-                              z3::ite(is_E, z3::mk_or(case_e), m_z3_ctx->bool_val(false)))));
+                              z3::ite(is_E, z3::mk_or(case_e), m_z3_ctx.bool_val(false)))));
             clauses.push_back(clause);
         }
         
@@ -339,7 +340,7 @@ void Macro::encode_pins_on_macro_frontier()
  */
 void Macro::encode_pins_non_overlapping()
 {
-    z3::expr_vector clauses(*m_z3_ctx);
+    z3::expr_vector clauses(m_z3_ctx);
     
     m_encode_pins_not_overlapping = z3::mk_and(clauses);
 }
@@ -351,7 +352,7 @@ void Macro::encode_pins_non_overlapping()
  */
 void Macro::encode_pins_center_of_macro()
 {
-    z3::expr_vector clauses(*m_z3_ctx);
+    z3::expr_vector clauses(m_z3_ctx);
     
     z3::expr is_N = z3::expr(m_orientation == m_encode->get_value(eNorth));
     z3::expr is_W = z3::expr(m_orientation == m_encode->get_value(eWest));
@@ -362,22 +363,22 @@ void Macro::encode_pins_center_of_macro()
         Pin* pin = _pin.second;
             
 ///{{{  Case N
-        z3::expr_vector case_n(*m_z3_ctx);
+        z3::expr_vector case_n(m_z3_ctx);
         case_n.push_back(pin->get_pin_pos_x() == (m_lx + (m_width/2)));
         case_n.push_back(pin->get_pin_pos_y() == (m_ly + (m_height/2)));
 ///}}}
 ///{{{  Case W
-        z3::expr_vector case_w(*m_z3_ctx);
+        z3::expr_vector case_w(m_z3_ctx);
         case_w.push_back(pin->get_pin_pos_x() == (m_lx - (m_height/2)));
         case_w.push_back(pin->get_pin_pos_y() == (m_ly + (m_width/2)));
 ///}}}
 ///{{{  Case S
-        z3::expr_vector case_s(*m_z3_ctx);
+        z3::expr_vector case_s(m_z3_ctx);
         case_s.push_back(pin->get_pin_pos_x() == (m_lx - (m_width/2)));
         case_s.push_back(pin->get_pin_pos_y() == (m_ly - (m_height/2)));
 ///}}}
 ///{{{  Case E
-        z3::expr_vector case_e(*m_z3_ctx);
+        z3::expr_vector case_e(m_z3_ctx);
         case_e.push_back(pin->get_pin_pos_x() == (m_lx + (m_height/2)));
         case_e.push_back(pin->get_pin_pos_y() == (m_ly - (m_width/2)));
 ///}}}
@@ -385,7 +386,7 @@ void Macro::encode_pins_center_of_macro()
                           z3::ite(is_W, z3::mk_and(case_w),
                           z3::ite(is_S, z3::mk_and(case_s),
                           z3::ite(is_E, z3::mk_and(case_e),
-                                  m_z3_ctx->bool_val(false)))));
+                                  m_z3_ctx.bool_val(false)))));
             
         clauses.push_back(clause);
     }

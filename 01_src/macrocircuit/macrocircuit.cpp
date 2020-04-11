@@ -25,7 +25,7 @@ MacroCircuit::MacroCircuit():
     m_terminals_on_frontier(m_encode->get_value(0)),
     m_terminals_non_overlapping(m_encode->get_value(0))
 {
-    m_z3_opt = new z3::optimize(*m_z3_ctx);
+    m_z3_opt = new z3::optimize(m_z3_ctx);
     m_layout = new Layout();
     m_eval = new Evaluate(this);
     m_supplement = new Supplement();
@@ -69,7 +69,6 @@ MacroCircuit::~MacroCircuit()
     }
     //delete m_tree; m_tree = nullptr;
     delete m_z3_opt; m_z3_opt = nullptr;
-    delete m_z3_ctx; m_z3_ctx = nullptr;
     delete m_eval; m_eval = nullptr;
     delete m_supplement; m_supplement = nullptr;
     delete m_layout; m_layout = nullptr;
@@ -91,7 +90,7 @@ void MacroCircuit::build_circuit()
             m_supplement->read_supplement_file();
             m_circuit = new Circuit::Circuit(this->get_lef(),
                                              this->get_def());
-            m_tree = new Tree(m_z3_ctx);
+            m_tree = new Tree();
             assert (m_tree != nullptr);
             assert (m_circuit != nullptr);
             this->set_design_name(m_circuit->defDesignName);
@@ -127,7 +126,7 @@ void MacroCircuit::build_circuit()
             //m_tree->visualize();
 
         } else if (!this->get_bookshelf_file().empty()){
-            m_bookshelf = new Bookshelf(m_z3_ctx);
+            m_bookshelf = new Bookshelf();
             m_bookshelf->read_files();
             this->set_design_name(m_bookshelf->get_design_name());
             m_estimated_area = m_bookshelf->get_estimated_area();
@@ -274,9 +273,9 @@ void MacroCircuit::add_terminals()
         Terminal* tmp;
         
         if(x == 0 || y == 0){
-            tmp = new Terminal(itor.pinName(), m_z3_ctx, direction);
+            tmp = new Terminal(itor.pinName(), direction);
         } else {
-            tmp = new Terminal(itor.pinName(), x, y, m_z3_ctx, direction);
+            tmp = new Terminal(itor.pinName(), x, y, direction);
         }
         assert(tmp != nullptr);
         
@@ -613,7 +612,7 @@ void MacroCircuit::add_cell(LefDefParser::defiComponent const & cmp)
     std::string name = cmp.name();
     std::string id   = cmp.id();
 
-    Cell* c = new Cell(m_z3_ctx, name, id);
+    Cell* c = new Cell(name, id);
     m_cells.push_back(c);
     m_id2cell[id] = c;
 }
@@ -875,12 +874,15 @@ size_t MacroCircuit::get_solutions()
  */
 void MacroCircuit::config_z3()
 {
-    z3::params param(*m_z3_ctx);
+    z3::params param(m_z3_ctx);
     
-    m_z3_ctx->set("logic", "LIA");
+    if (this->get_logic() == eInt){
+        m_z3_ctx.set("logic", "LIA");
+    }
+    
     //param.set(":opt.solution_prefix", "intermediate_result");
     //param.set(":opt.dump_models", true);
-    param.set(":opt.pb.compile_equality", true);
+    //param.set(":opt.pb.compile_equality", true);
     if(this->get_pareto_optimizer()){
         m_logger->use_pareto_optimizer();
         param.set(":opt.priority", "pareto");
@@ -910,13 +912,11 @@ void MacroCircuit::run_encoding()
 {
     this->encode_components_inside_die(e2D);
     this->encode_components_non_overlapping(e2D);
-    
-    std::cout << *m_z3_opt << std::endl;
-    
+
     m_z3_opt->add(m_components_inside_die);
     m_z3_opt->add(m_components_non_overlapping);
     m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
-    
+
     m_z3_opt->minimize(m_layout->get_ux());
     m_z3_opt->minimize(m_layout->get_uy());
    
@@ -934,53 +934,53 @@ void MacroCircuit::run_encoding()
 void MacroCircuit::encode_components_inside_die(eRotation const type)
 {
     try {
-        z3::expr_vector clauses(*m_z3_ctx);
+        z3::expr_vector clauses(m_z3_ctx);
 
         z3::expr die_lx = m_layout->get_lx();
         z3::expr die_ux = m_layout->get_ux();
         z3::expr die_ly = m_layout->get_ly();
         z3::expr die_uy = m_layout->get_uy();
-        
+
         for (Component* itor: m_components){
             z3::expr is_N = itor->get_orientation() == m_encode->get_value(eNorth);
             z3::expr is_W = itor->get_orientation() == m_encode->get_value(eWest);
             z3::expr is_S = itor->get_orientation() == m_encode->get_value(eSouth);
             z3::expr is_E = itor->get_orientation() == m_encode->get_value(eEast);
 
-            z3::expr_vector case_N(*m_z3_ctx);
+            z3::expr_vector case_N(m_z3_ctx);
             case_N.push_back(m_encode->ge(itor->get_lx(eNorth), die_lx)); ///< LX
             case_N.push_back(m_encode->ge(itor->get_ly(eNorth), die_ly)); ///< LY
             case_N.push_back(m_encode->le(itor->get_ux(eNorth), die_ux)); ///< UX
             case_N.push_back(m_encode->le(itor->get_uy(eNorth), die_uy)); ///< UY
 
-            z3::expr_vector case_W(*m_z3_ctx);
+            z3::expr_vector case_W(m_z3_ctx);
             case_W.push_back(m_encode->ge(itor->get_lx(eWest), die_lx)); ///< LX
             case_W.push_back(m_encode->ge(itor->get_ly(eWest), die_ly)); ///< LY
             case_W.push_back(m_encode->le(itor->get_ux(eWest), die_ux)); ///< UX
             case_W.push_back(m_encode->le(itor->get_uy(eWest), die_uy)); ///< UY
 
-            z3::expr_vector case_S(*m_z3_ctx);
+            z3::expr_vector case_S(m_z3_ctx);
             case_S.push_back(m_encode->ge(itor->get_lx(eSouth), die_lx)); ///< LX
             case_S.push_back(m_encode->ge(itor->get_ly(eSouth), die_ly)); ///< LY
             case_S.push_back(m_encode->le(itor->get_ux(eSouth), die_ux)); ///< UX
             case_S.push_back(m_encode->le(itor->get_uy(eSouth), die_uy)); ///< UY
 
-            z3::expr_vector case_E(*m_z3_ctx);
+            z3::expr_vector case_E(m_z3_ctx);
             case_E.push_back(m_encode->ge(itor->get_lx(eEast), die_lx)); ///< LX
             case_E.push_back(m_encode->ge(itor->get_ly(eEast), die_ly)); ///< LY
             case_E.push_back(m_encode->le(itor->get_ux(eEast), die_ux)); ///< UX
             case_E.push_back(m_encode->le(itor->get_uy(eEast), die_uy)); ///< UY
-            
+
             if(type == eRotation::e2D){
                 z3::expr ite = z3::ite(is_N, z3::mk_and(case_N),
-                               z3::ite(is_W, z3::mk_and(case_W), m_z3_ctx->bool_val(false)));
+                               z3::ite(is_W, z3::mk_and(case_W), m_z3_ctx.bool_val(false)));
                 clauses.push_back(ite);
                 
             } else if (type == eRotation::e4D){
                 z3::expr ite = z3::ite(is_N, z3::mk_and(case_N),
                                z3::ite(is_E, z3::mk_and(case_E),
                                z3::ite(is_S, z3::mk_and(case_S),
-                               z3::ite(is_W, z3::mk_and(case_W), m_z3_ctx->bool_val(false)))));
+                               z3::ite(is_W, z3::mk_and(case_W), m_z3_ctx.bool_val(false)))));
                 clauses.push_back(ite);
             } else {
                 assert (0);
@@ -1013,7 +1013,7 @@ void MacroCircuit::encode_components_inside_die(eRotation const type)
 void MacroCircuit::encode_components_non_overlapping(eRotation const type)
 {
      try {
-        z3::expr_vector clauses(*m_z3_ctx);
+        z3::expr_vector clauses(m_z3_ctx);
 
         z3::expr N = m_encode->get_value(eNorth);
         z3::expr W = m_encode->get_value(eWest);
@@ -1032,112 +1032,112 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
                 Component* free  = m_components[j];
 
 //{{{           Case North North
-                z3::expr_vector case_nn(*m_z3_ctx);
+                z3::expr_vector case_nn(m_z3_ctx);
                 case_nn.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eNorth))); ///< Right
                 case_nn.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eNorth))); ///< Left
                 case_nn.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eNorth))); ///< Upper
                 case_nn.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case West North
-                z3::expr_vector case_wn(*m_z3_ctx);
+                z3::expr_vector case_wn(m_z3_ctx);
                 case_wn.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eNorth))); ///< Right
                 case_wn.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eNorth))); ///< Left
                 case_wn.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eNorth))); ///< Upper
                 case_wn.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case South North
-                z3::expr_vector case_sn(*m_z3_ctx);
+                z3::expr_vector case_sn(m_z3_ctx);
                 case_sn.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eNorth))); ///< Right
                 case_sn.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eNorth))); ///< Left
                 case_sn.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eNorth))); ///< Upper
                 case_sn.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case East North
-                z3::expr_vector case_en(*m_z3_ctx);
+                z3::expr_vector case_en(m_z3_ctx);
                 case_en.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eNorth))); ///< Right
                 case_en.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eNorth))); ///< Left
                 case_en.push_back(m_encode->ge(free->get_ly(eEast), fixed->get_uy(eNorth))); ///< Upper
                 case_en.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eNorth))); ///< Below
 //}}}
 //{{{           Case North West
-                z3::expr_vector case_nw(*m_z3_ctx);
+                z3::expr_vector case_nw(m_z3_ctx);
                 case_nw.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eWest))); ///< Right
                 case_nw.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eWest))); ///< Left
                 case_nw.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eWest))); ///< Upper
                 case_nw.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eWest))); ///< Below
 //}}}                
 //{{{           Case West West
-                z3::expr_vector case_ww(*m_z3_ctx);
+                z3::expr_vector case_ww(m_z3_ctx);
                 case_ww.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eWest))); ///< Right
                 case_ww.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eWest))); ///< Left
                 case_ww.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eWest))); ///< Upper
                 case_ww.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eWest))); ///< Below
 //}}}
 //{{{           Case South West
-                z3::expr_vector case_sw(*m_z3_ctx);
+                z3::expr_vector case_sw(m_z3_ctx);
                 case_sw.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eWest))); ///< Right
                 case_sw.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eWest))); ///< Left
                 case_sw.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eWest))); ///< Upper
                 case_sw.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eWest))); ///< Below
 //}}}
 //{{{           Case East West
-                z3::expr_vector case_ew(*m_z3_ctx);
+                z3::expr_vector case_ew(m_z3_ctx);
                 case_ew.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eWest))); ///< Right
                 case_ew.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eWest))); ///< Left
                 case_ew.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eWest))); ///< Upper
                 case_ew.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eWest))); ///< Below
 //}}}
 //{{{           Case North South
-                z3::expr_vector case_ns(*m_z3_ctx);
+                z3::expr_vector case_ns(m_z3_ctx);
                 case_ns.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eSouth))); ///< Right
                 case_ns.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eSouth))); ///< Left
                 case_ns.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eSouth))); ///< Upper
                 case_ns.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eSouth))); ///< Below
 //}}}
 //{{{           Case West South
-                z3::expr_vector case_ws(*m_z3_ctx);
+                z3::expr_vector case_ws(m_z3_ctx);
                 case_ws.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eSouth))); ///< Right
                 case_ws.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eSouth))); ///< Left
                 case_ws.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eSouth))); ///< Upper
                 case_ws.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eSouth))); ///< Below
 //}}}
 //{{{           Case South South
-                z3::expr_vector case_ss(*m_z3_ctx);
+                z3::expr_vector case_ss(m_z3_ctx);
                 case_ss.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eSouth))); ///< Right
                 case_ss.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eSouth))); ///< Left
                 case_ss.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eSouth))); ///< Upper
                 case_ss.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eSouth))); ///< Below
 //}}} 
 //{{{           Case East South
-                z3::expr_vector case_es(*m_z3_ctx);
+                z3::expr_vector case_es(m_z3_ctx);
                 case_es.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eSouth))); ///< Right
                 case_es.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eSouth))); ///< Left
                 case_es.push_back(m_encode->ge(free->get_ly(eEast), fixed->get_uy(eSouth))); ///< Upper
                 case_es.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eSouth))); ///< Below
 //}}}
 //{{{           Case North East
-                z3::expr_vector case_ne(*m_z3_ctx);
+                z3::expr_vector case_ne(m_z3_ctx);
                 case_ne.push_back(m_encode->ge(free->get_lx(eNorth), fixed->get_ux(eEast))); ///< Right
                 case_ne.push_back(m_encode->le(free->get_ux(eNorth), fixed->get_lx(eEast))); ///< Left
                 case_ne.push_back(m_encode->ge(free->get_ly(eNorth), fixed->get_uy(eEast))); ///< Upper
                 case_ne.push_back(m_encode->le(free->get_uy(eNorth), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{           Case West East
-                z3::expr_vector case_we(*m_z3_ctx);
+                z3::expr_vector case_we(m_z3_ctx);
                 case_we.push_back(m_encode->ge(free->get_lx(eWest), fixed->get_ux(eEast))); ///< Right
                 case_we.push_back(m_encode->le(free->get_ux(eWest), fixed->get_lx(eEast))); ///< Left
                 case_we.push_back(m_encode->ge(free->get_ly(eWest), fixed->get_uy(eEast))); ///< Upper
                 case_we.push_back(m_encode->le(free->get_uy(eWest), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{           Case South East
-                z3::expr_vector case_se(*m_z3_ctx);
+                z3::expr_vector case_se(m_z3_ctx);
                 case_se.push_back(m_encode->ge(free->get_lx(eSouth), fixed->get_ux(eEast))); ///< Right
                 case_se.push_back(m_encode->le(free->get_ux(eSouth), fixed->get_lx(eEast))); ///< Left
                 case_se.push_back(m_encode->ge(free->get_ly(eSouth), fixed->get_uy(eEast))); ///< Upper
                 case_se.push_back(m_encode->le(free->get_uy(eSouth), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{           Case East East
-                z3::expr_vector case_ee(*m_z3_ctx);
+                z3::expr_vector case_ee(m_z3_ctx);
                 case_ee.push_back(m_encode->ge(free->get_lx(eEast), fixed->get_ux(eEast))); ///< Right
                 case_ee.push_back(m_encode->le(free->get_ux(eEast), fixed->get_lx(eEast))); ///< Left
                 case_ee.push_back(m_encode->ge(free->get_ly(eEast), fixed->get_uy(eEast))); ///< Upper
@@ -1183,13 +1183,13 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
                 z3::expr is_EE((free->get_orientation() == E) && (fixed->get_orientation() == E));
 //}}}
 //{{{           Encoding
-                z3::expr clause = m_z3_ctx->int_val(0);
+                z3::expr clause = m_z3_ctx.int_val(0);
                 
                 if(type == eRotation::e2D){
                     clause = z3::ite(is_NN, z3::mk_or(case_nn),
                              z3::ite(is_NW, z3::mk_or(case_nw),
                              z3::ite(is_WN, z3::mk_or(case_wn),
-                             z3::ite(is_WW, z3::mk_or(case_ww), m_z3_ctx->bool_val(false)))));
+                             z3::ite(is_WW, z3::mk_or(case_ww), m_z3_ctx.bool_val(false)))));
                 } else if (type == eRotation::e4D){
                     clause = z3::ite(is_NN, z3::mk_or(case_nn),
                              z3::ite(is_NW, z3::mk_or(case_nw),
@@ -1206,7 +1206,7 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
                              z3::ite(is_EN, z3::mk_or(case_en),
                              z3::ite(is_EW, z3::mk_or(case_ew),
                              z3::ite(is_ES, z3::mk_or(case_es),
-                             z3::ite(is_EE, z3::mk_or(case_ee), m_z3_ctx->bool_val(false)
+                             z3::ite(is_EE, z3::mk_or(case_ee), m_z3_ctx.bool_val(false)
                              ))))))))))))))));
                 } else {
                     assert (0);
@@ -1231,7 +1231,7 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
  */
 void MacroCircuit::encode_terminals_on_frontier()
 {
-    z3::expr_vector clauses(*m_z3_ctx);
+    z3::expr_vector clauses(m_z3_ctx);
 
     z3::expr die_lx = m_layout->get_lx();
     z3::expr die_ux = m_layout->get_ux();
@@ -1239,30 +1239,30 @@ void MacroCircuit::encode_terminals_on_frontier()
     z3::expr die_uy = m_layout->get_uy();
 
     for(auto itor: m_terminals){
-        z3::expr_vector subclause(*m_z3_ctx);
+        z3::expr_vector subclause(m_z3_ctx);
         z3::expr x = itor->get_pin_pos_x();
         z3::expr y = itor->get_pin_pos_y();
 
         // Case 1 x = moveable, y = ly
-        z3::expr_vector case_1(*m_z3_ctx);
+        z3::expr_vector case_1(m_z3_ctx);
         case_1.push_back(y == die_ly);
         case_1.push_back(x > die_lx);
         case_1.push_back(x < die_ux);
 
         // Case 2 x = moveable, y = uy
-        z3::expr_vector case_2(*m_z3_ctx);
+        z3::expr_vector case_2(m_z3_ctx);
         case_2.push_back(y == die_uy);
         case_2.push_back(x > die_lx);
         case_2.push_back(x < die_ux);
 
         // Case 3 x = lx, y = moveable
-        z3::expr_vector case_3(*m_z3_ctx);
+        z3::expr_vector case_3(m_z3_ctx);
         case_3.push_back(x == die_lx);
         case_3.push_back(y > die_ly);
         case_3.push_back(y < die_uy);
 
         // Case 4 x = ux, y = moveable
-        z3::expr_vector case_4(*m_z3_ctx);
+        z3::expr_vector case_4(m_z3_ctx);
         case_4.push_back(x == die_ux);
         case_4.push_back(y > die_ly);
         case_4.push_back(y < die_uy);
@@ -1286,11 +1286,11 @@ void MacroCircuit::encode_terminals_on_frontier()
 void MacroCircuit::encode_terminals_non_overlapping()
 {
     try {
-        z3::expr_vector clauses(*m_z3_ctx);
+        z3::expr_vector clauses(m_z3_ctx);
         
         for(size_t i = 0; i < m_terminals.size(); ++i){
             for(size_t j = 0; j < m_terminals.size(); ++j){
-                z3::expr_vector subclause(*m_z3_ctx);
+                z3::expr_vector subclause(m_z3_ctx);
                 if(i == j){
                     continue;
                 }
@@ -1302,12 +1302,12 @@ void MacroCircuit::encode_terminals_non_overlapping()
                 assert (b != nullptr);
                 
                 // Case 1: x moveable
-                z3::expr_vector case_1(*m_z3_ctx);
+                z3::expr_vector case_1(m_z3_ctx);
                 case_1.push_back(a->get_pin_pos_x() > b->get_pin_pos_x());
                 case_1.push_back(a->get_pin_pos_x() < b->get_pin_pos_x());
                 
                 // Case 2: y moveable
-                z3::expr_vector case_2(*m_z3_ctx);
+                z3::expr_vector case_2(m_z3_ctx);
                 case_2.push_back(a->get_pin_pos_y() > b->get_pin_pos_y());
                 case_2.push_back(a->get_pin_pos_y() < b->get_pin_pos_y());
                 

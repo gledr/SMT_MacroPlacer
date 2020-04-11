@@ -95,7 +95,6 @@ public:
 
 private:
     // Microsoft Z3
-    z3::context* m_z3_ctx;
     z3::optimize* m_z3_opt;
 
     Circuit::Circuit* m_circuit;

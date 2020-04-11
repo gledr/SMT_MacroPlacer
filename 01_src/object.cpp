@@ -48,8 +48,8 @@ size_t Object::m_results_id = 0;
 size_t Object::m_partition_id = 0;
 size_t Object::m_partition_size = 1;
 eLogic Object::m_logic = eInt;
-z3::context* Object::m_z3_ctx = new z3::context();
-z3::expr_vector Object::m_stored_constraints(*m_z3_ctx);
+z3::context Object::m_z3_ctx;
+z3::expr_vector Object::m_stored_constraints(m_z3_ctx);
 
 Object::Object()
 {

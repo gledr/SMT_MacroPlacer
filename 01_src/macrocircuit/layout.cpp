@@ -27,7 +27,7 @@ Layout::Layout ():
     m_free_ux(true),
     m_free_uy(true),
     m_lx(m_encode->get_constant("die_lx")),
-    m_ly(m_encode->get_constant("die_uy")),
+    m_ly(m_encode->get_constant("die_ly")),
     m_ux(m_encode->get_constant("die_ux")),
     m_uy(m_encode->get_constant("die_uy")),
     m_units(m_encode->get_constant("die_units"))
@@ -206,7 +206,7 @@ void Layout::set_units(size_t const val)
 }
 
 /**
- * @brief Check if ly is free
+ * @brief Check if lx is free
  *
  * @return bool
  */

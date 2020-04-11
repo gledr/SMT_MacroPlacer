@@ -24,9 +24,8 @@ namespace Placer {
 class Cell: public virtual Component{
 public:
    
-    Cell(z3::context* z3_ctx,
-        std::string const & name,
-        std::string const & id);
+    Cell(std::string const & name,
+         std::string const & id);
 
     virtual ~Cell();
     

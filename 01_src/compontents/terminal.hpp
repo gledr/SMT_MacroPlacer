@@ -15,7 +15,9 @@
 #include <iostream>
 #include <string>
 
-#include "pin.hpp"
+#include <object.hpp>
+#include <pin.hpp>
+#include <encoding_utils.hpp>
 
 namespace Placer {
 
@@ -23,17 +25,15 @@ namespace Placer {
  * @class Terminal
  * @brief Soc Terminal Pin
  */
-class Terminal {
+class Terminal: public virtual Object {
 public:
     
     Terminal(std::string const & name,
-             z3::context* z3_ctx,
              e_pin_direction const direction);
 
     Terminal(std::string const & name,
              size_t const pos_x,
              size_t const pos_y,
-             z3::context* z3_ctx,
              e_pin_direction const direction);
 
     virtual ~Terminal();
@@ -62,8 +62,7 @@ public:
     virtual void dump(std::ostream & stream = std::cout);
 
 private:
-    z3::context* m_z3_ctx;
-
+    EncodingUtils* m_encode;
     std::string m_name;
     bool m_free;
     e_pin_direction m_direction;

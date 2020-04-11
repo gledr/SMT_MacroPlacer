@@ -21,12 +21,9 @@ using namespace Placer::Utils;
  * 
  * @param ctx Z3 Context
  */
-Tree::Tree(z3::context* ctx):
+Tree::Tree():
     Object()
 {
-    assert (ctx != nullptr);
-  
-    m_z3_ctx = ctx;
     m_logger = Utils::Logger::getInstance();
 }
 

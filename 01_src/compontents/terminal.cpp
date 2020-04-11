@@ -20,20 +20,18 @@ static bool debug = false;
  * @brief Constructor for Free Placeable Terminal
  * 
  * @param name Terminal Name
- * @param z3_ctx Z3 Context
  * @param direction Terminal Direction
  */
 Terminal::Terminal(std::string const & name,
-                  z3::context* z3_ctx,
                   e_pin_direction const direction):
+    Object(),
+    m_encode(new EncodingUtils()),
     m_name(name),
-    m_z3_ctx(z3_ctx),
     m_direction(direction),
-    m_pin_pos_x(z3_ctx->int_const(std::string("terminal_" + name + "_x").c_str())),
-    m_pin_pos_y(z3_ctx->int_const(std::string("terminal_" + name + "_y").c_str())),
+    m_pin_pos_x(m_encode->get_constant("terminal_" + name + "_x")),
+    m_pin_pos_y(m_encode->get_constant("terminal_" + name + "_y")),
     m_free(true)
 {
-    assert(z3_ctx != nullptr);
     m_free = true;
     debug && std::cout << "[Info]: Added Free Terminal " << name << std::endl;
 }
@@ -50,16 +48,14 @@ Terminal::Terminal(std::string const & name,
 Terminal::Terminal(std::string const & name,
                    size_t const pos_x,
                    size_t const pos_y,
-                   z3::context* z3_ctx,
                    e_pin_direction const direction):
-    m_z3_ctx(z3_ctx),
+    Object(),
     m_name(name),
     m_free(false),
     m_direction(direction),
-    m_pin_pos_x(z3_ctx->int_val(pos_x)),
-    m_pin_pos_y(z3_ctx->int_val(pos_y))
+    m_pin_pos_x(m_encode->get_value(pos_x)),
+    m_pin_pos_y(m_encode->get_value(pos_y))
 {
-    assert(z3_ctx != nullptr);
     m_free = false;
     debug && std::cout << "[Info]: Added Fixed Terminal " 
                 << name << "(" << pos_x << ":" 
@@ -68,6 +64,7 @@ Terminal::Terminal(std::string const & name,
 
 Terminal::~Terminal()
 {
+    delete m_encode; m_encode = nullptr;
 }
 
 std::string Terminal::get_name()

@@ -34,7 +34,7 @@ namespace Placer {
  */
 class Bookshelf: public virtual Object{
 public:
-    Bookshelf(z3::context* ctx);
+    Bookshelf();
 
     virtual ~Bookshelf();
 
@@ -56,8 +56,6 @@ public:
     void set_tree(Tree * tree);
 
 private:
-    z3::context* m_z3_ctx;
-
     void read_blocks();
     void read_nets();
     void read_pl();

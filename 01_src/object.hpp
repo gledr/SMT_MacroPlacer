@@ -154,7 +154,7 @@ protected:
     void store_constraint(z3::expr const & constraint);
     z3::expr_vector get_stored_constraints();
 
-    static z3::context* m_z3_ctx;
+    static z3::context m_z3_ctx;
 
 private:
     static std::vector<std::string> m_lef;

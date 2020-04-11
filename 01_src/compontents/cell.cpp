@@ -13,8 +13,7 @@
 
 using namespace Placer;
 
-Cell::Cell(z3::context* z3_ctx,
-           std::string const & _name,
+Cell::Cell(std::string const & _name,
            std::string const & _id):
     Component()
 {

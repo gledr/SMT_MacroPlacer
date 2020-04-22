@@ -331,7 +331,7 @@ bool Partition::has_value_uy()
 }
 
 /**
- * @brief ...
+ * @brief Get area occupied by partition
  * 
  * @return size_t
  */
@@ -345,9 +345,9 @@ size_t Partition::get_area()
 }
 
 /**
- * @brief ...
+ * @brief Dump Partition Information to given stream
  * 
- * @param stream p_stream:...
+ * @param stream Stream to dump to
  */
 void Partition::dump(std::ostream& stream)
 {

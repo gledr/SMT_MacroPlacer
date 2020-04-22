@@ -20,7 +20,10 @@ Macro::Macro(std::string const & name,
     Component(),
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
-    m_encode_pins_center_of_macro(m_encode->get_value(0))
+    m_encode_pins_center_of_macro(m_encode->get_value(0)),
+    m_root_coordinate(m_z3_ctx),
+    m_grid_coordinates(m_z3_ctx),
+    m_cost_distribution(m_z3_ctx)
 {
     m_free = true;
     m_supplement = nullptr;
@@ -47,13 +50,42 @@ Macro::Macro(std::string const & name,
     Component(),
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
-    m_encode_pins_center_of_macro(m_encode->get_value(0))
+    m_encode_pins_center_of_macro(m_encode->get_value(0)),
+    m_root_coordinate(m_z3_ctx),
+    m_grid_coordinates(m_z3_ctx),
+    m_cost_distribution(m_z3_ctx)
 {
     m_lx = m_encode->get_value(pos_lx);
     m_ly = m_encode->get_value(pos_ly);
     m_width = m_encode->get_value(width);
     m_height = m_encode->get_value(height);
     m_orientation = m_encode->get_value(orientation);
+    m_name = name;
+    m_id = id;
+    m_free = false;
+    m_supplement = nullptr;
+    
+    this->get_verbose() && std::cout << "[Info]: Adding Fixed Macro " << id << std::endl;
+}
+
+Macro::Macro(std::string const & name,
+             std::string const & id,
+             size_t const width,
+             size_t const height,
+             size_t const layout_x,
+             size_t const layout_y):
+    Component(),
+    m_encode_pin_macro_frontier(m_encode->get_value(0)),
+    m_encode_pins_not_overlapping(m_encode->get_value(0)),
+    m_encode_pins_center_of_macro(m_encode->get_value(0)),
+    m_root_coordinate(m_z3_ctx),
+    m_grid_coordinates(m_z3_ctx),
+    m_cost_distribution(m_z3_ctx)
+{
+    m_layout_x = layout_x;
+    m_layout_y = layout_y;
+    m_width = m_encode->get_value(width);
+    m_height = m_encode->get_value(height);
     m_name = name;
     m_id = id;
     m_free = false;
@@ -69,6 +101,78 @@ Macro::~Macro()
     }
     
     m_supplement = nullptr;
+}
+
+void Macro::init_grid()
+{
+    for (size_t i = 0; i < m_layout_x; ++i) {
+        for (size_t j = 0; j < m_layout_y; ++j) {
+            std::string idx_root = m_id + "_root_" + std::to_string(i) + std::to_string(j);
+                std::string idx_grid = m_id + "_grid_" + std::to_string(i)+ std::to_string(j);
+                m_cost_distribution.push_back(m_z3_ctx.int_val((int)sqrt((i*i) + (j*j))));
+                m_grid_coordinates.push_back(m_z3_ctx.bool_const(idx_grid.c_str()));
+                m_root_coordinate.push_back(m_z3_ctx.bool_const(idx_root.c_str()));
+            }
+        }
+}
+
+z3::expr Macro::encode_grid()
+{
+    z3::expr_vector clauses(m_z3_ctx);
+    
+    std::vector<int> val_m1(m_root_coordinate.size(), 1);
+    int val_arr[val_m1.size()];
+    std::copy(val_m1.begin(), val_m1.end(), val_arr);
+    z3::expr sum_m1 = z3::pbeq(m_root_coordinate, val_arr, 1);
+    clauses.push_back(sum_m1);
+    
+    // Macro Covers Certain Area
+    z3::expr_vector covering(m_z3_ctx);
+    for (size_t i = 0; i < m_layout_x; ++i) {
+        for (size_t j = 0; j < m_layout_y; ++j) {
+            if ((i + m_width.get_numeral_uint() - 1 < m_layout_x) && (j + m_height.get_numeral_uint() - 1 < m_layout_y)) {
+                if (((i + 1) * m_layout_x) + j < m_root_coordinate.size()) {
+                    z3::expr_vector area(m_z3_ctx);
+                    area.push_back(m_root_coordinate[(i * m_layout_x) + j]);
+
+                    for (size_t k = 0; k < m_width.get_numeral_uint(); k++) {
+                        area.push_back(m_grid_coordinates[(i * m_layout_x) + j + k]);
+                    }
+
+                    for (size_t k = 0; k < m_height.get_numeral_int(); k++) {
+                        area.push_back(m_grid_coordinates[((i + 1) * m_layout_x) + j + k]);
+                    }
+                    covering.push_back(mk_and(area));
+                }
+            }
+        }
+    }
+    clauses.push_back(z3::mk_or(covering));
+    
+    // Macro has to cover a particular number of cells
+    std::vector<int> val_m1_grid(m_grid_coordinates.size(), 1);
+    int _val_m1_arr[val_m1_grid.size()];
+    std::copy(val_m1.begin(), val_m1.end(), _val_m1_arr);
+    z3::expr sum_m1_grid = z3::pbeq(m_grid_coordinates, _val_m1_arr, m_width.get_numeral_uint() * m_height.get_numeral_uint());
+    clauses.push_back(sum_m1_grid);
+    
+    return z3::mk_and(clauses);
+}
+
+z3::expr_vector Macro::get_grid_coordinates()
+{
+    return m_grid_coordinates;
+}
+
+z3::expr_vector Macro::get_grid_costs()
+{
+    z3::expr_vector ret_val(m_z3_ctx);
+    
+    for (size_t i = 0; i < m_grid_coordinates.size(); ++i){
+        ret_val.push_back(z3::ite(m_root_coordinate[i], m_cost_distribution[i], m_z3_ctx.int_val(0)));
+    }
+    
+    return ret_val;
 }
 
 void Macro::set_supplement(Supplement* supplement)

@@ -206,7 +206,38 @@ void MacroCircuit::encode_smt()
     m_layout->free_ux();
 
     this->config_z3();
-    this->run_encoding();
+    //this->run_encoding();
+    this->encode_grid();
+}
+
+void MacroCircuit::encode_grid()
+{
+    z3::expr_vector costs(m_z3_ctx);
+    for (Macro* m : m_macros){
+        m_z3_opt->add(m->encode_grid());
+        
+        z3::expr_vector c = m->get_grid_costs();
+        
+        for (size_t i = 0; i < c.size(); ++i){
+            costs.push_back(c[i]);
+        }
+    }
+    
+    for (size_t i = 0; i < m_macros.front()->get_grid_coordinates().size(); ++i){
+        z3::expr_vector unique_cell(m_z3_ctx);
+        
+        for (Macro* m: m_macros){
+             unique_cell.push_back(m->get_grid_coordinates()[i]);
+        }
+        std::vector<int> cell_val(unique_cell.size(), 1);
+        int cell_val_arr[cell_val.size()];
+        std::copy(cell_val.begin(), cell_val.end(), cell_val_arr);
+        z3::expr sum_cell = z3::pble(unique_cell, cell_val_arr, 1);
+        m_z3_opt->add(sum_cell);
+    }
+    
+    z3::expr cost_funtion = m_encode->mk_sum(costs);
+    m_z3_opt->minimize(cost_funtion);
 }
 
 /**
@@ -587,7 +618,9 @@ void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
     size_t height = lef_data.sizeY();
 
     std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
-    Macro*m = new Macro(name, id, width, height);
+    //Macro*m = new Macro(name, id, width, height);
+    Macro* m = new Macro(name, id, width, height, 6, 6);
+    m->init_grid();
     for(auto itor: lef_pins){
         Pin* p = new Pin(itor.name(), id, Pin::string2enum(itor.direction()));
         assert (p != nullptr);
@@ -878,8 +911,13 @@ void MacroCircuit::config_z3()
     
     if (this->get_logic() == eInt){
         m_z3_ctx.set("logic", "LIA");
+        m_logger->encode_int();
+    } else if (this->get_logic() == eBitVector) {
+        // http://smtlib.cs.uiowa.edu/logics-all.shtml
+        m_z3_ctx.set("logic", "QF_BV");
+        m_logger->encode_bv();
     }
-    
+
     //param.set(":opt.solution_prefix", "intermediate_result");
     //param.set(":opt.dump_models", true);
     //param.set(":opt.pb.compile_equality", true);
@@ -893,7 +931,7 @@ void MacroCircuit::config_z3()
         m_logger->use_lex_optimizer();
         param.set(":opt.priority", "lex");
     } else {
-        std::cout << "Default Optimiter: Lex" << std::endl;
+        m_logger->use_lex_optimizer();
         param.set(":opt.priority", "lex");
     }
     
@@ -912,7 +950,7 @@ void MacroCircuit::run_encoding()
 {
     this->encode_components_inside_die(e2D);
     this->encode_components_non_overlapping(e2D);
-
+    
     m_z3_opt->add(m_components_inside_die);
     m_z3_opt->add(m_components_non_overlapping);
     m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));

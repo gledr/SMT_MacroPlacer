@@ -65,7 +65,7 @@ Pin::~Pin()
 }
 
 /**
- * @brief ...
+ * @brief Get Pinname
  * 
  * @return std::string
  */
@@ -75,9 +75,9 @@ std::string Pin::get_name()
 }
 
 /**
- * @brief ...
+ * @brief Set Bitwidth of Pin
  * 
- * @param width p_width:...
+ * @param width Bitwidth
  */
 void Pin::set_bitwidth(size_t const width)
 {
@@ -85,7 +85,7 @@ void Pin::set_bitwidth(size_t const width)
 }
 
 /**
- * @brief ...
+ * @brief Get Bitwidth of Pin
  * 
  * @return size_t
  */
@@ -95,7 +95,7 @@ size_t Pin::get_bitwidth() const
 }
 
 /**
- * @brief ...
+ * @brief Get Macro name Pin belongs to
  * 
  * @return std::string
  */
@@ -105,9 +105,9 @@ std::string Pin::get_macro_name()
 }
 
 /**
- * @brief ...
+ * @brief Set Pin frequency
  * 
- * @param frequency p_frequency:...
+ * @param frequency Frequency
  */
 void Pin::set_frequency(size_t const frequency)
 {
@@ -115,7 +115,7 @@ void Pin::set_frequency(size_t const frequency)
 }
 
 /**
- * @brief ...
+ * @brief Get Pin Frequency
  * 
  * @return size_t
  */
@@ -125,9 +125,9 @@ size_t Pin::get_frequency() const
 }
 
 /**
- * @brief ...
+ * @brief Dump Pin Information to given stream
  * 
- * @param stream p_stream:...
+ * @param stream Stream to dump to
  */
 void Pin::dump(std::ostream& stream)
 {
@@ -138,9 +138,9 @@ void Pin::dump(std::ostream& stream)
 }
 
 /**
- * @brief ...
+ * @brief Translate given name to enum
  * 
- * @param name p_name:...
+ * @param name String to translate
  * @return Placer::e_pin_direction
  */
 e_pin_direction Pin::string2enum(std::string const & name)
@@ -157,9 +157,9 @@ e_pin_direction Pin::string2enum(std::string const & name)
 }
 
 /**
- * @brief ...
+ * @brief Translate given enum to string
  * 
- * @param direction p_direction:...
+ * @param direction Enum to translate
  * @return std::string
  */
 std::string Pin::enum2string(e_pin_direction const direction)
@@ -178,7 +178,7 @@ std::string Pin::enum2string(e_pin_direction const direction)
 }
 
 /**
- * @brief ...
+ * @brief Get Pin ID
  * 
  * @return std::string
  */
@@ -188,7 +188,7 @@ std::string Pin::get_id()
 }
 
 /**
- * @brief ...
+ * @brief Check if Pin is Input
  * 
  * @return bool
  */
@@ -198,7 +198,7 @@ bool Pin::is_input()
 }
 
 /**
- * @brief ...
+ * @brief Check if Pin is Output
  * 
  * @return bool
  */
@@ -208,7 +208,7 @@ bool Pin::is_output()
 }
 
 /**
- * @brief ...
+ * @brief Get Pin Position X Coordinate
  * 
  * @return z3::expr&
  */
@@ -218,7 +218,7 @@ z3::expr& Pin::get_pin_pos_x()
 }
 
 /**
- * @brief ...
+ * @brief Get Pin Position Y Coordinate
  * 
  * @return z3::expr&
  */
@@ -228,9 +228,9 @@ z3::expr& Pin::get_pin_pos_y()
 }
 
 /**
- * @brief ...
+ * @brief Add Solution for X Coordinate
  * 
- * @param val p_val:...
+ * @param val Coordinate
  */
 void Pin::add_solution_pin_pos_x(size_t const val)
 {
@@ -240,9 +240,9 @@ void Pin::add_solution_pin_pos_x(size_t const val)
 }
 
 /**
- * @brief ...
+ * @brief Add Solution for Y Coordinate
  * 
- * @param val p_val:...
+ * @param val Coordinate
  */
 void Pin::add_solution_pin_pos_y(size_t const val)
 {
@@ -252,9 +252,9 @@ void Pin::add_solution_pin_pos_y(size_t const val)
 }
 
 /**
- * @brief ...
+ * @brief Get Solution for X Coordinate
  * 
- * @param sol p_sol:...
+ * @param sol Solution ID
  * @return size_t
  */
 size_t Pin::get_solution_pin_pos_x(size_t const  sol)
@@ -263,9 +263,9 @@ size_t Pin::get_solution_pin_pos_x(size_t const  sol)
 }
 
 /**
- * @brief ...
+ * @brief Get Solution for Y Coordinate
  * 
- * @param sol p_sol:...
+ * @param sol Solution ID
  * @return size_t
  */
 size_t Pin::get_solution_pin_pos_y(size_t const sol)
@@ -274,9 +274,9 @@ size_t Pin::get_solution_pin_pos_y(size_t const sol)
 }
 
 /**
- * @brief ...
+ * @brief Set X Coordinate Offset to Center
  * 
- * @param offset p_offset:...
+ * @param offset Offset
  */
 void Pin::set_x_offset(size_t const offset)
 {
@@ -284,7 +284,7 @@ void Pin::set_x_offset(size_t const offset)
 }
 
 /**
- * @brief ...
+ * @brief Set Y Coordinate Offset to Center
  * 
  * @param offset p_offset:...
  */

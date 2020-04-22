@@ -22,6 +22,10 @@
 
 namespace Placer {
 
+/**
+ * @class Macro
+ * @brief Symbolic Representation of a Macro for Encoding
+ */
 class Macro: public virtual Component {
 public:
 
@@ -31,15 +35,27 @@ public:
           size_t const height);
 
    Macro(std::string const & name,
-          std::string const & id,
-          size_t const width,
-          size_t const height, 
-          size_t const pos_x,
-          size_t const pos_y,
-          size_t const orientation);
+         std::string const & id,
+         size_t const width,
+         size_t const height,
+         size_t const pos_x,
+         size_t const pos_y,
+         size_t const orientation);
+   
+   Macro(std::string const & name,
+         std::string const & id,
+         size_t const width,
+         size_t const height,
+         size_t const layout_x,
+         size_t const layout_y);
 
     virtual ~Macro();
-
+    
+    void init_grid();
+    z3::expr encode_grid();
+    z3::expr_vector get_grid_costs();
+    z3::expr_vector get_grid_coordinates();
+    
     void set_supplement(Supplement* supplement);
 
     void add_pin(Pin* const pin);
@@ -64,7 +80,14 @@ private:
     Supplement* m_supplement;
 
     bool m_free;
-
+    
+    z3::expr_vector m_root_coordinate;
+    z3::expr_vector m_grid_coordinates;
+    z3::expr_vector m_cost_distribution;
+    
+    size_t m_layout_x;
+    size_t m_layout_y;
+    
     void handle_supplement();
     
     /**

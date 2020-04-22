@@ -244,17 +244,27 @@ void Logger::execution_start ()
 {
     std::stringstream msg;
     msg <<  "Execution Start: " << Utils::Utils::get_current_time();
-    LOG(eInfo) << Utils::Utils::get_bash_string_blink_red(msg.str());
+    LOG(eDebug) << Utils::Utils::get_bash_string_blink_red(msg.str());
 }
 
 void Logger::execution_end ()
 {
     std::stringstream msg;
     msg <<  "Execution End: " << Utils::Utils::get_current_time();
-    LOG(eInfo) << Utils::Utils::get_bash_string_blink_red(msg.str());
+    LOG(eDebug) << Utils::Utils::get_bash_string_blink_red(msg.str());
 }
 
 void Logger::run_partitioning()
 {
     LOG(eInfo) << "Partitioning Mode!";
+}
+
+void Logger::encode_int()
+{
+    LOG(eInfo) << "Using LIA Theory";
+}
+
+void Logger::encode_bv()
+{
+    LOG(eInfo) << "Using QF_BV Theory";
 }

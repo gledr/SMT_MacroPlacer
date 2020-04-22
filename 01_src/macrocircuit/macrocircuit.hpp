@@ -147,6 +147,7 @@ private:
      */
     void encode_smt();
     void encode_parquet();
+    void encode_grid();
 
     void config_z3();
     void run_encoding();

@@ -27,10 +27,10 @@ Terminal::Terminal(std::string const & name,
     Object(),
     m_encode(new EncodingUtils()),
     m_name(name),
+    m_free(true),
     m_direction(direction),
     m_pin_pos_x(m_encode->get_constant("terminal_" + name + "_x")),
-    m_pin_pos_y(m_encode->get_constant("terminal_" + name + "_y")),
-    m_free(true)
+    m_pin_pos_y(m_encode->get_constant("terminal_" + name + "_y"))
 {
     m_free = true;
     debug && std::cout << "[Info]: Added Free Terminal " << name << std::endl;
@@ -42,7 +42,6 @@ Terminal::Terminal(std::string const & name,
  * @param name Terminal Name
  * @param pos_x Terminal Position X
  * @param pos_y Terminal Position Y
- * @param z3_ctx Z3 Context
  * @param direction Terminal Direction
  */
 Terminal::Terminal(std::string const & name,
@@ -50,6 +49,7 @@ Terminal::Terminal(std::string const & name,
                    size_t const pos_y,
                    e_pin_direction const direction):
     Object(),
+    m_encode(new EncodingUtils()),
     m_name(name),
     m_free(false),
     m_direction(direction),

@@ -60,6 +60,7 @@ public:
 
         if(p_log_enabled) {
             if(this->log_info()){
+                std::cout << level_id << val << std::endl;
                 if(this->p_log_to_file){
                     std::ofstream out_file(p_working_directory + "/" + p_file_name, std::ios::app);
                     out_file << level_id << val << std::endl;

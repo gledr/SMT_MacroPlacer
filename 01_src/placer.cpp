@@ -14,6 +14,12 @@
 using namespace Placer;
 using namespace Placer::Utils;
 
+/**
+ * @brief 
+ * 
+ * @param argc
+ * @param argv
+ */
 MacroPlacer::MacroPlacer(int const argc, char ** argv):
     Object()
 {
@@ -23,6 +29,9 @@ MacroPlacer::MacroPlacer(int const argc, char ** argv):
     m_argv = argv;
 }
 
+/**
+ * @brief 
+ */
 MacroPlacer::~MacroPlacer()
 {
     Utils::Logger::destroy();
@@ -32,6 +41,9 @@ MacroPlacer::~MacroPlacer()
     delete m_mckt; m_mckt = nullptr;
 }
 
+/**
+ * @brief 
+ */
 void MacroPlacer::read_configuration()
 {
     try {
@@ -178,7 +190,7 @@ void MacroPlacer::read_configuration()
                 }
             }
         }
-        this->set_logic(eBitVector);
+        this->set_logic(eInt);
         this->set_working_directory(boost::filesystem::current_path().string());
         this->set_results_directory("results");
         this->set_results_id(this->existing_results() + 1);
@@ -251,20 +263,35 @@ void MacroPlacer::bash_completion_script()
    out_file.close();
 }
 
+/**
+ * @brief 
+ */
 void MacroPlacer::print_header()
 {
+    size_t max_len = 0;
+    
     std::ifstream header (Utils::Utils::get_base_path() + "/01_src/header.ascii");
     std::string line;
     while(std::getline(header, line)){
+        if (line.size() > max_len){
+            max_len = line.size();
+        }
         std::cout << line << std::endl;
     }
     header.close();
     
-    std::cout << GIT_HASH << std::endl;
-    std::cout << GIT_NAME << std::endl;
-    std::cout << GIT_DATE << std::endl;
+    size_t const outline = 14;
+    std::cout << std::left << std::setw(outline) << std::setfill(' ') << "Git Hash: "  << GIT_HASH << std::endl;
+    std::cout << std::left << std::setw(outline) << std::setfill(' ') << "Last Author: "  << GIT_NAME << std::endl;
+    std::cout << std::left << std::setw(outline) << std::setfill(' ') << "Last Changes: " << GIT_DATE << std::endl;
+    
+    std::cout << std::string (max_len, '-') << std::endl;
+    std::cout << std::endl;
 }
 
+/**
+ * @brief 
+ */
 void MacroPlacer::init ()
 {
     this->read_configuration();
@@ -273,6 +300,9 @@ void MacroPlacer::init ()
     this->print_header();
 }
 
+/**
+ * @brief 
+ */
 void MacroPlacer::run ()
 {
     m_timer->start_timer("total");
@@ -287,6 +317,9 @@ void MacroPlacer::run ()
     m_logger->execution_end();
 }
 
+/**
+ * @brief 
+ */
 void MacroPlacer::post_process()
 {
     m_mckt->store_results();
@@ -305,6 +338,11 @@ void MacroPlacer::post_process()
     m_mckt->best_result();
 }
 
+/**
+ * @brief 
+ * 
+ * @return size_t
+ */
 size_t MacroPlacer::existing_results ()
 {
     size_t retval = 0;
@@ -321,6 +359,9 @@ size_t MacroPlacer::existing_results ()
     return retval;
 }
 
+/**
+ * @brief 
+ */
 void MacroPlacer::store_configuration ()
 {
     std::ofstream config(this->get_results_directory() + "/" + std::to_string(this->get_results_id()) + "/config.ini");

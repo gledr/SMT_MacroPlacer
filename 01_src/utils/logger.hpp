@@ -75,6 +75,9 @@ public:
    void use_lex_optimizer();
    void use_box_optimizer();
    
+   void encode_int();
+   void encode_bv();
+   
    void pareto_solutions(size_t const solutions);
    void pareto_step();
    

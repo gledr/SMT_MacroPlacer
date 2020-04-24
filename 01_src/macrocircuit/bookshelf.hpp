@@ -25,6 +25,7 @@
 #include <vector>
 #include <string>
 #include <exception>
+#include <algorithm>
 
 namespace Placer {
 
@@ -63,6 +64,9 @@ private:
     void write_blocks();
     void write_nets();
     void write_pl();
+    
+    size_t m_gcd_h;
+    size_t m_gcd_w;
 
     std::string m_design_name;
     std::string m_blocks_file;
@@ -92,6 +96,8 @@ private:
 
     Macro* find_macro(std::string const & name);
     Terminal* find_terminal(std::string const & name);
+    
+    void calculate_gcd();
 };
 
 }

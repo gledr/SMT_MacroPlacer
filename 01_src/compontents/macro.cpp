@@ -13,6 +13,14 @@
 
 using namespace Placer;
 
+/**
+ * @brief 
+ * 
+ * @param name 
+ * @param id 
+ * @param width
+ * @param height
+ */
 Macro::Macro(std::string const & name,
              std::string const & id,
              size_t const width,
@@ -40,6 +48,17 @@ Macro::Macro(std::string const & name,
                        << id << " (" << width << "x" << height << ")"<< std::endl;
 }
 
+/**
+ * @brief 
+ * 
+ * @param name
+ * @param id
+ * @param width
+ * @param height
+ * @param pos_lx 
+ * @param pos_ly 
+ * @param orientation 
+ */
 Macro::Macro(std::string const & name,
              std::string const & id,
              size_t const width,
@@ -68,6 +87,16 @@ Macro::Macro(std::string const & name,
     this->get_verbose() && std::cout << "[Info]: Adding Fixed Macro " << id << std::endl;
 }
 
+/**
+ * @brief 
+ * 
+ * @param name
+ * @param id 
+ * @param width 
+ * @param height 
+ * @param layout_x
+ * @param layout_y 
+ */
 Macro::Macro(std::string const & name,
              std::string const & id,
              size_t const width,
@@ -91,43 +120,77 @@ Macro::Macro(std::string const & name,
     m_free = false;
     m_supplement = nullptr;
     
-    this->get_verbose() && std::cout << "[Info]: Adding Fixed Macro " << id << std::endl;
+    this->get_verbose() && std::cout << "[Info]: Adding Grid Macro " << id << std::endl;
 }
 
+/**
+ * @brief 
+ */
 Macro::~Macro()
 {
     for(auto itor: m_pins){
         delete itor.second; itor.second = nullptr;
     }
-    
+
     m_supplement = nullptr;
 }
 
+z3::expr Macro::is_N()
+{
+    return m_orientation == m_encode->get_value(eNorth);
+}
+
+z3::expr Macro::is_W()
+{
+    return m_orientation == m_encode->get_value(eWest);
+}
+
+z3::expr Macro::is_S()
+{
+    return m_orientation == m_encode->get_value(eSouth);
+}
+
+z3::expr Macro::is_E()
+{
+    return m_orientation == m_encode->get_value(eEast);
+}
+
+/**
+ * @brief 
+ */
 void Macro::init_grid()
 {
+    std::cout << "init grid" << std::endl;
     for (size_t i = 0; i < m_layout_x; ++i) {
         for (size_t j = 0; j < m_layout_y; ++j) {
-            std::string idx_root = m_id + "_root_" + std::to_string(i) + std::to_string(j);
-                std::string idx_grid = m_id + "_grid_" + std::to_string(i)+ std::to_string(j);
+            std::string idx_root = m_id + "_root_x_" + std::to_string(i) + "_y_" + std::to_string(j);
+                std::string idx_grid = m_id + "_grid_x_" + std::to_string(i) + "_y_" +  std::to_string(j);
                 m_cost_distribution.push_back(m_z3_ctx.int_val((int)sqrt((i*i) + (j*j))));
                 m_grid_coordinates.push_back(m_z3_ctx.bool_const(idx_grid.c_str()));
                 m_root_coordinate.push_back(m_z3_ctx.bool_const(idx_root.c_str()));
             }
         }
+         std::cout << "init grid done" << std::endl;
 }
 
+/**
+ * @brief 
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::encode_grid()
 {
     z3::expr_vector clauses(m_z3_ctx);
-    
+
     std::vector<int> val_m1(m_root_coordinate.size(), 1);
     int val_arr[val_m1.size()];
     std::copy(val_m1.begin(), val_m1.end(), val_arr);
     z3::expr sum_m1 = z3::pbeq(m_root_coordinate, val_arr, 1);
     clauses.push_back(sum_m1);
-    
+
     // Macro Covers Certain Area
-    z3::expr_vector covering(m_z3_ctx);
+    ///{{{
+    z3::expr_vector covering_n(m_z3_ctx);
     for (size_t i = 0; i < m_layout_x; ++i) {
         for (size_t j = 0; j < m_layout_y; ++j) {
             if ((i + m_width.get_numeral_uint() - 1 < m_layout_x) && (j + m_height.get_numeral_uint() - 1 < m_layout_y)) {
@@ -135,19 +198,31 @@ z3::expr Macro::encode_grid()
                     z3::expr_vector area(m_z3_ctx);
                     area.push_back(m_root_coordinate[(i * m_layout_x) + j]);
 
-                    for (size_t k = 0; k < m_width.get_numeral_uint(); k++) {
-                        area.push_back(m_grid_coordinates[(i * m_layout_x) + j + k]);
+                    for (size_t h = 0; h < m_height.get_numeral_uint(); ++h){
+                        for(size_t w = 0; w < m_width.get_numeral_uint(); ++w){
+                            area.push_back(m_grid_coordinates[(i * m_layout_x) + j + (w*m_layout_y) + h]);
+                        }
                     }
-
-                    for (size_t k = 0; k < m_height.get_numeral_int(); k++) {
-                        area.push_back(m_grid_coordinates[((i + 1) * m_layout_x) + j + k]);
-                    }
-                    covering.push_back(mk_and(area));
+                    covering_n.push_back(mk_and(area));
                 }
             }
         }
     }
-    clauses.push_back(z3::mk_or(covering));
+///}}}
+///{{{
+/*
+    z3::expr_vector covering_w(m_z3_ctx);
+    for (size_t i = m_layout_x; i >= 0; i--){
+        for (size_t j = 0; j < m_layout_y; ++j){
+            
+        }
+    }
+  */  
+
+///}}}
+
+    
+    clauses.push_back(z3::mk_or(covering_n));
     
     // Macro has to cover a particular number of cells
     std::vector<int> val_m1_grid(m_grid_coordinates.size(), 1);
@@ -159,22 +234,47 @@ z3::expr Macro::encode_grid()
     return z3::mk_and(clauses);
 }
 
+/**
+ * @brief 
+ * 
+ * @return z3::expr_vector
+ */
 z3::expr_vector Macro::get_grid_coordinates()
 {
     return m_grid_coordinates;
 }
 
+/**
+ * @brief 
+ * 
+ * @return z3::expr_vector
+ */
+z3::expr_vector Macro::get_root_coordinates()
+{
+    return m_root_coordinate;
+}
+
+/**
+ * @brief 
+ * 
+ * @return z3::expr_vector
+ */
 z3::expr_vector Macro::get_grid_costs()
 {
     z3::expr_vector ret_val(m_z3_ctx);
     
     for (size_t i = 0; i < m_grid_coordinates.size(); ++i){
-        ret_val.push_back(z3::ite(m_root_coordinate[i], m_cost_distribution[i], m_z3_ctx.int_val(0)));
+        ret_val.push_back(z3::ite(m_grid_coordinates[i], m_cost_distribution[i], m_z3_ctx.int_val(0)));
     }
     
     return ret_val;
 }
 
+/**
+ * @brief 
+ * 
+ * @param supplement 
+ */
 void Macro::set_supplement(Supplement* supplement)
 {
     assert (supplement != nullptr);
@@ -183,6 +283,11 @@ void Macro::set_supplement(Supplement* supplement)
     this->handle_supplement();
 }
 
+/**
+ * @brief 
+ * 
+ * @param pin 
+ */
 void Macro::add_pin(Pin *const pin)
 {
     assert (pin != nullptr);
@@ -190,11 +295,22 @@ void Macro::add_pin(Pin *const pin)
     m_pins[pin->get_id()] = pin;
 }
 
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @return Placer::Pin*
+ */
 Pin* Macro::get_pin(std::string const & id)
 {
     return m_pins[id];
 }
 
+/**
+ * @brief 
+ * 
+ * @return std::vector< Placer::Pin* >
+ */
 std::vector<Pin*> Macro::get_pins()
 {
     std::vector<Pin*> retval;
@@ -206,11 +322,22 @@ std::vector<Pin*> Macro::get_pins()
     return retval;
 }
 
+/**
+ * @brief 
+ * 
+ * @return bool
+ */
 bool Macro::is_free()
 {
     return m_free;
 }
 
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @return size_t
+ */
 size_t Macro::get_solution_ly(size_t const id)
 {
     assert (id < m_sol_ly.size());
@@ -218,6 +345,12 @@ size_t Macro::get_solution_ly(size_t const id)
     return  m_sol_ly[id];
 }
 
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @return size_t
+ */
 size_t Macro::get_solution_lx(size_t const id)
 {
     assert (id < m_sol_lx.size());
@@ -225,6 +358,12 @@ size_t Macro::get_solution_lx(size_t const id)
     return m_sol_lx[id];
 }
 
+/**
+ * @brief 
+ * 
+ * @param id 
+ * @return size_t
+ */
 size_t Macro::get_solution_orientation(size_t const id)
 {
     assert (id < m_sol_orientation.size());
@@ -232,6 +371,9 @@ size_t Macro::get_solution_orientation(size_t const id)
     return m_sol_orientation[id];
 }
 
+/**
+ * @brief 
+ */
 void Macro::handle_supplement()
 {
     if(!m_supplement->has_macro(m_name)){
@@ -256,11 +398,21 @@ void Macro::handle_supplement()
     }
 }
 
+/**
+ * @brief 
+ * 
+ * @return size_t
+ */
 size_t Macro::get_area()
 {
     return m_width.get_numeral_uint() * m_height.get_numeral_uint();
 }
 
+/**
+ * @brief 
+ * 
+ * @param stream 
+ */
 void Macro::dump(std::ostream & stream)
 {
     stream << std::string(30, '#') << std::endl;
@@ -273,6 +425,9 @@ void Macro::dump(std::ostream & stream)
     stream << std::endl;
 }
 
+/**
+ * @brief 
+ */
 void Macro::encode_pins()
 {
 }
@@ -285,13 +440,7 @@ void Macro::encode_pins_on_macro_frontier()
 {
     try {
         z3::expr_vector clauses(m_z3_ctx);
-        
-        z3::expr is_N = z3::expr(m_orientation == m_encode->get_value(eNorth));
-        z3::expr is_W = z3::expr(m_orientation == m_encode->get_value(eWest));
-        z3::expr is_S = z3::expr(m_orientation == m_encode->get_value(eSouth));
-        z3::expr is_E = z3::expr(m_orientation == m_encode->get_value(eEast));
 
-        
         for(auto pin: m_pins){
             z3::expr x = pin.second->get_pin_pos_x();
             z3::expr y = pin.second->get_pin_pos_y();
@@ -425,10 +574,10 @@ void Macro::encode_pins_on_macro_frontier()
 }
 ///}}}
 ///}}}
-            z3::expr clause = z3::ite(is_N, z3::mk_or(case_n),
-                              z3::ite(is_W, z3::mk_or(case_w),
-                              z3::ite(is_S, z3::mk_or(case_s),
-                              z3::ite(is_E, z3::mk_or(case_e), m_z3_ctx.bool_val(false)))));
+            z3::expr clause = z3::ite(this->is_N(), z3::mk_or(case_n),
+                              z3::ite(this->is_W(), z3::mk_or(case_w),
+                              z3::ite(this->is_S(), z3::mk_or(case_s),
+                              z3::ite(this->is_E(), z3::mk_or(case_e), m_z3_ctx.bool_val(false)))));
             clauses.push_back(clause);
         }
         
@@ -457,11 +606,6 @@ void Macro::encode_pins_non_overlapping()
 void Macro::encode_pins_center_of_macro()
 {
     z3::expr_vector clauses(m_z3_ctx);
-    
-    z3::expr is_N = z3::expr(m_orientation == m_encode->get_value(eNorth));
-    z3::expr is_W = z3::expr(m_orientation == m_encode->get_value(eWest));
-    z3::expr is_S = z3::expr(m_orientation == m_encode->get_value(eSouth));
-    z3::expr is_E = z3::expr(m_orientation == m_encode->get_value(eEast));
 
     for(auto _pin: m_pins){
         Pin* pin = _pin.second;
@@ -486,10 +630,10 @@ void Macro::encode_pins_center_of_macro()
         case_e.push_back(pin->get_pin_pos_x() == (m_lx + (m_height/2)));
         case_e.push_back(pin->get_pin_pos_y() == (m_ly - (m_width/2)));
 ///}}}
-        z3::expr clause = z3::ite(is_N, z3::mk_and(case_n),
-                          z3::ite(is_W, z3::mk_and(case_w),
-                          z3::ite(is_S, z3::mk_and(case_s),
-                          z3::ite(is_E, z3::mk_and(case_e),
+        z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
+                          z3::ite(this->is_W(), z3::mk_and(case_w),
+                          z3::ite(this->is_S(), z3::mk_and(case_s),
+                          z3::ite(this->is_E(), z3::mk_and(case_e),
                                   m_z3_ctx.bool_val(false)))));
             
         clauses.push_back(clause);
@@ -497,6 +641,34 @@ void Macro::encode_pins_center_of_macro()
     m_encode_pins_center_of_macro = z3::mk_and(clauses);
 }
 
-z3::expr Placer::Macro::get_pin_constraints()
+/**
+ * @brief 
+ * 
+ * @return z3::expr
+ */
+z3::expr Macro::get_pin_constraints()
 {
+}
+
+/**
+ * @brief ...
+ * 
+ * @param x p_x:...
+ * @param y p_y:...
+ */
+void Macro::add_solution_root(const size_t x, const size_t y)
+{
+    std::cout << "Set Macro Root to: " << x << ":" << y << std::endl;
+    
+    m_root_solution = std::make_pair(x,y);
+}
+
+/**
+ * @brief ...
+ * 
+ * @return std::pair< long unsigned int, long unsigned int >
+ */
+std::pair<size_t, size_t> Macro::get_solution_root() const
+{
+    return m_root_solution;
 }

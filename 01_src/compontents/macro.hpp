@@ -55,6 +55,7 @@ public:
     z3::expr encode_grid();
     z3::expr_vector get_grid_costs();
     z3::expr_vector get_grid_coordinates();
+    z3::expr_vector get_root_coordinates();
     
     void set_supplement(Supplement* supplement);
 
@@ -70,9 +71,17 @@ public:
     size_t get_solution_lx(size_t const id);
     size_t get_solution_ly(size_t const id);
     size_t get_solution_orientation(size_t const id);
+    
+    void add_solution_root(size_t const x, size_t const y);
+    std::pair<size_t, size_t> get_solution_root() const;
 
     void encode_pins();
     z3::expr get_pin_constraints();
+    
+    z3::expr is_N();
+    z3::expr is_W();
+    z3::expr is_S();
+    z3::expr is_E();
 
 private:
     std::map<std::string, Pin*> m_pins;
@@ -80,6 +89,8 @@ private:
     Supplement* m_supplement;
 
     bool m_free;
+    
+    std::pair<size_t, size_t> m_root_solution;
     
     z3::expr_vector m_root_coordinate;
     z3::expr_vector m_grid_coordinates;

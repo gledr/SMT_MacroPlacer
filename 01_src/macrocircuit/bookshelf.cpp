@@ -78,6 +78,7 @@ void Bookshelf::read_files()
     
     this->read_blocks();
     this->calc_estimated_die_area();
+    this->calculate_gcd();
     this->read_pl();
     //this->read_nets();
 }
@@ -315,6 +316,11 @@ void Bookshelf::read_pl()
     std::vector<std::string> processed_terminals;
     std::vector<std::string> processed_macros;
     
+    this->calc_estimated_die_area();
+    size_t xy = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+    
+    std::cout << "Using Grid: " << xy/m_gcd_h << std::endl;
+    
     while(std::getline(place_stream, line)){
         place_content.push_back(line);
     }
@@ -345,7 +351,8 @@ void Bookshelf::read_pl()
             
             // Placed Macro
             if(force_free) {
-                m_macros.push_back(new Macro(name, name, width, heigth));
+                Macro* m = new Macro(name, name, width, heigth, xy/m_gcd_w, xy/m_gcd_h);
+                m_macros.push_back(m);
             } else if((x != 0) || (y != 0)){
                 m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
             // Free Macro
@@ -681,4 +688,28 @@ void Bookshelf::write_pl()
 
     plFile << feed.str();
     plFile.close();
+}
+
+void Bookshelf::calculate_gcd()
+{
+    std::vector<size_t> w;
+    std::vector<size_t> h;
+    for (auto xy : m_macro_definitions){
+        w.push_back(xy.second.first);
+        h.push_back(xy.second.second);
+    }
+    
+    size_t gcd_w = w[0];
+    size_t gcd_h= h[0];
+    
+    for (size_t i =1 ; i < w.size(); ++i){
+        gcd_w = std::__gcd(w[i], gcd_w);
+        gcd_h = std::__gcd(h[i], gcd_h);
+    }
+    
+    m_gcd_w = gcd_w;
+    m_gcd_h = gcd_h;
+    
+    std::cout << "GCD W: " << gcd_w << std::endl;
+    std::cout << "GCD H: " << gcd_h << std::endl;
 }

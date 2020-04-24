@@ -42,6 +42,7 @@
 #include <partitioning.hpp>
 #include <parquet.hpp>
 #include <encoding_utils.hpp>
+#include <utils.hpp>
 
 namespace Placer {
 

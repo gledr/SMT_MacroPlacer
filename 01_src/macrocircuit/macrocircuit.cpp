@@ -212,15 +212,9 @@ void MacroCircuit::encode_smt()
 
 void MacroCircuit::encode_grid()
 {
-    z3::expr_vector costs(m_z3_ctx);
     for (Macro* m : m_macros){
+        m->init_grid();
         m_z3_opt->add(m->encode_grid());
-        
-        z3::expr_vector c = m->get_grid_costs();
-        
-        for (size_t i = 0; i < c.size(); ++i){
-            costs.push_back(c[i]);
-        }
     }
     
     for (size_t i = 0; i < m_macros.front()->get_grid_coordinates().size(); ++i){
@@ -236,8 +230,16 @@ void MacroCircuit::encode_grid()
         m_z3_opt->add(sum_cell);
     }
     
-    z3::expr cost_funtion = m_encode->mk_sum(costs);
-    m_z3_opt->minimize(cost_funtion);
+    for (Macro* m : m_macros){
+        z3::expr_vector costs(m_z3_ctx);
+        z3::expr_vector c = m->get_grid_costs();
+        
+        for (size_t i = 0; i < c.size(); ++i){
+            costs.push_back(c[i]);
+        }
+        z3::expr cost_funtion = m_encode->mk_sum(costs);
+        m_z3_opt->minimize(cost_funtion);
+    }
 }
 
 /**
@@ -346,6 +348,8 @@ void MacroCircuit::dump_best()
  */
 void MacroCircuit::create_image(size_t const solution)
 {
+#if 0
+    
     if(!boost::filesystem::exists(this->get_image_directory())){
         boost::filesystem::create_directories(this->get_image_directory());
     }
@@ -475,6 +479,40 @@ void MacroCircuit::create_image(size_t const solution)
         
         std::string cmd = "gnuplot " + gnu_plot_script;
         system(cmd.c_str());
+#endif
+
+    if(!boost::filesystem::exists(this->get_image_directory())){
+        boost::filesystem::create_directories(this->get_image_directory());
+    }
+
+    boost::filesystem::current_path(this->get_image_directory());
+
+    std::string gnu_plot_script = "script_" + std::to_string(solution) + ".plt";
+
+    size_t die_ux = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+    size_t die_uy = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+  
+    std::stringstream img_name;
+    img_name << "placement_" << this->get_design_name() << "_" << solution << ".png";
+    std::ofstream gnu_plot_file(gnu_plot_script);
+    gnu_plot_file << "set terminal png size 400,300;"  << std::endl;
+    gnu_plot_file << "set output '" << img_name.str() << "';" << std::endl;
+    
+    gnu_plot_file << "set xrange[" << 0 << ":" << std::to_string(die_ux) << "];" << std::endl;
+    gnu_plot_file << "set yrange[" << 0 << ":" << std::to_string(die_uy) << "];" << std::endl;
+
+    for(size_t j = 0; j < m_macros.size(); ++j){
+        gnu_plot_file  << "set object " << j+1 << " rect from " << std::to_string(m_macros[j]->get_solution_root().first) << "," << 
+                                                                   std::to_string(m_macros[j]->get_solution_root().second) << " to "  << 
+                                                                   std::to_string(m_macros[j]->get_solution_root().first + m_macros[j]->get_width().get_numeral_uint())<< ","<< std::to_string(m_macros[j]->get_solution_root().second + m_macros[j]->get_height().get_numeral_uint()) <<" lw 5;"<< std::endl;
+                                                                   
+      }
+      
+    gnu_plot_file << "plot x " << std::endl,
+    gnu_plot_file.close();
+        
+    std::string cmd = "gnuplot " + gnu_plot_script;
+    system(cmd.c_str());
 }
 
 /**
@@ -616,11 +654,13 @@ void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
 
     size_t width = lef_data.sizeX();
     size_t height = lef_data.sizeY();
+    
+    size_t  layout_x = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+    size_t layout_y = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
 
     std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
     //Macro*m = new Macro(name, id, width, height);
-    Macro* m = new Macro(name, id, width, height, 6, 6);
-    m->init_grid();
+    Macro* m = new Macro(name, id, width, height, layout_x, layout_y);
     for(auto itor: lef_pins){
         Pin* p = new Pin(itor.name(), id, Pin::string2enum(itor.direction()));
         assert (p != nullptr);
@@ -920,7 +960,7 @@ void MacroCircuit::config_z3()
 
     //param.set(":opt.solution_prefix", "intermediate_result");
     //param.set(":opt.dump_models", true);
-    //param.set(":opt.pb.compile_equality", true);
+    param.set(":opt.pb.compile_equality", true);
     if(this->get_pareto_optimizer()){
         m_logger->use_pareto_optimizer();
         param.set(":opt.priority", "pareto");
@@ -1387,6 +1427,7 @@ void MacroCircuit::solve()
         } else if (sat == z3::check_result::sat){
             m_solutions = 1;
 
+#if 0
             do {
                 z3::model m = m_z3_opt->get_model();
 
@@ -1425,6 +1466,31 @@ void MacroCircuit::solve()
                         break;
                     }
                 } while (sat == z3::check_result::sat);
+#endif
+                 z3::model model = m_z3_opt->get_model();
+
+                for (Macro* m: m_macros){
+                    
+                    for (size_t i = 0; i < m->get_root_coordinates().size(); i++){
+                        z3::expr tmp = model.eval(m->get_root_coordinates()[i]);
+                        std::stringstream ss;
+                        ss << tmp;
+
+                        if(ss.str() == "true"){
+                            std::stringstream id;
+                            id << m->get_root_coordinates()[i];
+                            std::string sid = id.str();
+                           
+                            std::vector<std::string> token = Placer::Utils::Utils::tokenize(sid, "_");
+                          
+                            size_t y = std::stoi(token[token.size()-1]);
+                            size_t x = std::stoi(token[token.size()-3]);
+                            m->add_solution_root(x, y);
+                        }
+                    }
+                }
+                
+                m_solutions = 1;
             } else {
             assert (0);
             }
@@ -1448,8 +1514,11 @@ void MacroCircuit::dump_smt_instance()
     std::ofstream out_file(smt_file);
     out_file << "(set-option :produce-models true)" << std::endl;
     out_file << *m_z3_opt;
+#if 0
     out_file << "(get-value(die_ux))" << std::endl;
     out_file << "(get-value(die_uy))" << std::endl;
+#endif
+    out_file << "(get-model)" << std::endl;
     out_file.close();
     }
 
@@ -1458,6 +1527,7 @@ void MacroCircuit::dump_smt_instance()
  */
 void MacroCircuit::best_result()
 {
+#if 0
     std::pair<size_t, size_t> results;
     results.first = UINT_MAX;
     results.second = UINT_MAX;
@@ -1472,4 +1542,28 @@ void MacroCircuit::best_result()
         }
    }
    std::cout << "Min Die Area: " << results.second << std::endl;
+# endif
+   
+   std::pair<size_t, size_t> max_coordinate;
+   max_coordinate.first = 0;
+   max_coordinate.second = 0;
+   
+   size_t x = 0;
+   size_t y = 0;
+   
+   for (Macro* m: m_macros){
+       std::pair <size_t, size_t> root = m->get_solution_root();
+       
+       if ((root.first + root.second) > (max_coordinate.first + max_coordinate.second)){
+           max_coordinate = root;
+            x = m->get_width().get_numeral_uint();
+            y = m->get_height().get_numeral_uint();
+        }
+   }
+   
+   std::cout << "Max Coordinate: " << max_coordinate.first << ":" << max_coordinate.second << std::endl;
+   std::cout << "Layout: " << max_coordinate.first + x << ":" << max_coordinate.second + y << std::endl;
+   std::cout << "Die Area Solution: " <<  (max_coordinate.first + x) * (max_coordinate.second + y) << std::endl;
+
+   
 }

@@ -43,6 +43,7 @@
 #include <parquet.hpp>
 #include <encoding_utils.hpp>
 #include <utils.hpp>
+#include <costfunction.hpp>
 
 namespace Placer {
 
@@ -113,6 +114,7 @@ private:
     Partitioning* m_partitioning;
     ParquetFrontend* m_parquet;
     EncodingUtils* m_encode;
+    CostFunction* m_lut;
 
     std::map<std::string, Macro*> m_id2macro;
     std::map<std::string, Terminal*> m_id2terminal;

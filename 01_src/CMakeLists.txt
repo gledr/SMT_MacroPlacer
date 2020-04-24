@@ -74,6 +74,7 @@ add_executable(smt_placer
     utils/logger.cpp
     utils/base_logger.cpp
     utils/utils.cpp
+    utils/costfunction.cpp
     clustering/centroid.cpp
     clustering/cluster.cpp
     clustering/kmeans.cpp

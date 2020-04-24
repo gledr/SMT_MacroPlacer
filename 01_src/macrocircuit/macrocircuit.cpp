@@ -33,6 +33,7 @@ MacroCircuit::MacroCircuit():
     m_timer = new Utils::Timer();
     m_partitioning = new Partitioning();
     m_parquet = new ParquetFrontend();
+    m_lut = new CostFunction();
 
     m_circuit = nullptr;
     m_solutions = 0;
@@ -76,6 +77,7 @@ MacroCircuit::~MacroCircuit()
     delete m_parquet; m_parquet = nullptr;
     delete m_encode; m_encode = nullptr;
     delete m_timer; m_timer = nullptr;
+    delete m_lut; m_lut = nullptr;
 
     m_logger = nullptr;
 }
@@ -112,6 +114,10 @@ void MacroCircuit::build_circuit()
             area_estimator.join();
 
             m_logger->min_die_area(m_estimated_area);
+            size_t  layout_x = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+            size_t layout_y = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+            m_lut->init_lookup_table(layout_x, layout_y);
+            
             std::thread macro_worker(&MacroCircuit::add_macros, this);
             std::thread cell_worker(&MacroCircuit::add_cells, this);
             std::thread terminal_worker(&MacroCircuit::add_terminals, this);
@@ -657,10 +663,10 @@ void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
     
     size_t  layout_x = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
     size_t layout_y = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
-
+   
     std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
     //Macro*m = new Macro(name, id, width, height);
-    Macro* m = new Macro(name, id, width, height, layout_x, layout_y);
+    Macro* m = new Macro(name, id, width, height, layout_x, layout_y, m_lut);
     for(auto itor: lef_pins){
         Pin* p = new Pin(itor.name(), id, Pin::string2enum(itor.direction()));
         assert (p != nullptr);
@@ -1471,26 +1477,31 @@ void MacroCircuit::solve()
 
                 for (Macro* m: m_macros){
                     
-                    for (size_t i = 0; i < m->get_root_coordinates().size(); i++){
-                        z3::expr tmp = model.eval(m->get_root_coordinates()[i]);
+                    for (size_t i = 0; i < m->get_grid_coordinates().size(); i++){
+                        z3::expr tmp = model.eval(m->get_grid_coordinates()[i]);
                         std::stringstream ss;
                         ss << tmp;
 
                         if(ss.str() == "true"){
                             std::stringstream id;
-                            id << m->get_root_coordinates()[i];
+                            id << m->get_grid_coordinates()[i];
                             std::string sid = id.str();
                            
                             std::vector<std::string> token = Placer::Utils::Utils::tokenize(sid, "_");
                           
                             size_t y = std::stoi(token[token.size()-1]);
                             size_t x = std::stoi(token[token.size()-3]);
-                            m->add_solution_root(x, y);
+                            m->add_solution_grid(x, y);
                         }
                     }
                 }
                 
                 m_solutions = 1;
+                
+                for (Macro* m : m_macros){
+                    m->calculate_root();
+                }
+                
             } else {
             assert (0);
             }

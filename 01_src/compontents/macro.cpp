@@ -29,7 +29,6 @@ Macro::Macro(std::string const & name,
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_root_coordinate(m_z3_ctx),
     m_grid_coordinates(m_z3_ctx),
     m_cost_distribution(m_z3_ctx)
 {
@@ -70,7 +69,6 @@ Macro::Macro(std::string const & name,
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_root_coordinate(m_z3_ctx),
     m_grid_coordinates(m_z3_ctx),
     m_cost_distribution(m_z3_ctx)
 {
@@ -102,15 +100,18 @@ Macro::Macro(std::string const & name,
              size_t const width,
              size_t const height,
              size_t const layout_x,
-             size_t const layout_y):
+             size_t const layout_y,
+             CostFunction* lut):
     Component(),
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_root_coordinate(m_z3_ctx),
     m_grid_coordinates(m_z3_ctx),
-    m_cost_distribution(m_z3_ctx)
+    m_cost_distribution(m_z3_ctx),
+    m_lut(lut)
 {
+    assert (lut != nullptr);
+    
     m_layout_x = layout_x;
     m_layout_y = layout_y;
     m_width = m_encode->get_value(width);
@@ -165,9 +166,8 @@ void Macro::init_grid()
         for (size_t j = 0; j < m_layout_y; ++j) {
             std::string idx_root = m_id + "_root_x_" + std::to_string(i) + "_y_" + std::to_string(j);
                 std::string idx_grid = m_id + "_grid_x_" + std::to_string(i) + "_y_" +  std::to_string(j);
-                m_cost_distribution.push_back(m_z3_ctx.int_val((int)sqrt((i*i) + (j*j))));
+                m_cost_distribution.push_back(m_z3_ctx.int_val(m_lut->quadratic_lut(i,j)));
                 m_grid_coordinates.push_back(m_z3_ctx.bool_const(idx_grid.c_str()));
-                m_root_coordinate.push_back(m_z3_ctx.bool_const(idx_root.c_str()));
             }
         }
          std::cout << "init grid done" << std::endl;
@@ -182,21 +182,14 @@ z3::expr Macro::encode_grid()
 {
     z3::expr_vector clauses(m_z3_ctx);
 
-    std::vector<int> val_m1(m_root_coordinate.size(), 1);
-    int val_arr[val_m1.size()];
-    std::copy(val_m1.begin(), val_m1.end(), val_arr);
-    z3::expr sum_m1 = z3::pbeq(m_root_coordinate, val_arr, 1);
-    clauses.push_back(sum_m1);
-
     // Macro Covers Certain Area
     ///{{{
     z3::expr_vector covering_n(m_z3_ctx);
     for (size_t i = 0; i < m_layout_x; ++i) {
         for (size_t j = 0; j < m_layout_y; ++j) {
             if ((i + m_width.get_numeral_uint() - 1 < m_layout_x) && (j + m_height.get_numeral_uint() - 1 < m_layout_y)) {
-                if (((i + 1) * m_layout_x) + j < m_root_coordinate.size()) {
+                if (((i + 1) * m_layout_x) + j < m_grid_coordinates.size()) {
                     z3::expr_vector area(m_z3_ctx);
-                    area.push_back(m_root_coordinate[(i * m_layout_x) + j]);
 
                     for (size_t h = 0; h < m_height.get_numeral_uint(); ++h){
                         for(size_t w = 0; w < m_width.get_numeral_uint(); ++w){
@@ -227,7 +220,7 @@ z3::expr Macro::encode_grid()
     // Macro has to cover a particular number of cells
     std::vector<int> val_m1_grid(m_grid_coordinates.size(), 1);
     int _val_m1_arr[val_m1_grid.size()];
-    std::copy(val_m1.begin(), val_m1.end(), _val_m1_arr);
+    std::copy(val_m1_grid.begin(), val_m1_grid.end(), _val_m1_arr);
     z3::expr sum_m1_grid = z3::pbeq(m_grid_coordinates, _val_m1_arr, m_width.get_numeral_uint() * m_height.get_numeral_uint());
     clauses.push_back(sum_m1_grid);
     
@@ -242,16 +235,6 @@ z3::expr Macro::encode_grid()
 z3::expr_vector Macro::get_grid_coordinates()
 {
     return m_grid_coordinates;
-}
-
-/**
- * @brief 
- * 
- * @return z3::expr_vector
- */
-z3::expr_vector Macro::get_root_coordinates()
-{
-    return m_root_coordinate;
 }
 
 /**
@@ -671,4 +654,18 @@ void Macro::add_solution_root(const size_t x, const size_t y)
 std::pair<size_t, size_t> Macro::get_solution_root() const
 {
     return m_root_solution;
+}
+
+void Macro::add_solution_grid(size_t const x, size_t const y)
+{
+    m_grid_solutions.push_back(std::make_pair(x,y));
+}
+
+void Macro::calculate_root()
+{
+    m_root_solution = *std::min_element(m_grid_solutions.begin(), m_grid_solutions.end(), [](std::pair<size_t, size_t> a, std::pair<size_t, size_t> b){
+            return a.first <= b.first && a.second <= b.second;
+    });
+    std::cout << "Setting Root: " << m_root_solution.first << ":" << m_root_solution.second << std::endl;
+    
 }

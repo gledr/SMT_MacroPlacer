@@ -19,6 +19,7 @@
 #include <layout.hpp>
 #include <pin.hpp>
 #include <supplement.hpp>
+#include <costfunction.hpp>
 
 namespace Placer {
 
@@ -47,7 +48,8 @@ public:
          size_t const width,
          size_t const height,
          size_t const layout_x,
-         size_t const layout_y);
+         size_t const layout_y,
+         CostFunction* lut);
 
     virtual ~Macro();
     
@@ -55,7 +57,7 @@ public:
     z3::expr encode_grid();
     z3::expr_vector get_grid_costs();
     z3::expr_vector get_grid_coordinates();
-    z3::expr_vector get_root_coordinates();
+    void calculate_root();
     
     void set_supplement(Supplement* supplement);
 
@@ -74,6 +76,8 @@ public:
     
     void add_solution_root(size_t const x, size_t const y);
     std::pair<size_t, size_t> get_solution_root() const;
+    
+    void add_solution_grid(size_t const x, size_t const y);
 
     void encode_pins();
     z3::expr get_pin_constraints();
@@ -87,12 +91,13 @@ private:
     std::map<std::string, Pin*> m_pins;
     Pin* m_active_pin;
     Supplement* m_supplement;
+    CostFunction* m_lut;
 
     bool m_free;
     
     std::pair<size_t, size_t> m_root_solution;
+    std::vector<std::pair<size_t, size_t>> m_grid_solutions;
     
-    z3::expr_vector m_root_coordinate;
     z3::expr_vector m_grid_coordinates;
     z3::expr_vector m_cost_distribution;
     

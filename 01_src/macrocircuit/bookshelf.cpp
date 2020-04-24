@@ -20,6 +20,7 @@ Bookshelf::Bookshelf():
     Object()
 {
     m_tree = new Tree();
+    m_lut = new CostFunction();
 }
 
 /**
@@ -28,6 +29,7 @@ Bookshelf::Bookshelf():
 Bookshelf::~Bookshelf()
 {
     m_tree = nullptr;
+    delete m_lut; m_lut = nullptr;
 }
 
 /**
@@ -318,6 +320,7 @@ void Bookshelf::read_pl()
     
     this->calc_estimated_die_area();
     size_t xy = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+    m_lut->init_lookup_table(xy, xy);
     
     std::cout << "Using Grid: " << xy/m_gcd_h << std::endl;
     
@@ -351,10 +354,10 @@ void Bookshelf::read_pl()
             
             // Placed Macro
             if(force_free) {
-                Macro* m = new Macro(name, name, width, heigth, xy/m_gcd_w, xy/m_gcd_h);
+                Macro* m = new Macro(name, name, width, heigth, xy/m_gcd_w, xy/m_gcd_h, m_lut);
                 m_macros.push_back(m);
             } else if((x != 0) || (y != 0)){
-                m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
+               // m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
             // Free Macro
             } else {
                 m_macros.push_back(new Macro(name, name, width, heigth));

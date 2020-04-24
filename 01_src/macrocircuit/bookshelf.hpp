@@ -17,6 +17,7 @@
 #include <macro.hpp>
 #include <terminal.hpp>
 #include <tree.hpp>
+#include <costfunction.hpp>
 
 #include <boost/filesystem.hpp>
 #include <z3++.h>
@@ -57,6 +58,8 @@ public:
     void set_tree(Tree * tree);
 
 private:
+    CostFunction* m_lut;
+    
     void read_blocks();
     void read_nets();
     void read_pl();

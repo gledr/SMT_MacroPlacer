@@ -320,7 +320,7 @@ void Bookshelf::read_pl()
     std::vector<std::string> processed_macros;
     
     this->calc_estimated_die_area();
-    size_t xy = std::ceil(sqrt(m_estimated_area))+std::max(m_max_h, m_max_w);
+    size_t xy = std::ceil(sqrt(m_estimated_area))+m_max_h+m_max_w;
     m_lut->init_lookup_table(xy, xy);
     
     std::cout << "Using Grid: " << xy/m_gcd_h << std::endl;

@@ -240,7 +240,7 @@ void MacroCircuit::encode_grid()
         z3::expr sum_cell = z3::pble(unique_cell, cell_val_arr, 1);
         m_z3_opt->add(sum_cell);
     }
-    
+    /*
     for (Macro* m : m_macros){
         z3::expr_vector costs(m_z3_ctx);
         z3::expr_vector c = m->get_grid_costs();
@@ -251,6 +251,7 @@ void MacroCircuit::encode_grid()
         z3::expr cost_funtion = m_encode->mk_sum(costs);
         m_z3_opt->minimize(cost_funtion);
     }
+    */
 }
 
 void MacroCircuit::grid_builder(size_t const start_point)

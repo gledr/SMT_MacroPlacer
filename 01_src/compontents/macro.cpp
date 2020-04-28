@@ -179,24 +179,28 @@ void Macro::init_grid()
  */
 z3::expr Macro::encode_grid()
 {
+    std::cout << "encode grid" << std::endl;
+    
     z3::expr_vector clauses(m_z3_ctx);
 
+    size_t height = m_height.get_numeral_uint();
+    size_t widht = m_width.get_numeral_uint();
+    
     // Macro Covers Certain Area
     ///{{{
     z3::expr_vector covering_n(m_z3_ctx);
-    for (size_t i = 0; i < m_layout_x; ++i) {
-        for (size_t j = 0; j < m_layout_y; ++j) {
-            if ((i + m_width.get_numeral_uint() - 1 < m_layout_x) && (j + m_height.get_numeral_uint() - 1 < m_layout_y)) {
-                if (((i + 1) * m_layout_x) + j < m_grid_coordinates.size()) {
-                    z3::expr_vector area(m_z3_ctx);
+    for (size_t i = 0; (i + widht - 1) < m_layout_x; ++i) {
+        for (size_t j = 0; (j + height - 1) < m_layout_y; ++j) {
+            if((((i + 1) * m_layout_x) + j) < m_grid_coordinates.size()) {
 
-                    for (size_t h = 0; h < m_height.get_numeral_uint(); ++h){
-                        for(size_t w = 0; w < m_width.get_numeral_uint(); ++w){
-                            area.push_back(m_grid_coordinates[(i * m_layout_x) + j + (w*m_layout_y) + h]);
-                        }
+                z3::expr_vector area(m_z3_ctx);
+                for (size_t h = 0; h < height; ++h){
+                    for(size_t w = 0; w < widht; ++w){
+                        std::cout << i << ":" << j<< ":" << h << ":" << w << std::endl;
+                        area.push_back(m_grid_coordinates[(i * m_layout_x) + j + (w*m_layout_y) + h]);
                     }
-                    covering_n.push_back(mk_and(area));
                 }
+                covering_n.push_back(mk_and(area));
             }
         }
     }
@@ -213,6 +217,8 @@ z3::expr Macro::encode_grid()
 
 ///}}}
 
+    std::cout << "Covering Done" << std::endl;
+
     
     clauses.push_back(z3::mk_or(covering_n));
     
@@ -222,6 +228,8 @@ z3::expr Macro::encode_grid()
     std::copy(val_m1_grid.begin(), val_m1_grid.end(), _val_m1_arr);
     z3::expr sum_m1_grid = z3::pbeq(m_grid_coordinates, _val_m1_arr, m_width.get_numeral_uint() * m_height.get_numeral_uint());
     clauses.push_back(sum_m1_grid);
+    
+    std::cout << "encoding grid done..." << std::endl;
     
     return z3::mk_and(clauses);
 }

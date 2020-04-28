@@ -80,6 +80,7 @@ void Bookshelf::read_files()
     
     this->read_blocks();
     this->calc_estimated_die_area();
+    this->locate_biggest_macro();
     this->calculate_gcd();
     this->read_pl();
     //this->read_nets();
@@ -319,7 +320,7 @@ void Bookshelf::read_pl()
     std::vector<std::string> processed_macros;
     
     this->calc_estimated_die_area();
-    size_t xy = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+    size_t xy = std::ceil(sqrt(m_estimated_area))+std::max(m_max_h, m_max_w);
     m_lut->init_lookup_table(xy, xy);
     
     std::cout << "Using Grid: " << xy/m_gcd_h << std::endl;
@@ -715,4 +716,23 @@ void Bookshelf::calculate_gcd()
     
     std::cout << "GCD W: " << gcd_w << std::endl;
     std::cout << "GCD H: " << gcd_h << std::endl;
+}
+
+
+void Bookshelf::locate_biggest_macro()
+{
+    m_max_w = 0;
+    m_max_h = 0;
+    
+    for (auto m : m_macro_definitions){
+        if (m.second.first > m_max_w){
+            m_max_w = m.second.first;
+        }
+        if (m.second.second > m_max_h){
+            m_max_h = m.second.second;
+        }
+    }
+    
+    std::cout << "MAX_H: " << m_max_h << std::endl;
+    std::cout << "MAX_W: " << m_max_w << std::endl;
 }

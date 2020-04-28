@@ -164,13 +164,12 @@ void Macro::init_grid()
     std::cout << "init grid" << std::endl;
     for (size_t i = 0; i < m_layout_x; ++i) {
         for (size_t j = 0; j < m_layout_y; ++j) {
-            std::string idx_root = m_id + "_root_x_" + std::to_string(i) + "_y_" + std::to_string(j);
-                std::string idx_grid = m_id + "_grid_x_" + std::to_string(i) + "_y_" +  std::to_string(j);
-                m_cost_distribution.push_back(m_z3_ctx.int_val(m_lut->quadratic_lut(i,j)));
-                m_grid_coordinates.push_back(m_z3_ctx.bool_const(idx_grid.c_str()));
-            }
+            std::string idx_grid = m_id + "_grid_x_" + std::to_string(i) + "_y_" +  std::to_string(j);
+            m_cost_distribution.push_back(m_z3_ctx.int_val(m_lut->quadratic_lut(i,j)));
+            m_grid_coordinates.push_back(m_z3_ctx.bool_const(idx_grid.c_str()));
         }
-         std::cout << "init grid done" << std::endl;
+    }
+        std::cout << "init grid done" << std::endl;
 }
 
 /**

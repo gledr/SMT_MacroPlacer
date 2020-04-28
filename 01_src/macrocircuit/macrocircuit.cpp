@@ -114,8 +114,8 @@ void MacroCircuit::build_circuit()
             area_estimator.join();
 
             m_logger->min_die_area(m_estimated_area);
-            size_t  layout_x = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
-            size_t layout_y = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+            size_t  layout_x = std::ceil(sqrt(m_estimated_area))+3;
+            size_t layout_y = std::ceil(sqrt(m_estimated_area))+3;
             m_lut->init_lookup_table(layout_x, layout_y);
             
             std::thread macro_worker(&MacroCircuit::add_macros, this);
@@ -218,10 +218,15 @@ void MacroCircuit::encode_smt()
 
 void MacroCircuit::encode_grid()
 {
-    for (Macro* m : m_macros){
-        m->init_grid();
-        m_z3_opt->add(m->encode_grid());
-    }
+    std::cout << "Firing Grid Worker Threads (2)" << std::endl;
+    
+    std::thread grid_worker_1(&MacroCircuit::grid_builder, this, 0);
+    //std::thread grid_worker_2(&MacroCircuit::grid_builder, this, 1);
+
+    grid_worker_1.join();
+    //grid_worker_2.join();
+    
+    std::cout << "Grid Worker Threads Terminated..." << std::endl;
     
     for (size_t i = 0; i < m_macros.front()->get_grid_coordinates().size(); ++i){
         z3::expr_vector unique_cell(m_z3_ctx);
@@ -245,6 +250,26 @@ void MacroCircuit::encode_grid()
         }
         z3::expr cost_funtion = m_encode->mk_sum(costs);
         m_z3_opt->minimize(cost_funtion);
+    }
+}
+
+void MacroCircuit::grid_builder(size_t const start_point)
+{
+    try {
+        std::cout << "Thread " << start_point << " started..." << std::endl;
+        
+        for (size_t i = start_point; i < m_macros.size(); i+=1){
+            Macro *m = m_macros[i];
+            m->init_grid();
+            z3::expr tmp = m->encode_grid();
+            
+            mtx.lock();
+            m_z3_opt->add(tmp);
+            mtx.unlock();
+        }
+    } catch (z3::exception const & exp){
+        std::cout << exp.msg() << std::endl;
+        assert (0);
     }
 }
 
@@ -495,8 +520,8 @@ void MacroCircuit::create_image(size_t const solution)
 
     std::string gnu_plot_script = "script_" + std::to_string(solution) + ".plt";
 
-    size_t die_ux = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
-    size_t die_uy = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+    size_t die_ux = std::ceil(sqrt(m_estimated_area))+80;
+    size_t die_uy = std::ceil(sqrt(m_estimated_area))+80;
   
     std::stringstream img_name;
     img_name << "placement_" << this->get_design_name() << "_" << solution << ".png";
@@ -661,8 +686,8 @@ void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
     size_t width = lef_data.sizeX();
     size_t height = lef_data.sizeY();
     
-    size_t  layout_x = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
-    size_t layout_y = static_cast<size_t>(sqrt(m_estimated_area))*layout_factor;
+    size_t  layout_x = std::ceil(sqrt(m_estimated_area))+80;
+    size_t layout_y = std::ceil(sqrt(m_estimated_area))*+80;
    
     std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
     //Macro*m = new Macro(name, id, width, height);

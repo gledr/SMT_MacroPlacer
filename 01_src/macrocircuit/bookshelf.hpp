@@ -70,6 +70,9 @@ private:
     
     size_t m_gcd_h;
     size_t m_gcd_w;
+    
+    size_t m_max_h;
+    size_t m_max_w;
 
     std::string m_design_name;
     std::string m_blocks_file;
@@ -101,6 +104,7 @@ private:
     Terminal* find_terminal(std::string const & name);
     
     void calculate_gcd();
+    void locate_biggest_macro();
 };
 
 }

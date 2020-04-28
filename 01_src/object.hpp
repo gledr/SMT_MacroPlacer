@@ -24,7 +24,7 @@ enum eEncodingProblem { eMacroCircuit, ePartition, eInit };
 enum eRotation { eFixed, e2D, e4D };
 enum eLogic { eInt, eBitVector };
 
-double const layout_factor = 2;
+double const layout_factor = 1.2;
 
 enum eOrientation {
      eNorth     = 0,

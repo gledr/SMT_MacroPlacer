@@ -260,15 +260,7 @@ void MacroCircuit::encode_smt()
 
 void MacroCircuit::encode_grid()
 {
-    std::cout << "Firing Grid Worker Threads (2)" << std::endl;
-    
-    std::thread grid_worker_1(&MacroCircuit::grid_builder, this, 0);
-    //std::thread grid_worker_2(&MacroCircuit::grid_builder, this, 1);
-
-    grid_worker_1.join();
-    //grid_worker_2.join();
-    
-    std::cout << "Grid Worker Threads Terminated..." << std::endl;
+    this->grid_builder();
     
     for (size_t i = 0; i < m_macros.front()->get_grid_coordinates().size(); ++i){
         z3::expr_vector unique_cell(m_z3_ctx);
@@ -295,23 +287,15 @@ void MacroCircuit::encode_grid()
     }
 }
 
-void MacroCircuit::grid_builder(size_t const start_point)
+void MacroCircuit::grid_builder()
 {
     try {
-        #pragma omp parallel
-        //std::cout << "Try Lock" << std::endl;
-        //mtx.lock();
-        std::cout << "Thread " << omp_get_thread_num() << " started..." << std::endl;
-        //mtx.unlock();
-        
-        for (size_t i = omp_get_thread_num(); i < m_macros.size(); i+=omp_get_num_threads()){
+        std::cout << "Using Grid: " << m_layout_x/m_gcd_w << ":" << m_layout_y/m_gcd_h << std::endl;
+        for (size_t i = 0; i < m_macros.size(); i++){
             Macro *m = m_macros[i];
+            std::cout << "Initializing " << m->get_id()  << " (" << i+1 << "/" << m_macros.size() << ")" << std::endl;
             m->init_grid();
-            z3::expr tmp = m->encode_grid();
-            
-           // mtx.lock();
-            m_z3_opt->add(tmp);
-           // mtx.unlock();
+            m_z3_opt->add(m->encode_grid());
         }
     } catch (z3::exception const & exp){
         std::cout << exp.msg() << std::endl;

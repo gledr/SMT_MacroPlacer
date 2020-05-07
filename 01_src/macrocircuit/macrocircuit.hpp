@@ -147,7 +147,7 @@ private:
     void add_macros();
     void add_cells();
     void area_estimator();
-    void grid_builder(size_t const start_point);
+    void grid_builder();
     std::mutex mtx;
 
     void add_cell(LefDefParser::defiComponent const & cmp);

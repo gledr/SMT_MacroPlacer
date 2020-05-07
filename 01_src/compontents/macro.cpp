@@ -182,8 +182,6 @@ z3::expr Macro::get_bool_orientation()
  */
 void Macro::init_grid()
 {
-    //std::cout << "init grid" << std::endl;
-    //std::cout << m_layout_x << ":" << m_layout_y << std::endl;
     for (size_t i = 0; i < m_layout_x; ++i) {
         for (size_t j = 0; j < m_layout_y; ++j) {
             std::string idx_grid = m_id + "_grid_x_" + std::to_string(i) + "_y_" +  std::to_string(j);
@@ -191,9 +189,8 @@ void Macro::init_grid()
             m_grid_coordinates.push_back(m_z3_ctx.bool_const(idx_grid.c_str()));
         }
     }
-    
+
     m_init_grid = true;
-    //std::cout << "init grid done" << std::endl;
 }
 
 /**
@@ -204,8 +201,6 @@ void Macro::init_grid()
 z3::expr Macro::encode_grid()
 {
     try {
-        //std::cout << "Start Encode Grid..." << std::endl;
-        
         assert (m_init_grid);
         
         z3::expr_vector clauses(m_z3_ctx);
@@ -272,8 +267,6 @@ z3::expr Macro::encode_grid()
         z3::expr sum_m1_grid = z3::pbeq(m_grid_coordinates, _val_m1_arr, m_height.get_numeral_uint() * m_width.get_numeral_uint());
         clauses.push_back(sum_m1_grid);
 
-        //std::cout << "Encode Grid Done" << std::endl;
-        
         return z3::mk_and(clauses);
     } catch (z3::exception const & exp){
         std::cout << exp.msg() << std::endl;

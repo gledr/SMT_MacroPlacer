@@ -330,7 +330,7 @@ void Bookshelf::read_pl()
     
     this->calc_estimated_die_area();
     
-      size_t max_size = std::max(m_max_h, m_max_w);
+    size_t max_size = std::max(m_max_h, m_max_w);
         
     size_t xy = std::ceil(sqrt(m_estimated_area))+max_size;
     m_lut->init_lookup_table(xy, xy);

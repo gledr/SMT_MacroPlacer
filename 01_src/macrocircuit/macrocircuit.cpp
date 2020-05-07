@@ -290,7 +290,6 @@ void MacroCircuit::encode_grid()
 void MacroCircuit::grid_builder()
 {
     try {
-        std::cout << "Using Grid: " << m_layout_x/m_gcd_w << ":" << m_layout_y/m_gcd_h << std::endl;
         for (size_t i = 0; i < m_macros.size(); i++){
             Macro *m = m_macros[i];
             std::cout << "Initializing " << m->get_id()  << " (" << i+1 << "/" << m_macros.size() << ")" << std::endl;

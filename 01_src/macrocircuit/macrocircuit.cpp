@@ -38,6 +38,9 @@ MacroCircuit::MacroCircuit():
     m_circuit = nullptr;
     m_solutions = 0;
     m_bookshelf = nullptr;
+    
+    m_gcd_w = 0;
+    m_gcd_h = 0;
 }
 
 /**
@@ -110,9 +113,12 @@ void MacroCircuit::build_circuit()
                 throw std::runtime_error("Site (" + this->get_site() + ") not found!");
             }
             
+            this->create_macro_definitions();
             std::thread area_estimator(&MacroCircuit::area_estimator, this);
             area_estimator.join();
 
+            this->calculate_gcd();
+            
             m_logger->min_die_area(m_estimated_area);
 
             auto biggest_macro = this->biggest_macro();
@@ -159,6 +165,33 @@ void MacroCircuit::build_circuit()
     } catch (std::exception const & exp){
         std::cerr << exp.what() << std::endl;
         exit(0);
+    }
+}
+
+void MacroCircuit::create_macro_definitions()
+{
+    for(auto& itor: m_circuit->defComponentStor){
+        if(this->is_macro(itor)){
+            auto idx = m_circuit->lefMacroMap.find(itor.name());
+            LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
+            std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
+            
+            MacroDefinition macro_definition;
+            macro_definition.name = itor.name();
+            macro_definition.id = itor.id();
+            macro_definition.width = lef_data.sizeX();
+            macro_definition.height = lef_data.sizeY();
+            
+            for(auto pin: lef_pins){
+                PinDefinition pin_def;
+                pin_def.parent = itor.name();
+                pin_def.name = pin.name();
+                pin_def.direction = pin.direction();
+
+                macro_definition.pin_definitions.push_back(pin_def);
+            }
+            m_macro_definitions.push_back(macro_definition);
+        }
     }
 }
 
@@ -312,10 +345,28 @@ void MacroCircuit::add_macros()
 {
     m_logger->start_macro_thread();
 
-    for(auto& itor: m_circuit->defComponentStor){
-        if(this->is_macro(itor)){
-            this->add_macro(itor);
+    for (MacroDefinition macro_definition: m_macro_definitions){
+        Macro* m = new Macro(macro_definition.name,
+                             macro_definition.id,
+                             macro_definition.width,
+                             macro_definition.height,
+                             m_layout_x,
+                             m_layout_y,
+                             m_lut);
+        for (PinDefinition pin_definition: macro_definition.pin_definitions){
+            Pin* p = new Pin(pin_definition.parent,
+                             pin_definition.name,
+                             Pin::string2enum(pin_definition.direction));
+            assert (p != nullptr);
+            m->add_pin(p);
         }
+
+        if(m_supplement->has_supplement()){
+            m->set_supplement(m_supplement);
+        }
+
+        m_macros.push_back(m);
+        m_id2macro[macro_definition.id] = m;
     }
     m_logger->end_macro_thread();
 }
@@ -684,39 +735,6 @@ void MacroCircuit::build_tree()
 }
 
 /**
- * @brief Add single macro to macrocircuit
- * 
- * @param cmp Macro to add
- */
-void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
-{
-    std::string name = cmp.name();
-    std::string id   = cmp.id();
-
-    auto idx = m_circuit->lefMacroMap.find(name);
-    LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
-
-    size_t width = lef_data.sizeX();
-    size_t height = lef_data.sizeY();
-    
-    std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
-    //Macro*m = new Macro(name, id, width, height);
-    Macro* m = new Macro(name, id, width, height, m_layout_x, m_layout_y, m_lut);
-    for(auto itor: lef_pins){
-        Pin* p = new Pin(itor.name(), id, Pin::string2enum(itor.direction()));
-        assert (p != nullptr);
-        m->add_pin(p);
-    }
-    
-    if(m_supplement->has_supplement()){
-        m->set_supplement(m_supplement);
-    }
-
-    m_macros.push_back(m);
-    m_id2macro[id] = m;
-}
-
-/**
  * @brief Add single cell to macrocircuit
  * 
  * @param cmp Cell to add
@@ -843,17 +861,10 @@ void MacroCircuit::area_estimator()
 {
     m_estimated_area = 0;
 
-    for(auto& itor: m_circuit->defComponentStor){
-        std::string name = itor.name();
-        if(this->is_macro(itor)){
-            auto idx = m_circuit->lefMacroMap.find(name);
-            LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
-
-            size_t width = lef_data.sizeX();
-            size_t height = lef_data.sizeY();
-            m_estimated_area += (width * height);
-        }
+    for (MacroDefinition macro_definition: m_macro_definitions){
+        m_estimated_area += (macro_definition.width * macro_definition.height);
     }
+
     m_layout->set_min_die_predition(m_estimated_area);
 }
 
@@ -892,23 +903,12 @@ std::pair<size_t, size_t> MacroCircuit::biggest_macro()
     size_t w = 0;
     size_t h = 0;
 
-    for(auto& itor: m_circuit->defComponentStor){
-        if(this->is_macro(itor)){
-            std::string name = itor.name();
-            std::string id   = itor.id();
-
-            auto idx = m_circuit->lefMacroMap.find(name);
-            LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
-
-            size_t width = lef_data.sizeX();
-            size_t height = lef_data.sizeY();
-            
-             if(width > w){
-                w = width;
-            }
-            if(height > h){
-                h = height;
-            }
+    for (MacroDefinition macro_definition: m_macro_definitions){
+        if(macro_definition.width > w){
+            w = macro_definition.width;
+        }
+        if(macro_definition.height > h){
+            h = macro_definition.height;
         }
     }
 
@@ -1634,6 +1634,21 @@ void MacroCircuit::best_result()
    std::cout << "Max Coordinate: " << max_coordinate.first << ":" << max_coordinate.second << std::endl;
    std::cout << "Layout: " << max_coordinate.first + x << ":" << max_coordinate.second + y << std::endl;
    std::cout << "Die Area Solution: " <<  (max_coordinate.first + x) * (max_coordinate.second + y) << std::endl;
+}
 
-   
+void MacroCircuit::calculate_gcd()
+{
+    std::vector<size_t> w;
+    std::vector<size_t> h;
+    
+    for (MacroDefinition macro_def : m_macro_definitions){
+        w.push_back(macro_def.width);
+        h.push_back(macro_def.height);
+    }
+    
+    m_gcd_h = Utils::Utils::gcd(h);
+    m_gcd_w = Utils::Utils::gcd(w);
+    
+    std::cout << "GCD W: " << m_gcd_w << std::endl;
+    std::cout << "GCD H: " << m_gcd_h << std::endl;
 }

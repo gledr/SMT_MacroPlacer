@@ -13,6 +13,8 @@
 #define BOOKSHELF_HPP
 
 #include <object.hpp>
+#include <macro_definition.hpp>
+#include <terminal_definition.hpp>
 #include <utils.hpp>
 #include <macro.hpp>
 #include <terminal.hpp>
@@ -81,14 +83,10 @@ private:
     size_t m_estimated_area;
 
     std::vector<Macro*> m_macros;
+    std::vector<MacroDefinition> m_macro_definitions;
     std::vector<Terminal*> m_terminals;
+    std::vector<TerminalDefinition> m_terminal_definitions;
     Tree* m_tree;
-
-    /* Name, Width, Height */
-    std::map<std::string, std::pair<size_t, size_t>> m_macro_definitions;
-
-    /* Name, x, y */
-    std::map<std::string, std::pair<size_t, size_t>> m_terminal_definitions;
 
     size_t m_expected_macros;
     size_t m_excepted_terminals;

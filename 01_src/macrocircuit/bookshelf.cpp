@@ -140,13 +140,22 @@ void Bookshelf::read_blocks()
             std::string expr = macro_token[3];
 
             size_t comma_pos = expr.find(',');
-            size_t heigth = std::stoi(expr.substr(0, comma_pos));
+            size_t height = std::stoi(expr.substr(0, comma_pos));
             size_t width = std::stoi(expr.substr(comma_pos+1, expr.length()));
 
-            m_macro_definitions[name] = std::make_pair(width, heigth);
-            
+            MacroDefinition macro_def;
+            macro_def.width = width;
+            macro_def.height = height;
+            macro_def.name = name;
+            m_macro_definitions.push_back(macro_def);
+
         } else if (token[1] == "terminal"){
-            m_terminal_definitions[token[0]] = std::make_pair(0, 0);
+            TerminalDefinition terminal_definition;
+            terminal_definition.name = token[0];
+            terminal_definition.pos_x = 0;
+            terminal_definition.pos_y = 0;
+            m_terminal_definitions.push_back(terminal_definition);
+
         } else {
             std::cout << line << std::endl;
             assert (0);
@@ -345,26 +354,44 @@ void Bookshelf::read_pl()
             continue;
         }
         
-        if(m_macro_definitions.find(token[0]) != m_macro_definitions.end()){
+        auto macro = std::find_if(m_macro_definitions.begin(), m_macro_definitions.end(), 
+                    [token](MacroDefinition const & def)
+                    {
+                        return def.name == token[0];
+                    });
+        
+        auto terminal = std::find_if(m_terminal_definitions.begin(), m_terminal_definitions.end(),
+                    [token](TerminalDefinition const & def)
+                    {
+                        return token[0] == def.name;
+                    });
+        
+        if(macro != m_macro_definitions.end()){
             size_t x = std::stoi(token[1]);
             size_t y = std::stoi(token[2]);
-            std::string name = token[0];
-            size_t width = m_macro_definitions[token[0]].first;
-            size_t heigth = m_macro_definitions[token[0]].second;
-            processed_macros.push_back(name);
+            processed_macros.push_back(macro->name);
             
             // Placed Macro
             if(force_free) {
-                Macro* m = new Macro(name, name, width, heigth, xy/*/m_gcd_w*/, xy/*/m_gcd_h*/, m_lut);
+                Macro* m = new Macro(macro->name,
+                                     macro->name,
+                                     macro->width,
+                                     macro->height,
+                                     xy/*/m_gcd_w*/,
+                                     xy/*/m_gcd_h*/,
+                                     m_lut);
                 m_macros.push_back(m);
             } else if((x != 0) || (y != 0)){
                // m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
             // Free Macro
             } else {
-                m_macros.push_back(new Macro(name, name, width, heigth));
+                m_macros.push_back(new Macro(macro->name,
+                                             macro->name,
+                                             macro->width,
+                                             macro->height));
             }
             
-        } else if(m_terminal_definitions.find(token[0]) != m_terminal_definitions.end()){
+        } else if(terminal != m_terminal_definitions.end()){
             size_t x = std::stoi(token[1]);
             size_t y = std::stoi(token[2]);
             std::string name = token[0];
@@ -465,8 +492,8 @@ void Bookshelf::calc_estimated_die_area ()
     m_estimated_area = 0;
   
     for (auto itor: m_macro_definitions){
-        size_t x = itor.second.first;
-        size_t y = itor.second.second;
+        size_t x = itor.width;
+        size_t y = itor.height;
 
         m_estimated_area += (x*y);
     }
@@ -699,23 +726,15 @@ void Bookshelf::calculate_gcd()
     std::vector<size_t> w;
     std::vector<size_t> h;
     for (auto xy : m_macro_definitions){
-        w.push_back(xy.second.first);
-        h.push_back(xy.second.second);
+        w.push_back(xy.width);
+        h.push_back(xy.height);
     }
     
-    size_t gcd_w = w[0];
-    size_t gcd_h= h[0];
+    m_gcd_w = Utils::Utils::gcd(w);
+    m_gcd_h = Utils::Utils::gcd(h);
     
-    for (size_t i =1 ; i < w.size(); ++i){
-        gcd_w = std::__gcd(w[i], gcd_w);
-        gcd_h = std::__gcd(h[i], gcd_h);
-    }
-    
-    m_gcd_w = gcd_w;
-    m_gcd_h = gcd_h;
-    
-    std::cout << "GCD W: " << gcd_w << std::endl;
-    std::cout << "GCD H: " << gcd_h << std::endl;
+    std::cout << "GCD W: " << m_gcd_w << std::endl;
+    std::cout << "GCD H: " << m_gcd_h << std::endl;
 }
 
 
@@ -725,11 +744,11 @@ void Bookshelf::locate_biggest_macro()
     m_max_h = 0;
     
     for (auto m : m_macro_definitions){
-        if (m.second.first > m_max_w){
-            m_max_w = m.second.first;
+        if (m.width > m_max_w){
+            m_max_w = m.width;
         }
-        if (m.second.second > m_max_h){
-            m_max_h = m.second.second;
+        if (m.height > m_max_h){
+            m_max_h = m.height;
         }
     }
     

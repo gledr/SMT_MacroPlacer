@@ -60,7 +60,7 @@ private:
 
     void bash_completion_script();
     void print_header();
-    
+
     void read_configuration();
 
     size_t existing_results();

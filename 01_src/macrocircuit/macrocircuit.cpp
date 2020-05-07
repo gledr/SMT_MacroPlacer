@@ -348,10 +348,10 @@ void MacroCircuit::add_macros()
     for (MacroDefinition macro_definition: m_macro_definitions){
         Macro* m = new Macro(macro_definition.name,
                              macro_definition.id,
-                             macro_definition.width,
-                             macro_definition.height,
-                             m_layout_x,
-                             m_layout_y,
+                             macro_definition.width/m_gcd_w,
+                             macro_definition.height/m_gcd_h,
+                             m_layout_x/m_gcd_w,
+                             m_layout_y/m_gcd_h,
                              m_lut);
         for (PinDefinition pin_definition: macro_definition.pin_definitions){
             Pin* p = new Pin(pin_definition.parent,
@@ -973,16 +973,6 @@ Tree* MacroCircuit::get_tree()
 Layout* MacroCircuit::get_layout()
 {
     return m_layout;
-}
-
-/**
- * @brief Get access to the parser circuit class
- * 
- * @return Circuit::Circuit*
- */
-Circuit::Circuit* MacroCircuit::get_circuit()
-{
-    return m_circuit;
 }
 
 /**

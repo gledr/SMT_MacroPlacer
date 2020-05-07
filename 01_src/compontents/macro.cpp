@@ -204,7 +204,7 @@ void Macro::init_grid()
 z3::expr Macro::encode_grid()
 {
     try {
-        std::cout << "Start Encode Grid..." << std::endl;
+        //std::cout << "Start Encode Grid..." << std::endl;
         
         assert (m_init_grid);
         
@@ -272,7 +272,7 @@ z3::expr Macro::encode_grid()
         z3::expr sum_m1_grid = z3::pbeq(m_grid_coordinates, _val_m1_arr, m_height.get_numeral_uint() * m_width.get_numeral_uint());
         clauses.push_back(sum_m1_grid);
 
-        std::cout << "Encode Grid Done" << std::endl;
+        //std::cout << "Encode Grid Done" << std::endl;
         
         return z3::mk_and(clauses);
     } catch (z3::exception const & exp){

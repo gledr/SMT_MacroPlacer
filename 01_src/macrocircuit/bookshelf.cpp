@@ -329,7 +329,10 @@ void Bookshelf::read_pl()
     std::vector<std::string> processed_macros;
     
     this->calc_estimated_die_area();
-    size_t xy = std::ceil(sqrt(m_estimated_area))+m_max_h+m_max_w;
+    
+      size_t max_size = std::max(m_max_h, m_max_w);
+        
+    size_t xy = std::ceil(sqrt(m_estimated_area))+max_size;
     m_lut->init_lookup_table(xy, xy);
     
     std::cout << "Using Grid: " << xy/m_gcd_h << std::endl;
@@ -375,10 +378,10 @@ void Bookshelf::read_pl()
             if(force_free) {
                 Macro* m = new Macro(macro->name,
                                      macro->name,
-                                     macro->width,
-                                     macro->height,
-                                     xy/*/m_gcd_w*/,
-                                     xy/*/m_gcd_h*/,
+                                     macro->width/m_gcd_w,
+                                     macro->height/m_gcd_h,
+                                     xy/m_gcd_w,
+                                     xy/m_gcd_h,
                                      m_lut);
                 m_macros.push_back(m);
             } else if((x != 0) || (y != 0)){

@@ -71,8 +71,6 @@ public:
     void encode();
     void place();
 
-    Circuit::Circuit* get_circuit();
-
     void dump_all();
     void dump_best();
 
@@ -104,13 +102,13 @@ private:
     Circuit::Circuit* m_circuit;
     std::vector<Macro*> m_macros;
     std::vector<MacroDefinition> m_macro_definitions;
-    
+
     std::vector<Cell*> m_cells;
-    
+
     std::vector<Terminal*> m_terminals;
-    
+
     std::vector<Partition*> m_partitons;
-    
+
     std::vector<Component*> m_components;
     Tree* m_tree;
     Evaluate* m_eval;
@@ -128,13 +126,13 @@ private:
     std::map<std::string, Cell*> m_id2cell;
     size_t m_solutions;
     size_t m_estimated_area;
-    
+
     size_t m_layout_x;
     size_t m_layout_y;
 
     size_t m_gcd_h;
     size_t m_gcd_w;
-    
+
     Layout* m_layout;
 
     double m_standard_cell_height;
@@ -157,7 +155,7 @@ private:
     void build_tree();
     void create_macro_definitions();
     void calculate_gcd();
-    
+
     void create_image(size_t const solution);
     void write_def(std::string const & name, size_t const solution);
 

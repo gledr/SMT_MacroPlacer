@@ -1,4 +1,5 @@
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
+find_package(OpenMP)
 
 ############################################################
 # include directories 
@@ -101,4 +102,5 @@ target_link_libraries(smt_placer
     ${PARQUET_HOME}/lib/libParquetFP.a
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
     pthread
+    OpenMP::OpenMP_CXX
 )

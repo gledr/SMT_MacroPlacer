@@ -355,7 +355,7 @@ void Bookshelf::read_pl()
             
             // Placed Macro
             if(force_free) {
-                Macro* m = new Macro(name, name, width, heigth, xy/m_gcd_w, xy/m_gcd_h, m_lut);
+                Macro* m = new Macro(name, name, width, heigth, xy/*/m_gcd_w*/, xy/*/m_gcd_h*/, m_lut);
                 m_macros.push_back(m);
             } else if((x != 0) || (y != 0)){
                // m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));

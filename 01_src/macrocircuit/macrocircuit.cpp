@@ -109,15 +109,24 @@ void MacroCircuit::build_circuit()
             if(!found){
                 throw std::runtime_error("Site (" + this->get_site() + ") not found!");
             }
-
+            
             std::thread area_estimator(&MacroCircuit::area_estimator, this);
             area_estimator.join();
 
             m_logger->min_die_area(m_estimated_area);
-            size_t  layout_x = std::ceil(sqrt(m_estimated_area))+3;
-            size_t layout_y = std::ceil(sqrt(m_estimated_area))+3;
-            m_lut->init_lookup_table(layout_x, layout_y);
+
+            auto biggest_macro = this->biggest_macro();
+            std::cout << "Biggest Macro " << biggest_macro.first << " " << biggest_macro.second << std::endl;
             
+            
+            size_t max_size = std::max(biggest_macro.first, biggest_macro.second);
+            m_layout_x = std::ceil(sqrt(m_estimated_area)) + max_size;
+            m_layout_y = std::ceil(sqrt(m_estimated_area)) + max_size;
+            
+            std::cout << "Setting Layout to: " << m_layout_x << ":" << m_layout_y << std::endl;
+            
+            m_lut->init_lookup_table(m_layout_x, m_layout_y);
+
             std::thread macro_worker(&MacroCircuit::add_macros, this);
             std::thread cell_worker(&MacroCircuit::add_cells, this);
             std::thread terminal_worker(&MacroCircuit::add_terminals, this);
@@ -240,7 +249,7 @@ void MacroCircuit::encode_grid()
         z3::expr sum_cell = z3::pble(unique_cell, cell_val_arr, 1);
         m_z3_opt->add(sum_cell);
     }
-    /*
+    
     for (Macro* m : m_macros){
         z3::expr_vector costs(m_z3_ctx);
         z3::expr_vector c = m->get_grid_costs();
@@ -251,22 +260,25 @@ void MacroCircuit::encode_grid()
         z3::expr cost_funtion = m_encode->mk_sum(costs);
         m_z3_opt->minimize(cost_funtion);
     }
-    */
 }
 
 void MacroCircuit::grid_builder(size_t const start_point)
 {
     try {
-        std::cout << "Thread " << start_point << " started..." << std::endl;
+        #pragma omp parallel
+        //std::cout << "Try Lock" << std::endl;
+        //mtx.lock();
+        std::cout << "Thread " << omp_get_thread_num() << " started..." << std::endl;
+        //mtx.unlock();
         
-        for (size_t i = start_point; i < m_macros.size(); i+=1){
+        for (size_t i = omp_get_thread_num(); i < m_macros.size(); i+=omp_get_num_threads()){
             Macro *m = m_macros[i];
             m->init_grid();
             z3::expr tmp = m->encode_grid();
             
-            mtx.lock();
+           // mtx.lock();
             m_z3_opt->add(tmp);
-            mtx.unlock();
+           // mtx.unlock();
         }
     } catch (z3::exception const & exp){
         std::cout << exp.msg() << std::endl;
@@ -521,8 +533,8 @@ void MacroCircuit::create_image(size_t const solution)
 
     std::string gnu_plot_script = "script_" + std::to_string(solution) + ".plt";
 
-    size_t die_ux = std::ceil(sqrt(m_estimated_area))+80;
-    size_t die_uy = std::ceil(sqrt(m_estimated_area))+80;
+    size_t die_ux = std::ceil(sqrt(m_estimated_area))/*+std::max(this->biggest_macro().first, this->biggest_macro().second)*/;
+    size_t die_uy = std::ceil(sqrt(m_estimated_area))/*+std::max(this->biggest_macro().first, this->biggest_macro().second)*/;
   
     std::stringstream img_name;
     img_name << "placement_" << this->get_design_name() << "_" << solution << ".png";
@@ -687,12 +699,9 @@ void MacroCircuit::add_macro(LefDefParser::defiComponent const & cmp)
     size_t width = lef_data.sizeX();
     size_t height = lef_data.sizeY();
     
-    size_t  layout_x = std::ceil(sqrt(m_estimated_area))+80;
-    size_t layout_y = std::ceil(sqrt(m_estimated_area))*+80;
-   
     std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
     //Macro*m = new Macro(name, id, width, height);
-    Macro* m = new Macro(name, id, width, height, layout_x, layout_y, m_lut);
+    Macro* m = new Macro(name, id, width, height, m_layout_x, m_layout_y, m_lut);
     for(auto itor: lef_pins){
         Pin* p = new Pin(itor.name(), id, Pin::string2enum(itor.direction()));
         assert (p != nullptr);
@@ -883,14 +892,26 @@ std::pair<size_t, size_t> MacroCircuit::biggest_macro()
     size_t w = 0;
     size_t h = 0;
 
-    for(auto itor: m_macros){
-        if(itor->get_width().get_numeral_uint() > w){
-            w = itor->get_width().get_numeral_uint();
-        }
-        if(itor->get_height().get_numeral_uint() > h){
-            h = itor->get_height().get_numeral_uint();
+    for(auto& itor: m_circuit->defComponentStor){
+        if(this->is_macro(itor)){
+            std::string name = itor.name();
+            std::string id   = itor.id();
+
+            auto idx = m_circuit->lefMacroMap.find(name);
+            LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
+
+            size_t width = lef_data.sizeX();
+            size_t height = lef_data.sizeY();
+            
+             if(width > w){
+                w = width;
+            }
+            if(height > h){
+                h = height;
+            }
         }
     }
+
     return std::make_pair(w,h);
 }
 
@@ -982,7 +1003,7 @@ void MacroCircuit::config_z3()
     z3::params param(m_z3_ctx);
     
     if (this->get_logic() == eInt){
-        m_z3_ctx.set("logic", "LIA");
+        //m_z3_ctx.set("logic", "LIA");
         m_logger->encode_int();
     } else if (this->get_logic() == eBitVector) {
         // http://smtlib.cs.uiowa.edu/logics-all.shtml
@@ -1502,6 +1523,18 @@ void MacroCircuit::solve()
                  z3::model model = m_z3_opt->get_model();
 
                 for (Macro* m: m_macros){
+                    
+                    z3::expr orient = model.eval(m->get_bool_orientation());
+                    std::stringstream ss;
+                    ss << orient;
+
+                   if(ss.str() == "false"){
+                        m->add_solution_orientation(eNorth);
+                    } else if(ss.str() == "true"){
+                        m->add_solution_orientation(eWest);
+                    } else {
+                        assert (0);
+                    }
                     
                     for (size_t i = 0; i < m->get_grid_coordinates().size(); i++){
                         z3::expr tmp = model.eval(m->get_grid_coordinates()[i]);

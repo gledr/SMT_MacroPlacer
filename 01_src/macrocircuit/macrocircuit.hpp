@@ -21,6 +21,7 @@
 #include <chrono>
 #include <mutex>
 #include <cmath>
+#include <omp.h>
 
 #include <z3++.h>
 
@@ -121,6 +122,9 @@ private:
     std::map<std::string, Cell*> m_id2cell;
     size_t m_solutions;
     size_t m_estimated_area;
+    
+    size_t m_layout_x;
+    size_t m_layout_y;
 
     Layout* m_layout;
 

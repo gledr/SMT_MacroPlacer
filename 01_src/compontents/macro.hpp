@@ -86,6 +86,11 @@ public:
     z3::expr is_W();
     z3::expr is_S();
     z3::expr is_E();
+    
+    z3::expr is_bool_N();
+    z3::expr is_bool_W();
+    
+    z3::expr get_bool_orientation();
 
 private:
     std::map<std::string, Pin*> m_pins;
@@ -94,6 +99,7 @@ private:
     CostFunction* m_lut;
 
     bool m_free;
+    bool m_init_grid;
     
     std::pair<size_t, size_t> m_root_solution;
     std::vector<std::pair<size_t, size_t>> m_grid_solutions;
@@ -116,6 +122,8 @@ private:
     z3::expr m_encode_pin_macro_frontier;
     z3::expr m_encode_pins_not_overlapping;
     z3::expr m_encode_pins_center_of_macro;
+    
+    z3::expr m_bool_orientation;
 };
 
 }

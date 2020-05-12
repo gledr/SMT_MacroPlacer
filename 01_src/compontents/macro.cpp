@@ -364,45 +364,6 @@ bool Macro::is_free()
 
 /**
  * @brief 
- * 
- * @param id 
- * @return size_t
- */
-size_t Macro::get_solution_ly(size_t const id)
-{
-    assert (id < m_sol_ly.size());
-    
-    return  m_sol_ly[id];
-}
-
-/**
- * @brief 
- * 
- * @param id 
- * @return size_t
- */
-size_t Macro::get_solution_lx(size_t const id)
-{
-    assert (id < m_sol_lx.size());
-    
-    return m_sol_lx[id];
-}
-
-/**
- * @brief 
- * 
- * @param id 
- * @return size_t
- */
-size_t Macro::get_solution_orientation(size_t const id)
-{
-    assert (id < m_sol_orientation.size());
-    
-    return m_sol_orientation[id];
-}
-
-/**
- * @brief 
  */
 void Macro::handle_supplement()
 {

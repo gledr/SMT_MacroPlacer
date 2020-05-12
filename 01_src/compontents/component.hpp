@@ -46,6 +46,10 @@ public:
     void add_solution_lx(size_t const lx);
     void add_solution_ly(size_t const ly);
     void add_solution_orientation(Placer::eOrientation const orientation);
+    
+    size_t get_solution_lx(size_t const id);
+    size_t get_solution_ly(size_t const id);
+    size_t get_solution_orientation(size_t const id);
 
     virtual size_t get_area() = 0;
     virtual void dump(std::ostream & stream = std::cout) = 0;

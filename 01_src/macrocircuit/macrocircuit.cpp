@@ -254,8 +254,10 @@ void MacroCircuit::encode_smt()
     m_layout->free_ux();
 
     this->config_z3();
-    //this->run_encoding();
+    this->run_encoding();
+#if 0
     this->encode_grid();
+#endif
 }
 
 void MacroCircuit::encode_grid()
@@ -332,10 +334,10 @@ void MacroCircuit::add_macros()
         Macro* m = new Macro(macro_definition.name,
                              macro_definition.id,
                              macro_definition.width/m_gcd_w,
-                             macro_definition.height/m_gcd_h,
+                             macro_definition.height/m_gcd_h/*,
                              m_layout_x/m_gcd_w,
                              m_layout_y/m_gcd_h,
-                             m_lut);
+                             m_lut*/);
         for (PinDefinition pin_definition: macro_definition.pin_definitions){
             Pin* p = new Pin(pin_definition.parent,
                              pin_definition.name,
@@ -402,6 +404,7 @@ void MacroCircuit::add_terminals()
  */
 void MacroCircuit::dump_all()
 {
+    std::cout << m_solutions << std::endl;
     m_logger->dump_all();
     
     for(size_t i = 0; i < m_solutions; ++i){
@@ -426,8 +429,6 @@ void MacroCircuit::dump_best()
  */
 void MacroCircuit::create_image(size_t const solution)
 {
-#if 0
-    
     if(!boost::filesystem::exists(this->get_image_directory())){
         boost::filesystem::create_directories(this->get_image_directory());
     }
@@ -458,91 +459,54 @@ void MacroCircuit::create_image(size_t const solution)
     size_t _ux = 0;
     size_t _uy = 0;
 
-    if(this->get_partitioning()){
-        for(size_t j = 0; j < m_partitons.size(); ++j){
-            gnu_plot_file << "# " << m_macros[j]->get_id() << ":" << m_macros[j]->get_name() 
-                        << " Orientation: " << m_macros[j]->get_solution_orientation(solution) << std::endl;
+    for(size_t j = 0; j < m_components.size(); ++j){
+        gnu_plot_file << "# " << m_components[j]->get_id() << ":" << m_components[j]->get_name() 
+                      << " Orientation: " << m_components[j]->get_solution_orientation(solution) << std::endl;
 
-            size_t width = m_partitons[j]->get_width().get_numeral_uint();
-            size_t height = m_partitons[j]->get_height().get_numeral_uint();
+        size_t width = m_components[j]->get_width().get_numeral_uint();
+        size_t height = m_components[j]->get_height().get_numeral_uint();
         
-            // North
-            if(m_partitons[j]->get_orientation().get_numeral_uint() == eNorth){
-                _lx = m_partitons[j]->get_lx().get_numeral_uint();
-                _ly = m_partitons[j]->get_ly().get_numeral_uint();
-                _ux = m_partitons[j]->get_lx().get_numeral_uint() + width;
-                _uy = m_partitons[j]->get_ly().get_numeral_uint() + height;
-
-            // West
-            } else if (m_partitons[j]->get_orientation().get_numeral_uint() == eWest){
-                _lx = m_partitons[j]->get_lx().get_numeral_uint() - height;
-                _ly = m_partitons[j]->get_ly().get_numeral_uint();
-                _ux = m_partitons[j]->get_lx().get_numeral_uint();
-                _uy = m_partitons[j]->get_ly().get_numeral_uint() + width;
-
-            // South
-            } else if (m_partitons[j]->get_orientation().get_numeral_uint() == eSouth){
-                _lx = m_partitons[j]->get_lx().get_numeral_uint() - width;
-                _ly = m_partitons[j]->get_ly().get_numeral_uint() - height;
-                _ux = m_partitons[j]->get_lx().get_numeral_uint();
-                _uy = m_partitons[j]->get_ly().get_numeral_uint();
-
-            // East
-            } else if (m_partitons[j]->get_orientation().get_numeral_uint() == eEast){
-                _lx = m_partitons[j]->get_lx().get_numeral_uint();
-                _ly = m_partitons[j]->get_ly().get_numeral_uint() - width;
-                _ux = m_partitons[j]->get_lx().get_numeral_uint() + height;
-                _uy = m_partitons[j]->get_ly().get_numeral_uint();
-            // Error
-            } else {
-                    assert (0);
-            }
-             gnu_plot_file  << "set object " << j+1 << " rect from " << std::to_string(_lx) << "," << std::to_string(_ly) 
-                   << " to "  << std::to_string(_ux) << ","<< std::to_string(_uy) <<" lw 5;"<< std::endl;
-        }
-    } else {
-        for(size_t j = 0; j < m_macros.size(); ++j){
-            gnu_plot_file << "# " << m_macros[j]->get_id() << ":" << m_macros[j]->get_name() 
-                        << " Orientation: " << m_macros[j]->get_solution_orientation(solution) << std::endl;
-
-            size_t width = m_macros[j]->get_width().get_numeral_uint();
-            size_t height = m_macros[j]->get_height().get_numeral_uint();
+        size_t o  = m_components[j]->get_solution_orientation(solution);
+        size_t lx = m_components[j]->get_solution_lx(solution);
+        size_t ly = m_components[j]->get_solution_ly(solution);
         
-            // North
-            if(m_macros[j]->get_solution_orientation(solution) == eNorth){
-                _lx = m_macros[j]->get_solution_lx(solution);
-                _ly = m_macros[j]->get_solution_ly(solution);
-                _ux = m_macros[j]->get_solution_lx(solution) + width;
-                _uy = m_macros[j]->get_solution_ly(solution) + height;
+        // North
+        if(o == eNorth){
+            _lx = lx;
+            _ly = ly;
+            _ux = lx + width;
+            _uy = ly + height;
 
-            // West
-            } else if (m_macros[j]->get_solution_orientation(solution) == eWest){
-                _lx = m_macros[j]->get_solution_lx(solution) - height;
-                _ly = m_macros[j]->get_solution_ly(solution);
-                _ux = m_macros[j]->get_solution_lx(solution);
-                _uy = m_macros[j]->get_solution_ly(solution) + width;
+        // West
+        } else if (o == eWest){
+            _lx = lx - height;
+            _ly = ly;
+            _ux = lx;
+            _uy = ly + width;
 
-            // South
-            } else if (m_macros[j]->get_solution_orientation(solution) == eSouth){
-                _lx = m_macros[j]->get_solution_lx(solution) - width;
-                _ly = m_macros[j]->get_solution_ly(solution) - height;
-                _ux = m_macros[j]->get_solution_lx(solution);
-                _uy = m_macros[j]->get_solution_ly(solution);
+        // South
+        } else if (o == eSouth){
+            _lx = lx - width;
+            _ly = ly - height;
+            _ux = lx;
+            _uy = ly;
 
-            // East
-            } else if (m_macros[j]->get_solution_orientation(solution) == eEast){
-                _lx = m_macros[j]->get_solution_lx(solution);
-                _ly = m_macros[j]->get_solution_ly(solution) - width;
-                _ux = m_macros[j]->get_solution_lx(solution) + height;
-                _uy = m_macros[j]->get_solution_ly(solution);
-            // Error
-            } else {
-                    assert (0);
-            }
-            gnu_plot_file  << "set object " << j+1 << " rect from " << std::to_string(_lx) << "," << std::to_string(_ly) 
-                   << " to "  << std::to_string(_ux) << ","<< std::to_string(_uy) <<" lw 5;"<< std::endl;
+        // East
+        } else if (o == eEast){
+            _lx = lx;
+            _ly = ly - width;
+            _ux = lx + height;
+            _uy = ly;
+        // Error
+        } else {
+                assert (0);
         }
-    }
+        
+        gnu_plot_file  << "set object " << j+1 << 
+                          " rect from " << _lx << "," << _ly <<
+                          " to "  << _ux << ","<<_uy << 
+                          " lw 5;"<< std::endl;
+        }
 #ifdef PLOT_TERMINAL
         for(size_t i = 0 ; i < m_terminals.size(); ++ i){
             size_t x = m_terminals[i]->get_solution_pin_pos_x(solution);
@@ -557,14 +521,8 @@ void MacroCircuit::create_image(size_t const solution)
         
         std::string cmd = "gnuplot " + gnu_plot_script;
         system(cmd.c_str());
-#endif
 
-    if(!boost::filesystem::exists(this->get_image_directory())){
-        boost::filesystem::create_directories(this->get_image_directory());
-    }
-
-    boost::filesystem::current_path(this->get_image_directory());
-
+#if 0 //  Grid Approach
     std::string gnu_plot_script = "script_" + std::to_string(solution) + ".plt";
 
     size_t die_ux = std::ceil(sqrt(m_estimated_area))/*+std::max(this->biggest_macro().first, this->biggest_macro().second)*/;
@@ -591,6 +549,7 @@ void MacroCircuit::create_image(size_t const solution)
         
     std::string cmd = "gnuplot " + gnu_plot_script;
     system(cmd.c_str());
+#endif
 }
 
 /**
@@ -1451,9 +1410,8 @@ void MacroCircuit::solve()
             exit(0);
 
         } else if (sat == z3::check_result::sat){
-            m_solutions = 1;
+            m_solutions = 0;
 
-#if 0
             do {
                 z3::model m = m_z3_opt->get_model();
 
@@ -1462,13 +1420,14 @@ void MacroCircuit::solve()
                     
                 double area_estimation = (((ux) * (uy)));
                 double min_area = this->get_minimal_die_size_prediction();
-                double white_space = 100-0 - ((min_area/area_estimation)*100.0);
+                double white_space = 100 - ((min_area/area_estimation)*100.0);
                 m_logger->result_die_area(area_estimation);
                 m_logger->white_space(white_space);
 
                 m_layout->set_solution_ux(ux);
                 m_layout->set_solution_uy(uy);
                 m_logger->add_solution_layout(ux, uy);
+                m_solutions++;
                     
                 for(Component* component: m_components){
                         std::string name = component->get_name();
@@ -1487,12 +1446,12 @@ void MacroCircuit::solve()
                     if(/*this->get_pareto_optimizer() &&*/  (m_solutions < this->get_max_solutions())){
                         m_logger->pareto_step();
                         sat = m_z3_opt->check();
-                        m_solutions++;
+
                     } else {
                         break;
                     }
                 } while (sat == z3::check_result::sat);
-#endif
+#if 0
                  z3::model model = m_z3_opt->get_model();
 
                 for (Macro* m: m_macros){
@@ -1533,7 +1492,7 @@ void MacroCircuit::solve()
                 for (Macro* m : m_macros){
                     m->calculate_root();
                 }
-                
+#endif
             } else {
             assert (0);
             }
@@ -1557,10 +1516,8 @@ void MacroCircuit::dump_smt_instance()
     std::ofstream out_file(smt_file);
     out_file << "(set-option :produce-models true)" << std::endl;
     out_file << *m_z3_opt;
-#if 0
     out_file << "(get-value(die_ux))" << std::endl;
     out_file << "(get-value(die_uy))" << std::endl;
-#endif
     out_file << "(get-model)" << std::endl;
     out_file.close();
     }
@@ -1570,7 +1527,7 @@ void MacroCircuit::dump_smt_instance()
  */
 void MacroCircuit::best_result()
 {
-#if 0
+
     std::pair<size_t, size_t> results;
     results.first = UINT_MAX;
     results.second = UINT_MAX;
@@ -1585,8 +1542,8 @@ void MacroCircuit::best_result()
         }
    }
    std::cout << "Min Die Area: " << results.second << std::endl;
-# endif
-   
+
+#if 0
    std::pair<size_t, size_t> max_coordinate;
    max_coordinate.first = 0;
    max_coordinate.second = 0;
@@ -1607,6 +1564,7 @@ void MacroCircuit::best_result()
    std::cout << "Max Coordinate: " << max_coordinate.first << ":" << max_coordinate.second << std::endl;
    std::cout << "Layout: " << max_coordinate.first + x << ":" << max_coordinate.second + y << std::endl;
    std::cout << "Die Area Solution: " <<  (max_coordinate.first + x) * (max_coordinate.second + y) << std::endl;
+#endif
 }
 
 void MacroCircuit::calculate_gcd()

@@ -69,10 +69,6 @@ public:
 
     std::vector<Pin*> get_pins();
     bool is_free();
-
-    size_t get_solution_lx(size_t const id);
-    size_t get_solution_ly(size_t const id);
-    size_t get_solution_orientation(size_t const id);
     
     void add_solution_root(size_t const x, size_t const y);
     std::pair<size_t, size_t> get_solution_root() const;

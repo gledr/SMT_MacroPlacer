@@ -378,8 +378,8 @@ void Bookshelf::read_pl()
             if(force_free) {
                 Macro* m = new Macro(macro->name,
                                      macro->name,
-                                     macro->width/m_gcd_w,
-                                     macro->height/m_gcd_h/*,
+                                     macro->width,
+                                     macro->height/*,
                                      xy/m_gcd_w,
                                      xy/m_gcd_h,
                                      m_lut*/);
@@ -390,8 +390,8 @@ void Bookshelf::read_pl()
             } else {
                 m_macros.push_back(new Macro(macro->name,
                                              macro->name,
-                                             macro->width/m_gcd_w,
-                                             macro->height/m_gcd_h));
+                                             macro->width,
+                                             macro->height));
             }
             
         } else if(terminal != m_terminal_definitions.end()){

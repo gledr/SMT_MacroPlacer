@@ -15,6 +15,7 @@
 #include <object.hpp>
 #include <logger.hpp>
 #include <supplementmacro.hpp>
+#include <supplementlayout.hpp>
 
 #include <json/json.h>
 #include <map>
@@ -39,11 +40,16 @@ public:
 
     bool has_macro(std::string const & id);
 
+    bool has_layout();
+
     SupplementMacro* get_macro(std::string const & id);
+
+    SupplementLayout* get_layout();
 
 private:
     Utils::Logger* m_logger;
     std::map<std::string, SupplementMacro*> m_macros;
+    SupplementLayout* m_layout;
 };
 
 }

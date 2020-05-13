@@ -65,6 +65,7 @@ void MacroPlacer::read_configuration()
             ("box",                 "Utilize Z3s Box Optimizer")
             ("parquet",             "Utilize Parquet Floorplanning")
             ("partition",           "Enable Partitioning Mode")
+            ("minimize-area",       "Add Die Area as Minimization Target")
             ("partition-size",      boost::program_options::value<size_t>(),        "Parition Size")
             ("def",                 boost::program_options::value<std::string>(),   "Circuit as DEF File")
             ("lef",                 boost::program_options::value<std::string>(),   "Library as LEF File")
@@ -160,6 +161,9 @@ void MacroPlacer::read_configuration()
         }
         if(m_vm.count("store-log")){
             this->set_log_active(true);
+        }
+        if(m_vm.count("minimize-area")){
+            this->set_minimize_die_mode(true);
         }
         
         if((this->get_def().empty() || this->get_lef().empty()) && this->get_bookshelf_file().empty()){

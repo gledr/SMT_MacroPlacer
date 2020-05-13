@@ -192,6 +192,20 @@ void Logger::set_die_uy(size_t const val)
     LOG(eInfo) << msg.str();
 }
 
+void Logger::set_die_lx(size_t const val)
+{
+    std::stringstream msg;
+    msg << "Setting Die lx to " << val;
+    LOG(eInfo) << msg.str();
+}
+  
+void Logger::set_die_ly(size_t const val)
+{
+    std::stringstream msg;
+    msg << "Setting Die ly to " << val;
+    LOG(eInfo) << msg.str();
+}
+
 void Logger::place_macro(std::string const & name,
                          size_t const lx,
                          size_t const ly,

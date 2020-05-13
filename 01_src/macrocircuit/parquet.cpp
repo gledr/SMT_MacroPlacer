@@ -98,15 +98,17 @@ void ParquetFrontend::build_db()
         size_t w = macro->get_width().get_numeral_uint();
         size_t h= macro->get_height().get_numeral_uint();
         
-        float ar1 = w;
-        float ar2 = h;
+        float max = std::max(w,h);
+        float min = std::min(w,h);
+        float ar = max/min;
+
 
         parquetfp::Node next_node(macro->get_id().c_str(),
                                   area,
-                                  ar1,
-                                  ar2,
+                                  ar,
+                                  ar,
                                   i,
-                                  false);
+                                  true);
         
         m_nodes->putNewNode(next_node);
     }
@@ -159,14 +161,16 @@ void ParquetFrontend::run_parquet()
 
     // Command_Line object populate
     parquetfp::Command_Line param;
-    //param.minWL = true;
+    param.minWL = false;
     param.noRotation = false;
     param.FPrep = "BTree";
     param.seed = 100;
-    //param.scaleTerms = false;
-    //param.softBlocks = false;
+    param.scaleTerms = false;
+    param.softBlocks = false;
+    param.reqdAR = 1.0;
     
-     std::cout << std::endl << std::endl;
+    
+    std::cout << std::endl << std::endl;
     std::cout << "BTreeAreaWireAnnealer Constructor..." << std::endl;
     
     BTreeAreaWireAnnealer* annealer = 
@@ -179,7 +183,7 @@ void ParquetFrontend::run_parquet()
         
         annealer->go();
         
-         std::cout << std::endl << std::endl;
+        std::cout << std::endl << std::endl;
         std::cout << "ParquetFP Terminated..." << std::endl;
         delete annealer;
 }
@@ -191,11 +195,11 @@ void ParquetFrontend::data_from_parquet()
 {
     auto itor_begin = m_nodes->nodesBegin();
     auto itor_end   = m_nodes->nodesEnd();
-    
+
     for (; itor_begin != itor_end; itor_begin++){
        float x = itor_begin->getX();
        float y = itor_begin->getY();
-       
+
        uofm::string name  = itor_begin->getName();
        char const * const _name = name.c_str();
        Macro* m = this->find_macro(_name);
@@ -220,11 +224,15 @@ void ParquetFrontend::data_from_parquet()
        } else {
             assert (0);
        }
-       
+
        m->add_solution_orientation(orient_solution);
        m->add_solution_lx(x);
        m->add_solution_ly(y);
     }
+
+    m_layout->set_solution_ux(m_db->getXMax());
+    m_layout->set_solution_uy(m_db->getYMax());
+    m_db->plot("parquet", m_layout->get_solution_ux(0)* m_layout->get_solution_uy(0), 0, 1, 0, 0,false, false, true);
 }
 
 /**

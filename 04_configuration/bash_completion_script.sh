@@ -33,6 +33,7 @@ local cur
 			--box \
 			--parquet \
 			--partition \
+			--minimize-area \
 			--partition-size \
 			--def \
 			--lef \

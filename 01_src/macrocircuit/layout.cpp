@@ -156,6 +156,7 @@ void Layout::free_ly ()
  */
 void Layout::set_lx(size_t const val)
 {
+     m_logger->set_die_lx(val);
     m_free_lx = false;
     m_lx = m_encode->get_value(val);
 }
@@ -167,6 +168,7 @@ void Layout::set_lx(size_t const val)
  */
 void Layout::set_ly(size_t const val)
 {
+    m_logger->set_die_ly(val);
     m_free_ly = false;
     m_ly = m_encode->get_value(val);
 }
@@ -275,6 +277,7 @@ size_t Layout::get_solution_uy(size_t const idx)
  */
 void Layout::set_solution_ux(size_t const val)
 {
+    std::cout << "Setting Solution for UX: " << val << std::endl;
     m_solutions_ux.push_back(val);
 }
 
@@ -286,6 +289,7 @@ void Layout::set_solution_ux(size_t const val)
  */
 void Layout::set_solution_uy(size_t const val)
 {
+    std::cout << "Setting Solution for UY:" << val << std::endl;
     m_solutions_uy.push_back(val);
 }
 

@@ -57,6 +57,7 @@ add_executable(smt_placer
     macrocircuit/supplement.cpp
     macrocircuit/bookshelf.cpp
     macrocircuit/layout.cpp
+    macrocircuit/supplementlayout.cpp
     macrocircuit/partitioning.cpp
     macrocircuit/parquet.cpp
     compontents/component.cpp

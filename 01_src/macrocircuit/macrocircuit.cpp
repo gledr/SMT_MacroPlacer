@@ -91,8 +91,9 @@ MacroCircuit::~MacroCircuit()
 void MacroCircuit::build_circuit()
 {
     try {
+        m_supplement->read_supplement_file();
+        
         if(!this->get_def().empty() && !this->get_lef().empty()) {
-            m_supplement->read_supplement_file();
             m_circuit = new Circuit::Circuit(this->get_lef(),
                                              this->get_def());
             m_tree = new Tree();
@@ -113,6 +114,16 @@ void MacroCircuit::build_circuit()
                 throw std::runtime_error("Site (" + this->get_site() + ") not found!");
             }
             
+            if (!this->get_minimize_die_mode()){
+                m_layout->set_lx(m_circuit->defDieArea.xl());
+                m_layout->set_ux(m_circuit->defDieArea.xh());
+                m_layout->set_ly(m_circuit->defDieArea.yl());
+                m_layout->set_uy(m_circuit->defDieArea.yh());
+                
+                std::cout << m_circuit->defDieArea.xl() << ":" << m_circuit->defDieArea.yl() << std::endl;
+                std::cout << m_circuit->defDieArea.xh() << ":" << m_circuit->defDieArea.yh() << std::endl;
+            }
+         
             this->create_macro_definitions();
             std::thread area_estimator(&MacroCircuit::area_estimator, this);
             area_estimator.join();
@@ -123,8 +134,7 @@ void MacroCircuit::build_circuit()
 
             auto biggest_macro = this->biggest_macro();
             std::cout << "Biggest Macro " << biggest_macro.first << " " << biggest_macro.second << std::endl;
-            
-            
+
             size_t max_size = std::max(biggest_macro.first, biggest_macro.second);
             m_layout_x = std::ceil(sqrt(m_estimated_area)) + max_size;
             m_layout_y = std::ceil(sqrt(m_estimated_area)) + max_size;
@@ -152,6 +162,22 @@ void MacroCircuit::build_circuit()
             this->set_design_name(m_bookshelf->get_design_name());
             m_estimated_area = m_bookshelf->get_estimated_area();
             m_logger->min_die_area(m_estimated_area);
+            
+            
+            if (!this->get_parquet_fp()){
+                if (!this->get_minimize_die_mode()){
+                    if (!m_supplement->has_layout()){
+                        throw std::runtime_error("No Layout Supplement Defined!");
+                    } else {
+                        SupplementLayout* _layout = m_supplement->get_layout();
+                        m_layout->set_lx(_layout->get_lx());
+                        m_layout->set_ux(_layout->get_ux());
+                        m_layout->set_ly(_layout->get_ly());
+                        m_layout->set_uy(_layout->get_uy());
+                    }
+                }
+            }
+            
             m_layout->set_min_die_predition(m_estimated_area);
             m_macros = m_bookshelf->get_macros();
             m_terminals = m_bookshelf->get_terminals();
@@ -248,10 +274,12 @@ void MacroCircuit::encode_parquet()
  */
 void MacroCircuit::encode_smt()
 {
-    m_layout->set_lx(0);
-    m_layout->set_ly(0);
-    m_layout->free_uy();
-    m_layout->free_ux();
+    if (this->get_minimize_die_mode()){
+        m_layout->set_lx(0);
+        m_layout->set_ly(0);
+        m_layout->free_uy();
+        m_layout->free_ux();
+    }
 
     this->config_z3();
     this->run_encoding();
@@ -333,8 +361,8 @@ void MacroCircuit::add_macros()
     for (MacroDefinition macro_definition: m_macro_definitions){
         Macro* m = new Macro(macro_definition.name,
                              macro_definition.id,
-                             macro_definition.width/m_gcd_w,
-                             macro_definition.height/m_gcd_h/*,
+                             macro_definition.width,
+                             macro_definition.height/*,
                              m_layout_x/m_gcd_w,
                              m_layout_y/m_gcd_h,
                              m_lut*/);
@@ -469,7 +497,7 @@ void MacroCircuit::create_image(size_t const solution)
         size_t o  = m_components[j]->get_solution_orientation(solution);
         size_t lx = m_components[j]->get_solution_lx(solution);
         size_t ly = m_components[j]->get_solution_ly(solution);
-        
+
         // North
         if(o == eNorth){
             _lx = lx;
@@ -497,11 +525,40 @@ void MacroCircuit::create_image(size_t const solution)
             _ly = ly - width;
             _ux = lx + height;
             _uy = ly;
+
+        // Flip North
+        } else if (o == eFlipNorth){
+            _lx = lx - width;
+            _ly = ly;
+            _ux = lx;
+            _uy = ly + height;
+
+        // Flip West
+        } else if (o == eFlipWest){
+            _lx = lx;
+            _ly = ly;
+            _ux = _lx + height;
+            _uy = _ly + width;
+
+        // Flip South
+        } else if (o == eFlipSouth){
+            _lx = lx;
+            _ly = ly - height;
+            _ux = lx + width;
+            _uy = ly;
+
+        // Flip East
+        } else if (o == eFlipEast){
+            _lx = lx - height;
+            _ly = ly - width;
+            _ux = lx;
+            _uy = ly;
+
         // Error
         } else {
                 assert (0);
         }
-        
+
         gnu_plot_file  << "set object " << j+1 << 
                           " rect from " << _lx << "," << _ly <<
                           " to "  << _ux << ","<<_uy << 
@@ -980,12 +1037,14 @@ void MacroCircuit::run_encoding()
     m_z3_opt->add(m_components_non_overlapping);
     m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
 
-    m_z3_opt->minimize(m_layout->get_ux());
-    m_z3_opt->minimize(m_layout->get_uy());
-   
-    if(this->get_box_optimizer()){
-        m_z3_opt->minimize(m_layout->get_uy() + m_layout->get_ux());
-        m_z3_opt->check();
+    if (this->get_minimize_die_mode()){
+        m_z3_opt->minimize(m_layout->get_ux());
+        m_z3_opt->minimize(m_layout->get_uy());
+    
+        if(this->get_box_optimizer()){
+            m_z3_opt->minimize(m_layout->get_uy() + m_layout->get_ux());
+            m_z3_opt->check();
+        }
     }
 }
 

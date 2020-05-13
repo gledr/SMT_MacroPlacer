@@ -83,6 +83,8 @@ public:
    
    void set_die_ux(size_t const val);
    void set_die_uy(size_t const val);
+   void set_die_lx(size_t const val);
+   void set_die_ly(size_t const val);
    void add_solution_layout(size_t const ux, size_t const uy);
    
    void place_macro(std::string const & name,

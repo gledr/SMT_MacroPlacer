@@ -48,6 +48,9 @@ public:
 
     size_t get_estimated_area();
 
+    std::pair<size_t, size_t> get_deduced_layout();
+    bool could_deduce_layout();
+
     std::string get_design_name() const;
 
     std::vector<Macro*> get_macros();
@@ -90,6 +93,8 @@ private:
 
     size_t m_expected_macros;
     size_t m_excepted_terminals;
+    std::pair<size_t, size_t> m_deduced_layout;
+    bool m_could_duduce_layout;
 
     void calc_estimated_die_area();
     void add_pin_to_macro(std::string const & macro,
@@ -103,6 +108,7 @@ private:
     
     void calculate_gcd();
     void locate_biggest_macro();
+    void deduce_layout();
 };
 
 }

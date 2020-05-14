@@ -34,6 +34,7 @@ local cur
 			--parquet \
 			--partition \
 			--minimize-area \
+			--free-terminals \
 			--partition-size \
 			--def \
 			--lef \

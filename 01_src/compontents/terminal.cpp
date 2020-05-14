@@ -14,7 +14,7 @@
 using namespace Placer;
 
 
-static bool debug = false;
+static bool debug = true;
 
 /**
  * @brief Constructor for Free Placeable Terminal

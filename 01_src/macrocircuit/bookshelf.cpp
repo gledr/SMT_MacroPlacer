@@ -80,10 +80,11 @@ void Bookshelf::read_files()
     
     this->read_blocks();
     this->calc_estimated_die_area();
-    this->locate_biggest_macro();
-    this->calculate_gcd();
+    //this->locate_biggest_macro();
+    //this->calculate_gcd();
     this->read_pl();
-    //this->read_nets();
+    this->deduce_layout();
+    this->read_nets();
 }
 
 /**
@@ -329,14 +330,14 @@ void Bookshelf::read_pl()
     std::vector<std::string> processed_macros;
     
     this->calc_estimated_die_area();
-    
+
+#if 0
     size_t max_size = std::max(m_max_h, m_max_w);
-        
     size_t xy = std::ceil(sqrt(m_estimated_area))+max_size;
     m_lut->init_lookup_table(xy, xy);
     
     std::cout << "Using Grid: " << xy/m_gcd_h << std::endl;
-    
+#endif
     while(std::getline(place_stream, line)){
         place_content.push_back(line);
     }
@@ -393,20 +394,19 @@ void Bookshelf::read_pl()
                                              macro->width,
                                              macro->height));
             }
-            
+
         } else if(terminal != m_terminal_definitions.end()){
-            size_t x = std::stoi(token[1]);
-            size_t y = std::stoi(token[2]);
             std::string name = token[0];
             processed_terminals.push_back(name);
-            
-            // Placed Terminal
-            if((x != 0) || (y != 0)){
+
+            if ((token.size() == 3) && !this->get_free_terminals()){
+                size_t x = std::stoi(token[1]);
+                size_t y = std::stoi(token[2]);
+
                 Terminal* tmp = new Terminal(name, x, y, e_pin_direction::eUnknown);
                 m_terminals.push_back(tmp);
-            // Free Terminal
             } else {
-                Terminal* tmp = new Terminal(name, e_pin_direction::eUnknown);
+               Terminal* tmp = new Terminal(name, e_pin_direction::eUnknown);
                 m_terminals.push_back(tmp);
             }
         } else {
@@ -673,8 +673,8 @@ void Bookshelf::write_blocks()
  */
 void Bookshelf::write_nets()
 {
-     std::string filename = "export_" + this->get_design_name() + ".nets";
-    
+    std::string filename = "export_" + this->get_design_name() + ".nets";
+
     std::ofstream netsFile(filename);
 
     std::stringstream feed;
@@ -701,7 +701,7 @@ void Bookshelf::write_nets()
 void Bookshelf::write_pl()
 {
      std::string filename = "export_" + this->get_design_name() + ".pl";
-    
+
      std::ofstream plFile(filename);
 
     std::stringstream feed;
@@ -740,7 +740,6 @@ void Bookshelf::calculate_gcd()
     std::cout << "GCD H: " << m_gcd_h << std::endl;
 }
 
-
 void Bookshelf::locate_biggest_macro()
 {
     m_max_w = 0;
@@ -757,4 +756,37 @@ void Bookshelf::locate_biggest_macro()
     
     std::cout << "MAX_H: " << m_max_h << std::endl;
     std::cout << "MAX_W: " << m_max_w << std::endl;
+}
+
+void Bookshelf::deduce_layout()
+{
+    size_t x = 0;
+    size_t y = 0;
+
+    for (Terminal* terminal: m_terminals){
+        assert (terminal->get_pin_pos_x().is_numeral());
+        assert (terminal->get_pin_pos_y().is_numeral());
+
+        if (terminal->get_pin_pos_x().get_numeral_uint() > x){
+            x = terminal->get_pin_pos_x().get_numeral_uint();
+        }
+        if (terminal->get_pin_pos_y().get_numeral_uint() > y){
+            y = terminal->get_pin_pos_y().get_numeral_uint();
+        }
+    }
+
+    std::cout << "Layout Deduced: " << x << ":" << y << std::endl;
+
+    m_could_duduce_layout = (x != 0) && (y != 0);
+    m_deduced_layout = std::make_pair(x,y);
+}
+
+bool Bookshelf::could_deduce_layout()
+{
+    return m_could_duduce_layout;
+}
+
+std::pair<size_t, size_t> Bookshelf::get_deduced_layout()
+{
+    return m_deduced_layout;
 }

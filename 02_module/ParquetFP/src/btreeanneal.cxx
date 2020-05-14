@@ -186,9 +186,9 @@ void BTreeAreaWireAnnealer::constructor_core()
     }
 
   // generate an initial solution
-  in_curr_solution.save_bbb("tree_before");
+  //in_curr_solution.save_bbb("tree_before");
   GenerateRandomSoln(in_curr_solution, blockinfo.currDimensions.blocknum());
-in_curr_solution.save_bbb("tree_after");
+  //in_curr_solution.save_bbb("tree_after");
   cout << "finished GenerateRandSoln" << endl;
   in_best_solution = in_curr_solution;
   in_next_solution = in_curr_solution;

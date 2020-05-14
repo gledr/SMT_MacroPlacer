@@ -55,7 +55,7 @@ public:
     std::set<Edge*> get_edges();
 
     void dump(std::ostream & stream = std::cout);
-    
+
 private:
     std::set<Edge*> m_edges;
     Macro* m_macro;

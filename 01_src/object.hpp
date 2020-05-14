@@ -155,6 +155,9 @@ protected:
     
     void store_constraint(z3::expr const & constraint);
     z3::expr_vector get_stored_constraints();
+    
+    void set_free_terminals(bool const value);
+    bool get_free_terminals() const;
 
     static z3::context m_z3_ctx;
 
@@ -190,6 +193,7 @@ private:
     static bool m_box_optimizer;
     static bool m_parquet_fp;
     static bool m_partitioning;
+    static bool m_free_terminals;
     static size_t m_partition_size;
     static size_t m_solutions;
     static size_t m_results_id;

@@ -125,7 +125,14 @@ void Logger::construct_tree(size_t const edges)
 {
     std::stringstream msg;
     msg  << "Constructing Tree from " << edges << " edges...";
-    LOG(eDebug) << msg.str();
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::insert_edge(std::string const & from, std::string const & to)
+{
+    std::stringstream msg;
+    msg << "Insert Edge: " << from << " -> " << to;
+    LOG(eInfo) << msg.str();
 }
 
 void Logger::min_die_area(double const & area)

@@ -421,7 +421,13 @@ void Macro::dump(std::ostream & stream)
  */
 void Macro::encode_pins()
 {
+    for (auto itor: m_pins){
+        Pin* pin = itor.second;
+        
+        
+    }
 }
+
 /**
  * @brief Encode the Pins of a Macro to be located on its frontier
  * 

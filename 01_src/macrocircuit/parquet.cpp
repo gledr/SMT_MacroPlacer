@@ -232,7 +232,7 @@ void ParquetFrontend::data_from_parquet()
 
     m_layout->set_solution_ux(m_db->getXMax());
     m_layout->set_solution_uy(m_db->getYMax());
-    m_db->plot("parquet", m_layout->get_solution_ux(0)* m_layout->get_solution_uy(0), 0, 1, 0, 0,false, false, true);
+    //m_db->plot("parquet", m_layout->get_solution_ux(0)* m_layout->get_solution_uy(0), 0, 1, 0, 0,false, false, true);
 }
 
 /**

@@ -41,6 +41,7 @@ bool Object::m_lex_optimizer = false;
 bool Object::m_box_optimizer = false;
 bool Object::m_partitioning = false;
 bool Object::m_parquet_fp = false;
+bool Object::m_free_terminals = false;
 size_t Object::m_timeout = 0;
 size_t Object::m_bitwidth_orientation;
 size_t Object::m_solutions = 1;
@@ -421,4 +422,14 @@ void Object::store_constraint(z3::expr const & constraint)
 z3::expr_vector Object::get_stored_constraints()
 {
     return m_stored_constraints;
+}
+
+bool Object::get_free_terminals() const
+{
+    return m_free_terminals;
+}
+
+void Object::set_free_terminals(bool const value)
+{
+    m_free_terminals = value;
 }

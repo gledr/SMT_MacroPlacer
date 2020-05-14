@@ -66,6 +66,7 @@ public:
    void end_encoding();
    
    void construct_tree(size_t const edges);
+   void insert_edge(std::string const & from, std::string const & to);
    
    void min_die_area(double const & area);
    void result_die_area(double const & area);

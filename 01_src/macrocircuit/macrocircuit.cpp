@@ -166,14 +166,23 @@ void MacroCircuit::build_circuit()
             
             if (!this->get_parquet_fp()){
                 if (!this->get_minimize_die_mode()){
-                    if (!m_supplement->has_layout()){
-                        throw std::runtime_error("No Layout Supplement Defined!");
+                    if (m_bookshelf->could_deduce_layout()){
+                        std::pair<size_t, size_t> upper_corner = m_bookshelf->get_deduced_layout();
+                        m_layout->set_lx(0);
+                        m_layout->set_ux(upper_corner.first);
+                        m_layout->set_ly(0);
+                        m_layout->set_uy(upper_corner.second);
+                        
                     } else {
-                        SupplementLayout* _layout = m_supplement->get_layout();
-                        m_layout->set_lx(_layout->get_lx());
-                        m_layout->set_ux(_layout->get_ux());
-                        m_layout->set_ly(_layout->get_ly());
-                        m_layout->set_uy(_layout->get_uy());
+                           if (!m_supplement->has_layout()){
+                        throw std::runtime_error("No Layout Supplement Defined!");
+                        } else {
+                            SupplementLayout* _layout = m_supplement->get_layout();
+                            m_layout->set_lx(_layout->get_lx());
+                            m_layout->set_ux(_layout->get_ux());
+                            m_layout->set_ly(_layout->get_ly());
+                            m_layout->set_uy(_layout->get_uy());
+                        }
                     }
                 }
             }
@@ -407,17 +416,18 @@ void MacroCircuit::add_terminals()
     m_logger->start_terminal_thread();
 
     for(auto & itor: m_circuit->defPinStor){
-        int x = itor.placementX();
-        int y = itor.placementY();
-        
         e_pin_direction direction = Pin::string2enum(itor.direction());
         Terminal* tmp;
         
-        if(x == 0 || y == 0){
-            tmp = new Terminal(itor.pinName(), direction);
-        } else {
+        if (itor.hasPlacement() && !this->get_free_terminals()){
+            int x = itor.placementX();
+            int y = itor.placementY();
             tmp = new Terminal(itor.pinName(), x, y, direction);
+            
+        } else {
+            tmp = new Terminal(itor.pinName(), direction);
         }
+
         assert(tmp != nullptr);
         
         m_terminals.push_back(tmp);

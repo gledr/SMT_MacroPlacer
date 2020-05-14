@@ -1,3 +1,14 @@
+//==================================================================
+// Author       : Pointner Sebastian
+// Company      : Johannes Kepler University
+// Name         : SMT Macro Placer
+// Workfile     : pin_defintion.hpp
+//
+// Date         : 14. May 2020
+// Compiler     : gcc version 9.3.0 (GCC) 
+// Copyright    : Johannes Kepler University
+// Description  : Preliminary Pin Definition
+//==================================================================
 #ifndef SUPPLEMENTLAYOUT_HPP
 #define SUPPLEMENTLAYOUT_HPP
 

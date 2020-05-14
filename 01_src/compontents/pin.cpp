@@ -2,12 +2,12 @@
 // Author       : Pointner Sebastian
 // Company      : Johannes Kepler University
 // Name         : SMT Macro Placer
-// Workfile     : Terminal.cpp
+// Workfile     : Pin.cpp
 //
 // Date         : 22. December 2019
 // Compiler     : gcc version 9.2.0 (GCC) 
 // Copyright    : Johannes Kepler University
-// Description  : SoC Terminal Component
+// Description  : SoC Pin Component
 //==================================================================
 #include "pin.hpp"
 
@@ -30,7 +30,8 @@ Pin::Pin(std::string const & name,
     m_pin_name(name),
     m_direction(direction),
     m_pin_pos_x(m_encode->get_value(x)),
-    m_pin_pos_y(m_encode->get_value(y))
+    m_pin_pos_y(m_encode->get_value(y)),
+    m_is_placed(true)
 {
     this->get_verbose() && std::cout << "[Info]: Adding Placed Pin " << name << std::endl;
 }
@@ -51,7 +52,10 @@ Pin::Pin(std::string const & pin_name,
     m_macro_name(macro_name),
     m_direction(direction),
     m_pin_pos_x(m_encode->get_constant(macro_name + pin_name + "_pos_x")),
-    m_pin_pos_y(m_encode->get_constant(macro_name + pin_name + "_pos_y"))
+    m_pin_pos_y(m_encode->get_constant(macro_name + pin_name + "_pos_y")),
+    m_offset_x(0),
+    m_offset_y(0),
+    m_is_placed(false)
 {
     this->get_verbose() && std::cout << "[Info]: Adding Free Pin " << macro_name << "_" << pin_name << std::endl;
 }
@@ -291,4 +295,44 @@ void Pin::set_x_offset(size_t const offset)
 void Pin::set_y_offset(size_t const offset)
 {
     m_offset_y = offset;
+}
+
+/**
+ * @brief Get X Offset from Center
+ * 
+ * @return size_t
+ */
+size_t Pin::get_offset_x()
+{
+    return m_offset_x;
+}
+
+/**
+ * @brief Get Y Offset from Center
+ * 
+ * @return size_t
+ */
+size_t Pin::get_offset_y()
+{
+    return m_offset_y;
+}
+
+/**
+ * @brief Check if X Offset is Defined
+ * 
+ * @return bool
+ */
+bool Pin::has_offset_x()
+{
+    return m_offset_x != 0;
+}
+
+/**
+ * @brief Check if Y Offset is Defined
+ * 
+ * @return bool
+ */
+bool Pin::has_offset_y()
+{
+    return m_offset_y != 0;
 }

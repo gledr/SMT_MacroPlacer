@@ -2,12 +2,12 @@
 // Author       : Pointner Sebastian
 // Company      : Johannes Kepler University
 // Name         : SMT Macro Placer
-// Workfile     : supplement.cpp
+// Workfile     : supplementlayout.hpp
 //
-// Date         : 09. January 2019
-// Compiler     : gcc version 9.2.0 (GCC) 
+// Date         : 14. May 2020
+// Compiler     : gcc version 9.3.0 (GCC) 
 // Copyright    : Johannes Kepler University
-// Description  : LEF/DEF Supplement File
+// Description  : Supplement Layout Instance
 //==================================================================
 #include "supplement.hpp"
 

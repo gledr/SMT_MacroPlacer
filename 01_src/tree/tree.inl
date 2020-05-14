@@ -40,4 +40,6 @@ void Tree::insert_edge(from* from_val,
 
     Edge* _edge = new Edge(_from, _to, from_pin, to_pin, edge_name);
     m_edges.push_back(_edge);
+
+    m_logger->insert_edge(_from->get_id(), _to->get_id());
 }

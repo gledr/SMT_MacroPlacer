@@ -46,6 +46,7 @@
 #include <encoding_utils.hpp>
 #include <utils.hpp>
 #include <costfunction.hpp>
+#include <database.hpp>
 
 namespace Placer {
 
@@ -76,6 +77,8 @@ public:
 
     void save_all();
     void save_best();
+
+    void results_to_db();
 
     void best_result();
 
@@ -114,6 +117,7 @@ private:
     Evaluate* m_eval;
     Utils::Logger* m_logger;
     Utils::Timer* m_timer;
+    Utils::Database* m_db;
     Supplement* m_supplement;
     Bookshelf* m_bookshelf;
     Partitioning* m_partitioning;

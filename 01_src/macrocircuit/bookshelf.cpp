@@ -764,14 +764,14 @@ void Bookshelf::deduce_layout()
     size_t y = 0;
 
     for (Terminal* terminal: m_terminals){
-        assert (terminal->get_pin_pos_x().is_numeral());
-        assert (terminal->get_pin_pos_y().is_numeral());
+        assert (terminal->get_pos_x().is_numeral());
+        assert (terminal->get_pos_y().is_numeral());
 
-        if (terminal->get_pin_pos_x().get_numeral_uint() > x){
-            x = terminal->get_pin_pos_x().get_numeral_uint();
+        if (terminal->get_pos_x().get_numeral_uint() > x){
+            x = terminal->get_pos_x().get_numeral_uint();
         }
-        if (terminal->get_pin_pos_y().get_numeral_uint() > y){
-            y = terminal->get_pin_pos_y().get_numeral_uint();
+        if (terminal->get_pos_y().get_numeral_uint() > y){
+            y = terminal->get_pos_y().get_numeral_uint();
         }
     }
 

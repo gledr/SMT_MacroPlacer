@@ -216,23 +216,20 @@ void Logger::set_die_ly(size_t const val)
 void Logger::place_macro(std::string const & name,
                          size_t const lx,
                          size_t const ly,
-                         size_t const orientation)
+                         eOrientation const orientation)
 {
     std::stringstream msg;
-    msg << "Placing " << name << ": " << lx << "-" << ly;
-    
-     if(orientation == 0){
-        msg << " for orientation: North";
-    } else if (orientation == 1){
-         msg << " for orientation: West";
-    } else if (orientation == 2){
-         msg << " for orientation: South";
-    } else if (orientation == 3){
-      msg << " for orientation: Est";
-    } else {
-        assert (0);
-    }
+    msg << "Placing " << name << ": " << lx << "-" << ly 
+        << " for orientation " << this->orientation_to_string(orientation);
+
     LOG(eDebug) << msg.str();
+}
+
+void Logger::place_terminal(std::string const & name,
+                            size_t const x,
+                            size_t const y)
+{
+
 }
 
 void Logger::add_solution_layout(size_t const ux, size_t const uy)

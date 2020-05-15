@@ -81,6 +81,7 @@ MacroCircuit::~MacroCircuit()
     delete m_encode; m_encode = nullptr;
     delete m_timer; m_timer = nullptr;
     delete m_lut; m_lut = nullptr;
+    delete m_db; m_db = nullptr;
 
     m_logger = nullptr;
 }
@@ -92,7 +93,10 @@ void MacroCircuit::build_circuit()
 {
     try {
         m_supplement->read_supplement_file();
-        
+        std::string db_file = this->get_database_dir() + this->get_database_file();
+        m_db = new Utils::Database(db_file);
+        m_db->init_database();
+
         if(!this->get_def().empty() && !this->get_lef().empty()) {
             m_circuit = new Circuit::Circuit(this->get_lef(),
                                              this->get_def());
@@ -125,7 +129,7 @@ void MacroCircuit::build_circuit()
             area_estimator.join();
 
             //this->calculate_gcd();
-            
+
             m_logger->min_die_area(m_estimated_area);
 
             //auto biggest_macro = this->biggest_macro();
@@ -472,13 +476,13 @@ void MacroCircuit::create_image(size_t const solution)
 
     size_t die_lx = m_layout->get_lx().get_numeral_uint();
     size_t die_ly = m_layout->get_ly().get_numeral_uint();
-  
+
     std::stringstream img_name;
     img_name << "placement_" << this->get_design_name() << "_" << solution << ".png";
     std::ofstream gnu_plot_file(gnu_plot_script);
     gnu_plot_file << "set terminal png size 400,300;"  << std::endl;
     gnu_plot_file << "set output '" << img_name.str() << "';" << std::endl;
-    
+
     if(m_layout->is_free_ux()){
         gnu_plot_file << "set xrange[" << die_lx << ":" << m_layout->get_solution_ux(solution) << "];" << std::endl;
         gnu_plot_file << "set yrange[" << die_ly << ":" << m_layout->get_solution_uy(solution) << "];" << std::endl;
@@ -498,7 +502,7 @@ void MacroCircuit::create_image(size_t const solution)
 
         size_t width = m_components[j]->get_width().get_numeral_uint();
         size_t height = m_components[j]->get_height().get_numeral_uint();
-        
+
         size_t o  = m_components[j]->get_solution_orientation(solution);
         size_t lx = m_components[j]->get_solution_lx(solution);
         size_t ly = m_components[j]->get_solution_ly(solution);
@@ -1375,8 +1379,8 @@ void MacroCircuit::encode_terminals_on_frontier()
 
     for(auto itor: m_terminals){
         z3::expr_vector subclause(m_z3_ctx);
-        z3::expr x = itor->get_pin_pos_x();
-        z3::expr y = itor->get_pin_pos_y();
+        z3::expr x = itor->get_pos_x();
+        z3::expr y = itor->get_pos_y();
 
         // Case 1 x = moveable, y = ly
         z3::expr_vector case_1(m_z3_ctx);
@@ -1429,22 +1433,22 @@ void MacroCircuit::encode_terminals_non_overlapping()
                 if(i == j){
                     continue;
                 }
-                
+
                 Terminal* a = m_terminals[i];
                 Terminal* b = m_terminals[j];
-                
+
                 assert (a != nullptr);
                 assert (b != nullptr);
-                
+
                 // Case 1: x moveable
                 z3::expr_vector case_1(m_z3_ctx);
-                case_1.push_back(a->get_pin_pos_x() > b->get_pin_pos_x());
-                case_1.push_back(a->get_pin_pos_x() < b->get_pin_pos_x());
+                case_1.push_back(a->get_pos_x() > b->get_pos_x());
+                case_1.push_back(a->get_pos_x() < b->get_pos_x());
                 
                 // Case 2: y moveable
                 z3::expr_vector case_2(m_z3_ctx);
-                case_2.push_back(a->get_pin_pos_y() > b->get_pin_pos_y());
-                case_2.push_back(a->get_pin_pos_y() < b->get_pin_pos_y());
+                case_2.push_back(a->get_pos_y() > b->get_pos_y());
+                case_2.push_back(a->get_pos_y() < b->get_pos_y());
                 
                 subclause.push_back(z3::mk_or(case_1));
                 subclause.push_back(z3::mk_or(case_2));
@@ -1502,7 +1506,7 @@ void MacroCircuit::solve()
                     m_logger->add_solution_layout(ux, uy);
                 }
                 m_solutions++;
-                    
+
                 for(Component* component: m_components){
                         std::string name = component->get_name();
 
@@ -1518,16 +1522,19 @@ void MacroCircuit::solve()
                 }
 
                 for (Terminal* terminal: m_terminals){
-                    z3::expr clause_x = m.eval(terminal->get_pin_pos_x());
-                    z3::expr clause_y = m.eval(terminal->get_pin_pos_y());
+                    z3::expr clause_x = m.eval(terminal->get_pos_x());
+                    z3::expr clause_y = m.eval(terminal->get_pos_y());
                     
-                    if (clause_x.is_numeral()){
+                    if (clause_x.is_numeral() && clause_y.is_numeral()){
                         size_t pos_x = clause_x.get_numeral_uint();
-                        terminal->add_solution_pin_pos_x(pos_x);
-                    }
-                    if (clause_y.is_numeral()){
                         size_t pos_y = clause_y.get_numeral_uint();
-                        terminal->add_solution_pin_pos_y(pos_y);
+
+                        terminal->add_solution_pos_x(pos_x);
+                        terminal->add_solution_pos_y(pos_y);
+
+                        m_logger->place_terminal(terminal->get_name(),
+                                                 pos_x,
+                                                 pos_y);
                     }
                 }
 
@@ -1672,4 +1679,16 @@ void MacroCircuit::calculate_gcd()
     
     std::cout << "GCD W: " << m_gcd_w << std::endl;
     std::cout << "GCD H: " << m_gcd_h << std::endl;
+}
+
+/**
+ * @brief 
+ */
+void MacroCircuit::results_to_db()
+{
+    for (size_t i = 0; i < m_solutions; ++i){
+        for (Macro* macro: m_macros){
+            m_db->place_macro(i, macro);
+        }
+    }
 }

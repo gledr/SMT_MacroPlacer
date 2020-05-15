@@ -83,6 +83,30 @@ z3::expr& Component::get_width()
 }
 
 /**
+ * @brief Get Height
+ * 
+ * @return size_t
+ */
+size_t Component::get_height_numeral()
+{
+    assert (m_height.is_numeral());
+
+    return m_height.get_numeral_uint();
+}
+
+/**
+ * @brief Get Width
+ * 
+ * @return size_t
+ */
+size_t Component::get_width_numeral()
+{
+    assert (m_width.is_numeral());
+
+    return m_width.get_numeral_uint();
+}
+
+/**
  * @brief Get Component Name
  * 
  * @return std::string
@@ -217,9 +241,9 @@ z3::expr Component::get_uy(eOrientation const orientation)
 }
 
 /**
- * @brief 
+ * @brief Get Solution for LY
  * 
- * @param id 
+ * @param id Solution ID
  * @return size_t
  */
 size_t Component::get_solution_ly(size_t const id)
@@ -230,9 +254,9 @@ size_t Component::get_solution_ly(size_t const id)
 }
 
 /**
- * @brief 
+ * @brief Get Solution for LX
  * 
- * @param id 
+ * @param id Solution ID
  * @return size_t
  */
 size_t Component::get_solution_lx(size_t const id)
@@ -243,14 +267,28 @@ size_t Component::get_solution_lx(size_t const id)
 }
 
 /**
- * @brief 
+ * @brief Get Solution for Orientation
  * 
- * @param id 
- * @return size_t
+ * @param id Solution ID
+ * @return Placer::eOrientation
  */
-size_t Component::get_solution_orientation(size_t const id)
+eOrientation Component::get_solution_orientation(size_t const id)
 {
     assert (id < m_sol_orientation.size());
     
     return m_sol_orientation[id];
+}
+
+/**
+ * @brief Check if Solution Exists
+ * 
+ * @param id Solution ID to Check
+ * @return bool
+ */
+bool Component::has_solution(size_t const id)
+{
+    assert (m_sol_lx.size() == m_sol_ly.size());
+    assert (m_sol_ly.size() == m_sol_orientation.size());
+    
+    return (m_sol_lx.size()) > id;
 }

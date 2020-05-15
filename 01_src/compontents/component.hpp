@@ -39,9 +39,14 @@ public:
     z3::expr& get_orientation();
     z3::expr& get_width();
     z3::expr& get_height();
+    
+    size_t get_width_numeral();
+    size_t get_height_numeral();
 
     std::string get_name();
     std::string get_id();
+
+    bool has_solution(size_t const id);
 
     void add_solution_lx(size_t const lx);
     void add_solution_ly(size_t const ly);
@@ -49,7 +54,7 @@ public:
     
     size_t get_solution_lx(size_t const id);
     size_t get_solution_ly(size_t const id);
-    size_t get_solution_orientation(size_t const id);
+    eOrientation get_solution_orientation(size_t const id);
 
     virtual size_t get_area() = 0;
     virtual void dump(std::ostream & stream = std::cout) = 0;

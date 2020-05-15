@@ -149,15 +149,21 @@ protected:
     size_t get_partition_size() const;
 
     size_t get_partition_id();
-    
+
     void set_logic(eLogic const logic);
     eLogic get_logic() const;
-    
+
     void store_constraint(z3::expr const & constraint);
     z3::expr_vector get_stored_constraints();
-    
+
     void set_free_terminals(bool const value);
     bool get_free_terminals() const;
+
+    void set_database_file(std::string const & name);
+    std::string get_database_file();
+    std::string get_database_dir();
+    
+    std::string orientation_to_string(eOrientation const orientation);
 
     static z3::context m_z3_ctx;
 
@@ -175,6 +181,7 @@ private:
     static std::string m_bookshelf_file;
     static std::string m_design_name;
     static std::string m_binary_name;
+    static std::string m_database_file;
     static size_t m_timeout;
     static size_t m_bitwidth_orientation;
     static size_t m_partition_id;

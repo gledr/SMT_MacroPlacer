@@ -21,7 +21,7 @@ using namespace Placer::Utils;
 BaseDatabase::BaseDatabase(std::string const & url)
 {
     p_db_url = url;
-    p_debug = false;
+    p_debug = true;
 }
 
 /**
@@ -45,6 +45,7 @@ void BaseDatabase::db_command(std::string const & command)
    
     char const * str = command.c_str();
     if(sqlite3_exec(p_db, str, c_callback, this, NULL) != 0){
+        std::cout << "here" << std::endl;
         throw std::runtime_error(std::string(sqlite3_errmsg(p_db)));
     }
     this->close_database();
@@ -57,6 +58,7 @@ void BaseDatabase::open_database()
 {
     p_debug && std::cout<< "Open BaseDatabase Connection (" << p_db_url << ")" << std::endl;
     if((sqlite3_open(p_db_url.c_str(), &p_db)) != SQLITE_OK){
+        std::cout << "da" << std::endl;
         throw std::runtime_error(std::string(sqlite3_errmsg(p_db)));
     }
     p_debug && std::cout << "BaseDatabase Connection Established!" << std::endl;

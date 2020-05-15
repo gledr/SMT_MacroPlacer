@@ -25,6 +25,7 @@ std::string Object::m_parquet_directory;
 std::string Object::m_bookshelf_file;
 std::string Object::m_design_name;
 std::string Object::m_binary_name;
+std::string Object::m_database_file;
 std::vector<std::string> Object::m_lef;
 bool Object::m_verbose = false;
 bool Object::m_log = false;
@@ -432,4 +433,42 @@ bool Object::get_free_terminals() const
 void Object::set_free_terminals(bool const value)
 {
     m_free_terminals = value;
+}
+
+std::string Object::get_database_file()
+{
+    return m_database_file;
+}
+
+void Object::set_database_file(std::string const & name)
+{
+    m_database_file = name;
+}
+
+std::string Object::get_database_dir()
+{
+    return m_results_directory + "/" + std::to_string(m_results_id) + "/";
+}
+
+std::string Object::orientation_to_string(eOrientation const orientation)
+{
+    if (orientation == eNorth){
+        return "N";
+    } else if (orientation == eWest){
+        return "W";
+    } else if (orientation == eSouth){
+        return "S";
+    } else if (orientation == eEast){
+        return "E";
+    } else if (orientation == eFlipNorth){
+        return "FN";
+    } else if (orientation == eFlipWest){
+        return "FW";
+    } else if (orientation == eFlipSouth){
+        return "FS";
+    } else if (orientation == eFlipEast){
+        return "FE";
+    } else {
+        assert (0);
+    }
 }

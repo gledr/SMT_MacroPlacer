@@ -200,6 +200,7 @@ void MacroPlacer::read_configuration()
         this->set_smt_directory("smt");
         this->set_parquet_directory("parquet");
         this->set_log_name("placer.log");
+        this->set_database_file("results.db");
 
         boost::filesystem::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));
 
@@ -335,6 +336,7 @@ void MacroPlacer::post_process()
     }
 
     m_mckt->best_result();
+    m_mckt->results_to_db();
 }
 
 /**

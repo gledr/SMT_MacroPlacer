@@ -88,11 +88,11 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
             Terminal* terminal = from->get_terminal();
 
             if (terminal->is_free()){
-                from_x = terminal->get_solution_pin_pos_x(solution);
-                from_y = terminal->get_solution_pin_pos_y(solution);
+                from_x = terminal->get_solution_pos_x(solution);
+                from_y = terminal->get_solution_pos_y(solution);
             } else {
-                from_x = terminal->get_pin_pos_x().get_numeral_uint();
-                from_y = terminal->get_pin_pos_y().get_numeral_uint();
+                from_x = terminal->get_pos_x().get_numeral_uint();
+                from_y = terminal->get_pos_y().get_numeral_uint();
             }
         } else {
             assert (0);
@@ -113,11 +113,11 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
             Terminal* terminal = to->get_terminal();
 
             if (terminal->is_free()){
-                to_x = terminal->get_solution_pin_pos_x(solution);
-                to_y = terminal->get_solution_pin_pos_y(solution);
+                to_x = terminal->get_solution_pos_x(solution);
+                to_y = terminal->get_solution_pos_y(solution);
             } else {
-                to_x = terminal->get_pin_pos_x().get_numeral_uint();
-                to_y = terminal->get_pin_pos_y().get_numeral_uint();
+                to_x = terminal->get_pos_x().get_numeral_uint();
+                to_y = terminal->get_pos_y().get_numeral_uint();
             }
         } else {
             assert (0);

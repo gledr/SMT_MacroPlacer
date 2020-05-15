@@ -15,6 +15,9 @@
 #include <object.hpp>
 #include <base_database.hpp>
 
+#include <macro.hpp>
+#include <terminal.hpp>
+
 namespace Placer::Utils {
 
 class Database: public virtual Placer::Object,
@@ -24,8 +27,24 @@ public:
 
     virtual ~Database();
 
+    virtual int __callback__(int argc, char **argv, char **azColName);
+
+    void init_database();
+
+    void place_macro(size_t const solution, Macro* macro);
+
+    void place_terminal(size_t const solution, Terminal* terminal);
+
 private:
+    Database (Database const & db);
+    Database operator= (Database const & db);
+    bool operator== (Database const & db);
     
+    enum db_transaction {
+        e_init                      = 0  ///<
+    };
+
+    db_transaction p_active_transaction;
 };
 
 }

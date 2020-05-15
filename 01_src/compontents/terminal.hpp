@@ -15,8 +15,8 @@
 #include <iostream>
 #include <string>
 
-#include <object.hpp>
 #include <pin.hpp>
+#include <object.hpp>
 #include <logger.hpp>
 #include <encoding_utils.hpp>
 
@@ -40,21 +40,22 @@ public:
     virtual ~Terminal();
 
     bool is_free();
-    
+
     void set_direction(e_pin_direction const direction);
-    e_pin_direction get_pin_direction() const;
-    
-    z3::expr& get_pin_pos_x();
-    z3::expr& get_pin_pos_y();
-    
-    void add_solution_pin_pos_x(size_t const val);
-    void add_solution_pin_pos_y(size_t const val);
-    
-    size_t get_solution_pin_pos_x(size_t const sol);
-    size_t get_solution_pin_pos_y(size_t const sol);
+    e_pin_direction get_direction() const;
+
+    z3::expr& get_pos_x();
+    z3::expr& get_pos_y();
+
+    void add_solution_pos_x(size_t const val);
+    void add_solution_pos_y(size_t const val);
+
+    size_t get_solution_pos_x(size_t const sol);
+    size_t get_solution_pos_y(size_t const sol);
 
     std::string get_name();
     std::string get_id();
+    bool has_solution(size_t const solution);
 
     bool is_input();
     bool is_output();
@@ -69,8 +70,8 @@ private:
     bool m_free;
     e_pin_direction m_direction;
 
-    z3::expr m_pin_pos_x;
-    z3::expr m_pin_pos_y;
+    z3::expr m_pos_x;
+    z3::expr m_pos_y;
 
     std::vector<size_t> m_solutions_x;
     std::vector<size_t> m_solutions_y;

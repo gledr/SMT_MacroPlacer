@@ -12,10 +12,12 @@
 #ifndef LOGGER_HPP
 #define LOGGER_HPP
 
-#include <object.hpp>
-#include <utils.hpp>
+#include <iomanip>
 #include <sstream>
 #include <ctime>
+
+#include <object.hpp>
+#include <utils.hpp>
 #include <base_logger.hpp>
 
 #include <boost/filesystem.hpp>
@@ -94,6 +96,17 @@ public:
                     size_t const orientation);
    
    void run_partitioning();
+   
+   void add_free_terminal(std::string const & name);
+   void add_fixed_terminal(std::string const & name,
+                           size_t const x,
+                           size_t const y);
+   
+   void print_header(std::stringstream const & header);
+   void print_version(std::string const & date,
+                      std::string const & commit,
+                      std::string const & author,
+                      size_t const max_len);
 private:
     Logger();
     virtual ~Logger();

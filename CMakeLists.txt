@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.1)
 
-project(InitialPlacer)
+project(SMT_MacroPlacer)
 
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)

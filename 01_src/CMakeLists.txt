@@ -76,6 +76,8 @@ add_executable(smt_placer
     utils/logger.cpp
     utils/base_logger.cpp
     utils/utils.cpp
+    utils/base_database.cpp
+    utils/database.cpp
     utils/costfunction.cpp
     clustering/centroid.cpp
     clustering/cluster.cpp
@@ -87,6 +89,7 @@ add_dependencies(smt_placer
     lef
     build_z3
     build_jsoncpp
+    build_sqlite3
     placer_config
     ABKCommon
     ParquetFP
@@ -100,8 +103,10 @@ target_link_libraries(smt_placer
     lefzlib
     ${THIRD_PARTY_LIB}/libz3.so
     ${THIRD_PARTY_LIB}/libjsoncpp.a
+    ${THIRD_PARTY_LIB}/libsqlite3.a
     ${PARQUET_HOME}/lib/libParquetFP.a
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
     pthread
+    dl
     OpenMP::OpenMP_CXX
 )

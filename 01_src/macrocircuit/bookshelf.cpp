@@ -602,12 +602,12 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
                 if (!rel_pos_x.empty()){
                     std::string x = rel_pos_x.substr(1 ,rel_pos_x.size());
                     int x_i = std::stoi(x);
-                    p->set_x_offset(x_i);
+                    p->set_x_offset_percentage(x_i);
                 } 
                 if (!rel_pos_y.empty()){
                     std::string y = rel_pos_x.substr(1 ,rel_pos_y.size());
                     int y_i = std::stoi(y);
-                    p->set_y_offset(y_i);
+                    p->set_y_offset_percentage(y_i);
                 }
 
                 m->add_pin(p);

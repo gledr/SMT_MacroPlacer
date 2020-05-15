@@ -47,14 +47,14 @@ public:
     z3::expr& get_pin_pos_x();
     z3::expr& get_pin_pos_y();
 
-    void set_x_offset(size_t const offset);
-    void set_y_offset(size_t const offset);
+    void set_x_offset_percentage(int const offset);
+    void set_y_offset_percentage(int const offset);
 
     bool has_offset_x();
     bool has_offset_y();
 
-    size_t get_offset_x();
-    size_t get_offset_y();
+    int get_offset_x_percentage();
+    int get_offset_y_percentage();
 
     void add_solution_pin_pos_x(size_t const val);
     void add_solution_pin_pos_y(size_t const val);
@@ -95,8 +95,8 @@ private:
     std::vector<size_t> m_solutions_x;
     std::vector<size_t> m_solutions_y;
 
-    int m_offset_x;
-    int m_offset_y;
+    int m_offset_x_percentage;
+    int m_offset_y_percentage;
     bool m_is_placed;
 };
 

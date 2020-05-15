@@ -125,14 +125,14 @@ void Logger::construct_tree(size_t const edges)
 {
     std::stringstream msg;
     msg  << "Constructing Tree from " << edges << " edges...";
-    LOG(eInfo) << msg.str();
+    LOG(eDebug) << msg.str();
 }
 
 void Logger::insert_edge(std::string const & from, std::string const & to)
 {
     std::stringstream msg;
     msg << "Insert Edge: " << from << " -> " << to;
-    LOG(eInfo) << msg.str();
+    LOG(eDebug) << msg.str();
 }
 
 void Logger::min_die_area(double const & area)
@@ -288,4 +288,46 @@ void Logger::encode_int()
 void Logger::encode_bv()
 {
     LOG(eInfo) << "Using QF_BV Theory";
+}
+
+void Logger::add_fixed_terminal(std::string const & name,
+                                size_t const x,
+                                size_t const y)
+{
+    std::stringstream msg;
+    msg << "Add Fixed Terminal (" << name << ") at " << x << ":" << y;
+    LOG(eDebug) << msg.str();
+}
+
+void Logger::add_free_terminal(std::string const & name)
+{
+    std::stringstream msg;
+    msg << "Add Free Terminal (" << name << ")";
+    LOG(eDebug) << msg.str();
+}
+
+void Logger::print_header(std::stringstream const & header)
+{
+    LOG(eStdOut) << header.str();
+}
+
+void Logger::print_version(std::string const & date,
+                           std::string const & commit,
+                           std::string const& author,
+                           size_t const max_len)
+{
+    size_t const outline = 14;
+    std::stringstream date_stream;
+    std::stringstream commit_stream;
+    std::stringstream author_stream;
+    
+    commit_stream << std::left << std::setw(outline) << std::setfill(' ') << "Git Hash: "  << commit;
+    author_stream << std::left << std::setw(outline) << std::setfill(' ') << "Last Author: "  << author;
+    date_stream << std::left << std::setw(outline) << std::setfill(' ') << "Last Changes: " << date;
+    
+    LOG(eStdOut) << commit_stream.str();
+    LOG(eStdOut) << author_stream.str();
+    LOG(eStdOut) << date_stream.str();
+    LOG(eStdOut) << std::string (max_len, '-');
+    LOG(eStdOut) << "";
 }

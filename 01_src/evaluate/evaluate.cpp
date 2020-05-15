@@ -14,6 +14,7 @@
 using namespace Placer;
 
 Evaluate::Evaluate(MacroCircuit* mckt):
+    Object(),
     m_mckt(mckt)
 {
     assert (mckt != nullptr);
@@ -84,8 +85,15 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                 assert (0);
             }
         } else if (from->is_terminal()){
-            from_x = from->get_terminal()->get_solution_pin_pos_x(solution);
-            from_y = from->get_terminal()->get_solution_pin_pos_y(solution);
+            Terminal* terminal = from->get_terminal();
+
+            if (terminal->is_free()){
+                from_x = terminal->get_solution_pin_pos_x(solution);
+                from_y = terminal->get_solution_pin_pos_y(solution);
+            } else {
+                from_x = terminal->get_pin_pos_x().get_numeral_uint();
+                from_y = terminal->get_pin_pos_y().get_numeral_uint();
+            }
         } else {
             assert (0);
         }
@@ -102,8 +110,15 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                 assert (0);
             }
         } else if (to->is_terminal()){
-            to_x = to->get_terminal()->get_solution_pin_pos_x(solution);
-            to_y = to->get_terminal()->get_solution_pin_pos_y(solution);
+            Terminal* terminal = to->get_terminal();
+
+            if (terminal->is_free()){
+                to_x = terminal->get_solution_pin_pos_x(solution);
+                to_y = terminal->get_solution_pin_pos_y(solution);
+            } else {
+                to_x = terminal->get_pin_pos_x().get_numeral_uint();
+                to_y = terminal->get_pin_pos_y().get_numeral_uint();
+            }
         } else {
             assert (0);
         }

@@ -107,6 +107,7 @@ private:
     size_t m_layout_y;
     
     void handle_supplement();
+    void resolve_pin_position();
     
     /**
      * SMT Encoding
@@ -114,10 +115,13 @@ private:
     void encode_pins_on_macro_frontier();
     void encode_pins_non_overlapping();
     void encode_pins_center_of_macro();
+    void encode_pins_relative_to_center();
     
+    z3::expr m_pin_constraints;
     z3::expr m_encode_pin_macro_frontier;
     z3::expr m_encode_pins_not_overlapping;
     z3::expr m_encode_pins_center_of_macro;
+    z3::expr m_encode_pins_relative_to_center;
     
     z3::expr m_bool_orientation;
 };

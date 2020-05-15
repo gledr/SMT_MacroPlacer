@@ -53,8 +53,8 @@ Pin::Pin(std::string const & pin_name,
     m_direction(direction),
     m_pin_pos_x(m_encode->get_constant(macro_name + pin_name + "_pos_x")),
     m_pin_pos_y(m_encode->get_constant(macro_name + pin_name + "_pos_y")),
-    m_offset_x(0),
-    m_offset_y(0),
+    m_offset_x_percentage(0),
+    m_offset_y_percentage(0),
     m_is_placed(false)
 {
     this->get_verbose() && std::cout << "[Info]: Adding Free Pin " << macro_name << "_" << pin_name << std::endl;
@@ -278,43 +278,43 @@ size_t Pin::get_solution_pin_pos_y(size_t const sol)
 }
 
 /**
- * @brief Set X Coordinate Offset to Center
+ * @brief Set X Coordinate Offset to Center in Percentage
  * 
  * @param offset Offset
  */
-void Pin::set_x_offset(size_t const offset)
+void Pin::set_x_offset_percentage(int const offset)
 {
-    m_offset_x = offset;
+    m_offset_x_percentage = offset;
 }
 
 /**
- * @brief Set Y Coordinate Offset to Center
+ * @brief Set Y Coordinate Offset to Center in Percentage
  * 
- * @param offset p_offset:...
+ * @param offset Offset
  */
-void Pin::set_y_offset(size_t const offset)
+void Pin::set_y_offset_percentage(int const offset)
 {
-    m_offset_y = offset;
+    m_offset_y_percentage = offset;
 }
 
 /**
- * @brief Get X Offset from Center
+ * @brief Get X Offset from Center in Percentage
  * 
- * @return size_t
+ * @return int
  */
-size_t Pin::get_offset_x()
+int Pin::get_offset_x_percentage()
 {
-    return m_offset_x;
+    return m_offset_x_percentage;
 }
 
 /**
- * @brief Get Y Offset from Center
+ * @brief Get Y Offset from Center in Percentage
  * 
- * @return size_t
+ * @return int
  */
-size_t Pin::get_offset_y()
+int Pin::get_offset_y_percentage()
 {
-    return m_offset_y;
+    return m_offset_y_percentage;
 }
 
 /**
@@ -324,7 +324,7 @@ size_t Pin::get_offset_y()
  */
 bool Pin::has_offset_x()
 {
-    return m_offset_x != 0;
+    return m_offset_x_percentage != 0;
 }
 
 /**
@@ -334,5 +334,5 @@ bool Pin::has_offset_x()
  */
 bool Pin::has_offset_y()
 {
-    return m_offset_y != 0;
+    return m_offset_y_percentage != 0;
 }

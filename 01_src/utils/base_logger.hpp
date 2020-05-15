@@ -178,11 +178,10 @@ private:
     bool p_quiet;
     bool p_log_to_shell;
     bool p_log_to_file;
-    
+
     std::string p_working_directory;
     std::string p_file_name;
-    
-    
+
     /**
      * @brief Translate Loglevel to Readable String
      * 
@@ -192,7 +191,7 @@ private:
     std::string log_level_to_string(LogSeverity const level)
     {
         std::string retval;
-        
+
         switch (level) {
             case eInfo: 
                 retval = "[Info]: ";
@@ -215,12 +214,13 @@ private:
                 break;
 
             case eStdOut:
-                retval = "[StdOut]:";
+                //retval = "[StdOut]:";
+                retval = "";
                 break;
         }
         return retval;
     }
-    
+
     /**
      * @brief Log Level Info Active
      * 

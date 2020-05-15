@@ -14,12 +14,12 @@
 using namespace Placer;
 
 /**
- * @brief 
+ * @brief Constructor
  * 
- * @param name 
- * @param id 
- * @param width
- * @param height
+ * @param name      Name of Macro Type
+ * @param id        Unique Macro ID
+ * @param width     Macro Width
+ * @param height    Macro Height
  */
 Macro::Macro(std::string const & name,
              std::string const & id,
@@ -29,8 +29,10 @@ Macro::Macro(std::string const & name,
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_bool_orientation(m_encode->get_flag(false)),
+    m_encode_pins_relative_to_center(m_encode->get_value(0)),
+    m_pin_constraints(m_encode->get_value(0)),
     m_grid_coordinates(m_z3_ctx),
+    m_bool_orientation(m_encode->get_flag(false)),
     m_cost_distribution(m_z3_ctx)
 {
     m_free = true;
@@ -49,15 +51,15 @@ Macro::Macro(std::string const & name,
 }
 
 /**
- * @brief 
+ * @brief Constructor
  * 
- * @param name
- * @param id
- * @param width
- * @param height
- * @param pos_lx 
- * @param pos_ly 
- * @param orientation 
+ * @param name          Name of Macro Type
+ * @param id            Unique Macro ID
+ * @param width         Macro Width
+ * @param height        Macro Height
+ * @param pos_lx        Macro Position X
+ * @param pos_ly        Macro Position Y
+ * @param orientation   Macro Orientation
  */
 Macro::Macro(std::string const & name,
              std::string const & id,
@@ -70,6 +72,8 @@ Macro::Macro(std::string const & name,
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
+    m_encode_pins_relative_to_center(m_encode->get_value(0)),
+    m_pin_constraints(m_encode->get_value(0)),
     m_bool_orientation(m_encode->get_flag(false)),
     m_grid_coordinates(m_z3_ctx),
     m_cost_distribution(m_z3_ctx)
@@ -89,14 +93,17 @@ Macro::Macro(std::string const & name,
 }
 
 /**
- * @brief 
+ * @brief Constructor
  * 
- * @param name
- * @param id 
- * @param width 
- * @param height 
- * @param layout_x
- * @param layout_y 
+ * Constructor for Grid/Cell Based Approach
+ * 
+ * @param name      Macro Type
+ * @param id        Unique Macro ID
+ * @param width     Macro Width
+ * @param height    Macro Height
+ * @param layout_x  Applied Grid Size X
+ * @param layout_y  Applied Grid Size Y
+ * @param lut       Cost Function for Grid Encoding
  */
 Macro::Macro(std::string const & name,
              std::string const & id,
@@ -109,8 +116,10 @@ Macro::Macro(std::string const & name,
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_bool_orientation(m_encode->get_flag(false)),
+    m_encode_pins_relative_to_center(m_encode->get_value(0)),
+    m_pin_constraints(m_encode->get_value(0)),
     m_grid_coordinates(m_z3_ctx),
+    m_bool_orientation(m_encode->get_flag(false)),
     m_cost_distribution(m_z3_ctx),
     m_lut(lut)
 {
@@ -131,7 +140,7 @@ Macro::Macro(std::string const & name,
 }
 
 /**
- * @brief 
+ * @brief  Destructor
  */
 Macro::~Macro()
 {
@@ -142,43 +151,86 @@ Macro::~Macro()
     m_supplement = nullptr;
 }
 
+/**
+ * @brief Check Macro Position North Clause
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::is_N()
 {
     return m_orientation == m_encode->get_value(eNorth);
 }
 
+/**
+ * @brief Check West Position North Clause
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::is_W()
 {
     return m_orientation == m_encode->get_value(eWest);
 }
 
+/**
+ * @brief Check Macro Position South Clause
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::is_S()
 {
     return m_orientation == m_encode->get_value(eSouth);
 }
 
+/**
+ * @brief Check Macro Position East Clause
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::is_E()
 {
     return m_orientation == m_encode->get_value(eEast);
 }
 
+/**
+ * @brief Check Macro Position North Clause
+ * 
+ * Function only Valid for Grid Encoding Approach
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::is_bool_N()
 {
     return (m_bool_orientation == m_encode->get_flag(false));
 }
 
+/**
+ * @brief Check Macro Position West Clause
+ * 
+ * Function only Valid for Grid Encoding Approach
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::is_bool_W()
 {
     return (m_bool_orientation == m_encode->get_flag(true));
 }
 
+/**
+ * @brief Get Orientation Clause
+ * 
+ * Function only Valid for Grid Encoding Approach
+ * 
+ * @return z3::expr
+ */
 z3::expr Macro::get_bool_orientation()
 {
     return m_bool_orientation;
 }
 
 /**
- * @brief 
+ * @brief Init Grid for Grid Encoding Approach
+ * 
+ * Function only Valid for Grid Encoding Approach
  */
 void Macro::init_grid()
 {
@@ -194,7 +246,9 @@ void Macro::init_grid()
 }
 
 /**
- * @brief 
+ * @brief Encode Macro on Grid
+ * 
+ * Function only Valid for Grid Encoding Approach
  * 
  * @return z3::expr
  */
@@ -353,7 +407,7 @@ std::vector<Pin*> Macro::get_pins()
 }
 
 /**
- * @brief 
+ * @brief Check if Macro is free o
  * 
  * @return bool
  */
@@ -390,19 +444,22 @@ void Macro::handle_supplement()
 }
 
 /**
- * @brief 
+ * @brief Get Macro Area
  * 
  * @return size_t
  */
 size_t Macro::get_area()
 {
+    assert (m_width.is_numeral());
+    assert (m_height.is_numeral());
+    
     return m_width.get_numeral_uint() * m_height.get_numeral_uint();
 }
 
 /**
- * @brief 
+ * @brief Dump Macro Information to given stream
  * 
- * @param stream 
+ * @param stream Stream to dump to
  */
 void Macro::dump(std::ostream & stream)
 {
@@ -417,15 +474,78 @@ void Macro::dump(std::ostream & stream)
 }
 
 /**
- * @brief 
+ * @brief Encode Macro Pins
  */
 void Macro::encode_pins()
 {
+    z3::expr_vector clauses(m_z3_ctx);
+#if 0
+    // Pins are at the center of the Macro
+    this->encode_pins_center_of_macro();
+    
+    // Pins are at the macro edge non overlapping
+    this->encode_pins_on_macro_frontier();
+    this->encode_pins_non_overlapping();
+#endif
+    // Pins are positioned relative to the macro center
+    this->encode_pins_relative_to_center();
+
+    clauses.push_back(m_encode_pins_relative_to_center);
+    
+    m_pin_constraints =  z3::mk_and(clauses);
+}
+
+/**
+ * @brief Encode Pins Relative to Center for Bookshelf Data
+ */
+void Macro::encode_pins_relative_to_center()
+{
+    z3::expr_vector clauses(m_z3_ctx);
+
     for (auto itor: m_pins){
         Pin* pin = itor.second;
-        
-        
+        z3::expr relative_x = m_encode->get_value(pin->get_offset_x_percentage());
+        z3::expr relative_y = m_encode->get_value(pin->get_offset_y_percentage());
+        z3::expr offset_x = ((m_width/m_encode->get_value(100))*relative_x);
+        z3::expr offset_y = ((m_height/m_encode->get_value(100))*relative_y);
+
+///{{{  Case N
+        z3::expr_vector case_n(m_z3_ctx);
+        z3::expr center_n_x = m_lx + (m_width/2);
+        z3::expr center_n_y = m_ly + (m_height/2);
+        case_n.push_back(pin->get_pin_pos_x() == (center_n_x + offset_x));
+        case_n.push_back(pin->get_pin_pos_y() == (center_n_y + offset_y));
+///}}}
+///{{{  Case W
+        z3::expr_vector case_w(m_z3_ctx);
+        z3::expr center_w_x = m_lx - (m_height/2);
+        z3::expr center_w_y = m_ly + (m_width/2);
+        case_w.push_back(pin->get_pin_pos_x() == (center_w_x + offset_x));
+        case_w.push_back(pin->get_pin_pos_y() == (center_w_y + offset_y));
+///}}}
+///{{{  Case S
+        z3::expr_vector case_s(m_z3_ctx);
+        z3::expr center_s_n = m_lx - (m_width/2);
+        z3::expr center_s_y = m_ly - (m_height/2);
+        case_s.push_back(pin->get_pin_pos_x() == (center_s_n + offset_x));
+        case_s.push_back(pin->get_pin_pos_y() == (center_s_y + offset_y));
+///}}}
+///{{{  Case E
+        z3::expr_vector case_e(m_z3_ctx);
+        z3::expr center_e_x = m_lx + (m_height/2);
+        z3::expr center_e_y = m_ly - (m_width/2);
+        case_e.push_back(pin->get_pin_pos_x() == (center_e_x + offset_x));
+        case_e.push_back(pin->get_pin_pos_y() == (center_e_y + offset_y));
+///}}}
+        z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
+                          z3::ite(this->is_W(), z3::mk_and(case_w),
+                          z3::ite(this->is_S(), z3::mk_and(case_s),
+                          z3::ite(this->is_E(), z3::mk_and(case_e),
+                                  m_z3_ctx.bool_val(false)))));
+
+        clauses.push_back(clause);
     }
+    m_encode_pins_relative_to_center = z3::mk_and(clauses);
 }
 
 /**
@@ -592,6 +712,8 @@ void Macro::encode_pins_non_overlapping()
 {
     z3::expr_vector clauses(m_z3_ctx);
     
+    assert (0);
+    
     m_encode_pins_not_overlapping = z3::mk_and(clauses);
 }
 
@@ -639,12 +761,13 @@ void Macro::encode_pins_center_of_macro()
 }
 
 /**
- * @brief 
+ * @brief Get Clauses for Pins Relative to Macro
  * 
  * @return z3::expr
  */
 z3::expr Macro::get_pin_constraints()
 {
+    return m_pin_constraints;
 }
 
 /**
@@ -675,6 +798,11 @@ void Macro::add_solution_grid(size_t const x, size_t const y)
     m_grid_solutions.push_back(std::make_pair(x,y));
 }
 
+/**
+ * @brief Identify the Root Cell 
+ * 
+ * Function only Valid for Grid Encoding Approach
+ */
 void Macro::calculate_root()
 {
     // North

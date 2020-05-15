@@ -113,35 +113,31 @@ void MacroCircuit::build_circuit()
             if(!found){
                 throw std::runtime_error("Site (" + this->get_site() + ") not found!");
             }
-            
             if (!this->get_minimize_die_mode()){
                 m_layout->set_lx(m_circuit->defDieArea.xl());
                 m_layout->set_ux(m_circuit->defDieArea.xh());
                 m_layout->set_ly(m_circuit->defDieArea.yl());
                 m_layout->set_uy(m_circuit->defDieArea.yh());
-                
-                std::cout << m_circuit->defDieArea.xl() << ":" << m_circuit->defDieArea.yl() << std::endl;
-                std::cout << m_circuit->defDieArea.xh() << ":" << m_circuit->defDieArea.yh() << std::endl;
             }
-         
+
             this->create_macro_definitions();
             std::thread area_estimator(&MacroCircuit::area_estimator, this);
             area_estimator.join();
 
-            this->calculate_gcd();
+            //this->calculate_gcd();
             
             m_logger->min_die_area(m_estimated_area);
 
-            auto biggest_macro = this->biggest_macro();
-            std::cout << "Biggest Macro " << biggest_macro.first << " " << biggest_macro.second << std::endl;
+            //auto biggest_macro = this->biggest_macro();
+            //std::cout << "Biggest Macro " << biggest_macro.first << " " << biggest_macro.second << std::endl;
 
-            size_t max_size = std::max(biggest_macro.first, biggest_macro.second);
-            m_layout_x = std::ceil(sqrt(m_estimated_area)) + max_size;
-            m_layout_y = std::ceil(sqrt(m_estimated_area)) + max_size;
+            //size_t max_size = std::max(biggest_macro.first, biggest_macro.second);
+            //m_layout_x = std::ceil(sqrt(m_estimated_area)) + max_size;
+            //m_layout_y = std::ceil(sqrt(m_estimated_area)) + max_size;
             
-            std::cout << "Setting Layout to: " << m_layout_x << ":" << m_layout_y << std::endl;
+            //std::cout << "Setting Layout to: " << m_layout_x << ":" << m_layout_y << std::endl;
             
-            m_lut->init_lookup_table(m_layout_x, m_layout_y);
+            //m_lut->init_lookup_table(m_layout_x, m_layout_y);
 
             std::thread macro_worker(&MacroCircuit::add_macros, this);
             std::thread cell_worker(&MacroCircuit::add_cells, this);
@@ -162,8 +158,7 @@ void MacroCircuit::build_circuit()
             this->set_design_name(m_bookshelf->get_design_name());
             m_estimated_area = m_bookshelf->get_estimated_area();
             m_logger->min_die_area(m_estimated_area);
-            
-            
+
             if (!this->get_parquet_fp()){
                 if (!this->get_minimize_die_mode()){
                     if (m_bookshelf->could_deduce_layout()){
@@ -442,9 +437,8 @@ void MacroCircuit::add_terminals()
  */
 void MacroCircuit::dump_all()
 {
-    std::cout << m_solutions << std::endl;
     m_logger->dump_all();
-    
+
     for(size_t i = 0; i < m_solutions; ++i){
         this->create_image(i);
     }
@@ -455,6 +449,7 @@ void MacroCircuit::dump_all()
  */
 void MacroCircuit::dump_best()
 {
+    std::cout << "Dump best" << std::endl;
     std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
     this->create_image(best_hpwl.first);
     std::cout << "Best Solution: HPWL = " << best_hpwl.second << std::endl;
@@ -1043,6 +1038,14 @@ void MacroCircuit::run_encoding()
     this->encode_components_inside_die(e2D);
     this->encode_components_non_overlapping(e2D);
     
+    if (this->get_free_terminals()){
+        this->encode_terminals_non_overlapping();
+        this->encode_terminals_on_frontier();
+        
+        m_z3_opt->add(m_terminals_non_overlapping);
+        m_z3_opt->add(m_terminals_on_frontier);
+    }
+
     m_z3_opt->add(m_components_inside_die);
     m_z3_opt->add(m_components_non_overlapping);
     m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
@@ -1050,7 +1053,7 @@ void MacroCircuit::run_encoding()
     if (this->get_minimize_die_mode()){
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
-    
+
         if(this->get_box_optimizer()){
             m_z3_opt->minimize(m_layout->get_uy() + m_layout->get_ux());
             m_z3_opt->check();
@@ -1484,18 +1487,20 @@ void MacroCircuit::solve()
             do {
                 z3::model m = m_z3_opt->get_model();
 
-                size_t ux =  m.eval(m_layout->get_ux()).get_numeral_uint();
-                size_t uy =  m.eval(m_layout->get_uy()).get_numeral_uint();
-                    
-                double area_estimation = (((ux) * (uy)));
-                double min_area = this->get_minimal_die_size_prediction();
-                double white_space = 100 - ((min_area/area_estimation)*100.0);
-                m_logger->result_die_area(area_estimation);
-                m_logger->white_space(white_space);
+                if (this->get_minimize_die_mode()){
+                    size_t ux =  m.eval(m_layout->get_ux()).get_numeral_uint();
+                    size_t uy =  m.eval(m_layout->get_uy()).get_numeral_uint();
+                        
+                    double area_estimation = (((ux) * (uy)));
+                    double min_area = this->get_minimal_die_size_prediction();
+                    double white_space = 100 - ((min_area/area_estimation)*100.0);
+                    m_logger->result_die_area(area_estimation);
+                    m_logger->white_space(white_space);
 
-                m_layout->set_solution_ux(ux);
-                m_layout->set_solution_uy(uy);
-                m_logger->add_solution_layout(ux, uy);
+                    m_layout->set_solution_ux(ux);
+                    m_layout->set_solution_uy(uy);
+                    m_logger->add_solution_layout(ux, uy);
+                }
                 m_solutions++;
                     
                 for(Component* component: m_components){
@@ -1510,16 +1515,30 @@ void MacroCircuit::solve()
                         component->add_solution_orientation(o);
 
                         m_logger->place_macro(component->get_id(), x ,y, o);
-                    }
+                }
 
-                    if(/*this->get_pareto_optimizer() &&*/  (m_solutions < this->get_max_solutions())){
-                        m_logger->pareto_step();
-                        sat = m_z3_opt->check();
-
-                    } else {
-                        break;
+                for (Terminal* terminal: m_terminals){
+                    z3::expr clause_x = m.eval(terminal->get_pin_pos_x());
+                    z3::expr clause_y = m.eval(terminal->get_pin_pos_y());
+                    
+                    if (clause_x.is_numeral()){
+                        size_t pos_x = clause_x.get_numeral_uint();
+                        terminal->add_solution_pin_pos_x(pos_x);
                     }
-                } while (sat == z3::check_result::sat);
+                    if (clause_y.is_numeral()){
+                        size_t pos_y = clause_y.get_numeral_uint();
+                        terminal->add_solution_pin_pos_y(pos_y);
+                    }
+                }
+
+                if(/*this->get_pareto_optimizer() &&*/  (m_solutions < this->get_max_solutions())){
+                    m_logger->pareto_step();
+                    sat = m_z3_opt->check();
+
+                } else {
+                    break;
+                }
+            } while (sat == z3::check_result::sat);
 #if 0
                  z3::model model = m_z3_opt->get_model();
 
@@ -1596,21 +1615,23 @@ void MacroCircuit::dump_smt_instance()
  */
 void MacroCircuit::best_result()
 {
-
-    std::pair<size_t, size_t> results;
-    results.first = UINT_MAX;
-    results.second = UINT_MAX;
-    
-   for (size_t i = 0; i < m_solutions;++i){
-        size_t x = m_layout->get_solution_ux(i);
-        size_t y = m_layout->get_solution_uy(i);
-        size_t a = x*y;
+    if (this->get_minimize_die_mode()){
+        std::pair<size_t, size_t> results;
+        results.first = UINT_MAX;
+        results.second = UINT_MAX;
         
-        if (a < results.second){
-            results = std::make_pair(i, a);
+        for (size_t i = 0; i < m_solutions;++i){
+                size_t x = m_layout->get_solution_ux(i);
+                size_t y = m_layout->get_solution_uy(i);
+                size_t a = x*y;
+                
+                if (a < results.second){
+                    results = std::make_pair(i, a);
+                }
         }
-   }
-   std::cout << "Min Die Area: " << results.second << std::endl;
+        std::cout << "Min Die Area: " << results.second << std::endl;
+    }
+  
 
 #if 0
    std::pair<size_t, size_t> max_coordinate;

@@ -12,8 +12,9 @@
 #ifndef EVALUATE_HPP
 #define EVALUATE_HPP
 
+#include <object.hpp>
 #include <component.hpp>
-#include "macrocircuit.hpp"
+#include <macrocircuit.hpp>
 
 #include <cmath>
 #include <algorithm>
@@ -24,7 +25,7 @@ namespace Placer {
 
 class MacroCircuit;
 
-class Evaluate {
+class Evaluate: public virtual Object {
 public:
     Evaluate(MacroCircuit* mckt);
 

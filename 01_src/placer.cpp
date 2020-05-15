@@ -15,10 +15,10 @@ using namespace Placer;
 using namespace Placer::Utils;
 
 /**
- * @brief 
- * 
- * @param argc
- * @param argv
+ * @brief Constructor
+ *
+ * @param argc Command Line Arguments Counter
+ * @param argv Command Line Arguments Value
  */
 MacroPlacer::MacroPlacer(int const argc, char ** argv):
     Object()
@@ -30,7 +30,7 @@ MacroPlacer::MacroPlacer(int const argc, char ** argv):
 }
 
 /**
- * @brief 
+ * @brief Destructor
  */
 MacroPlacer::~MacroPlacer()
 {
@@ -42,7 +42,7 @@ MacroPlacer::~MacroPlacer()
 }
 
 /**
- * @brief 
+ * @brief Read Configuration by Commandline and Inifile
  */
 void MacroPlacer::read_configuration()
 {
@@ -75,7 +75,7 @@ void MacroPlacer::read_configuration()
             ("site",                boost::program_options::value<std::string>(),   "Specifies the used site for the Standard/Macro Cells")
             ("timeout",             boost::program_options::value<size_t>(),        "Timeout for Solving a SAT Instance")
             ("solutions",           boost::program_options::value<size_t>(),        "Maximum Number of AllSAT results to generate");
-        
+
         // Top Level Priority: Command Line:
         boost::program_options::command_line_parser parser(m_argc, m_argv);
         parser.options(*m_options_functions).allow_unregistered().style(
@@ -166,27 +166,24 @@ void MacroPlacer::read_configuration()
         if(m_vm.count("minimize-area")){
             this->set_minimize_die_mode(true);
         }
-        
+
         if((this->get_def().empty() || this->get_lef().empty()) && this->get_bookshelf_file().empty()){
             delete m_options_functions; m_options_functions = nullptr;
             throw std::runtime_error("No LEF/DEF or Bookshelf file has been specified!");
         }
-
         if(this->get_site().empty() && this->get_bookshelf_file().empty()){
             delete m_options_functions; m_options_functions = nullptr;
             throw std::runtime_error("Site has not been specified!");
         }
-        
         if(!this->get_def().empty() &&!boost::filesystem::exists(this->get_def())){
             delete m_options_functions; m_options_functions = nullptr;
             throw std::runtime_error("Could not find DEF File!");
         }
-
         if(!this->get_bookshelf_file().empty() && !boost::filesystem::exists(this->get_bookshelf_file())){
             delete m_options_functions; m_options_functions = nullptr;
             throw std::runtime_error("Could not find Bookshelf file!");
         }
-        
+
         if(!this->get_lef().empty()){
             for(auto itor: this->get_lef()){
                 if(!boost::filesystem::exists(itor)){
@@ -203,14 +200,14 @@ void MacroPlacer::read_configuration()
         this->set_smt_directory("smt");
         this->set_parquet_directory("parquet");
         this->set_log_name("placer.log");
-        
+
         boost::filesystem::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));
-        
+
         // Create Logger Singleton once the Commandline Information is known!
         m_logger = Utils::Logger::getInstance();
         m_timer  = new Placer::Utils::Timer();
         m_mckt = new Placer::MacroCircuit();
-        
+
     } catch (std::exception const & exp){
         std::cerr << std::endl;
         std::cerr << "### Configuration Error! ###" << std::endl;
@@ -249,19 +246,19 @@ void MacroPlacer::bash_completion_script()
     script << "\t\t-*)"                             << std::endl;
     script << "\t\tCOMPREPLY=( $( compgen -W ' \\"  << std::endl;
 
-   for(auto itor : m_options_functions->options()){
+    for(auto itor : m_options_functions->options()){
         script << "\t\t\t--" << itor->long_name() << " \\" << std::endl;
-   }
+    }
 
     script << "\t\t\t' -- $cur ) );;" << std::endl;
     script << "\tesac"                << std::endl;
     script                            << std::endl;
     script << "\treturn 0"            << std::endl;
     script << "}"                     << std::endl;
-    
+
     script << std::endl;
     script << "complete -F _smt_placer  smt_placer" << std::endl;
-    
+
    std::string current_path = boost::filesystem::current_path().string();
    std::fstream out_file(current_path + "/bash_completion_script.sh", std::ios::out);
    out_file << script.str();
@@ -269,33 +266,28 @@ void MacroPlacer::bash_completion_script()
 }
 
 /**
- * @brief 
+ * @brief Print Tool Header
  */
 void MacroPlacer::print_header()
 {
     size_t max_len = 0;
-    
-    std::ifstream header (Utils::Utils::get_base_path() + "/01_src/header.ascii");
+    std::stringstream headerstream;
+
+    std::ifstream header (Utils::Utils::get_base_path() + "/01_src/utils/header.ascii");
     std::string line;
     while(std::getline(header, line)){
         if (line.size() > max_len){
             max_len = line.size();
         }
-        std::cout << line << std::endl;
+        headerstream << line << std::endl;
     }
     header.close();
-    
-    size_t const outline = 14;
-    std::cout << std::left << std::setw(outline) << std::setfill(' ') << "Git Hash: "  << GIT_HASH << std::endl;
-    std::cout << std::left << std::setw(outline) << std::setfill(' ') << "Last Author: "  << GIT_NAME << std::endl;
-    std::cout << std::left << std::setw(outline) << std::setfill(' ') << "Last Changes: " << GIT_DATE << std::endl;
-    
-    std::cout << std::string (max_len, '-') << std::endl;
-    std::cout << std::endl;
+    m_logger->print_header(headerstream);
+    m_logger->print_version(GIT_DATE, GIT_HASH, GIT_NAME, max_len);
 }
 
 /**
- * @brief 
+ * @brief Init PLacer
  */
 void MacroPlacer::init ()
 {
@@ -306,52 +298,54 @@ void MacroPlacer::init ()
 }
 
 /**
- * @brief 
+ * @brief Run Placer
  */
 void MacroPlacer::run ()
 {
     m_timer->start_timer("total");
     m_logger->execution_start();
-    
+
     m_mckt->build_circuit();
     m_mckt->partitioning();
     m_mckt->encode();
     m_mckt->place();
-   
+
     m_timer->stop_timer("total");
     m_logger->execution_end();
 }
 
 /**
- * @brief 
+ * @brief Post Process Results
  */
 void MacroPlacer::post_process()
 {
     m_mckt->store_results();
     if(this->get_save_all()){
         m_mckt->save_all();
-    } else if (this->get_save_best()){
+    }
+    if (this->get_save_best()){
         m_mckt->save_best();
     }
 
     if (this->get_dump_all()){
         m_mckt->dump_all();
-    } else if (this->get_dump_best()){
+    }
+    if (this->get_dump_best()){
         m_mckt->dump_best();
     }
-    
+
     m_mckt->best_result();
 }
 
 /**
- * @brief 
+ * @brief Check Results Directory and Returns Id for Next Result
  * 
  * @return size_t
  */
 size_t MacroPlacer::existing_results ()
 {
     size_t retval = 0;
-    
+
     if(boost::filesystem::is_directory(this->get_results_directory())){
         for(auto& file: boost::filesystem::directory_iterator(this->get_results_directory())){
             boost::filesystem::path p(file);
@@ -365,11 +359,15 @@ size_t MacroPlacer::existing_results ()
 }
 
 /**
- * @brief 
+ * @brief Store Used Configuration to Filesystem 
  */
 void MacroPlacer::store_configuration ()
 {
-    std::ofstream config(this->get_results_directory() + "/" + std::to_string(this->get_results_id()) + "/config.ini");
+    std::string filename = this->get_results_directory() + "/" +
+                           std::to_string(this->get_results_id()) +
+                           "/config.ini";
+
+    std::ofstream config(filename);
     config << "def:" << this->get_def() << std::endl;
     config << "lef:";
     for(auto& itor: this->get_lef()){

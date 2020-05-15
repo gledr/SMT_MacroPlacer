@@ -14,8 +14,6 @@
 using namespace Placer;
 
 
-static bool debug = true;
-
 /**
  * @brief Constructor for Free Placeable Terminal
  * 
@@ -25,6 +23,7 @@ static bool debug = true;
 Terminal::Terminal(std::string const & name,
                   e_pin_direction const direction):
     Object(),
+    m_logger(Utils::Logger::getInstance()),
     m_encode(new EncodingUtils()),
     m_name(name),
     m_free(true),
@@ -33,7 +32,7 @@ Terminal::Terminal(std::string const & name,
     m_pin_pos_y(m_encode->get_constant("terminal_" + name + "_y"))
 {
     m_free = true;
-    debug && std::cout << "[Info]: Added Free Terminal " << name << std::endl;
+    m_logger->add_free_terminal(name);
 }
 
 /**
@@ -49,6 +48,7 @@ Terminal::Terminal(std::string const & name,
                    size_t const pos_y,
                    e_pin_direction const direction):
     Object(),
+    m_logger(Utils::Logger::getInstance()),
     m_encode(new EncodingUtils()),
     m_name(name),
     m_free(false),
@@ -57,14 +57,13 @@ Terminal::Terminal(std::string const & name,
     m_pin_pos_y(m_encode->get_value(pos_y))
 {
     m_free = false;
-    debug && std::cout << "[Info]: Added Fixed Terminal " 
-                << name << "(" << pos_x << ":" 
-                << pos_y << ")" << std::endl;
+    m_logger->add_fixed_terminal(name, pos_x, pos_y);
 }
 
 Terminal::~Terminal()
 {
     delete m_encode; m_encode = nullptr;
+    m_logger = nullptr;
 }
 
 std::string Terminal::get_name()
@@ -89,14 +88,14 @@ z3::expr& Terminal::get_pin_pos_y()
 
 void Terminal::add_solution_pin_pos_x(size_t const val)
 {
-    debug && std::cout << "[Debug]: Set Solution for x: " << val << std::endl;
+    //debug && std::cout << "[Debug]: Set Solution for x: " << val << std::endl;
 
     m_solutions_x.push_back(val);
 }
 
 void Terminal::add_solution_pin_pos_y(size_t const val)
 {
-    debug && std::cout << "[Debug]: Set Solution for y: " << val << std::endl;
+    //debug && std::cout << "[Debug]: Set Solution for y: " << val << std::endl;
 
     m_solutions_y.push_back(val);
 }

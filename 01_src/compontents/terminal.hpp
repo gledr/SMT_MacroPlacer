@@ -17,6 +17,7 @@
 
 #include <object.hpp>
 #include <pin.hpp>
+#include <logger.hpp>
 #include <encoding_utils.hpp>
 
 namespace Placer {
@@ -62,6 +63,7 @@ public:
     virtual void dump(std::ostream & stream = std::cout);
 
 private:
+    Utils::Logger* m_logger;
     EncodingUtils* m_encode;
     std::string m_name;
     bool m_free;

@@ -106,6 +106,7 @@ public:
                            size_t const x,
                            size_t const y);
 
+    void export_db_to_csv(std::string const & filename);
     void print_header(std::stringstream const & header);
     void print_version(std::string const & date,
                       std::string const & commit,

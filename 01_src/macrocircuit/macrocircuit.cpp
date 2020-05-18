@@ -38,9 +38,6 @@ MacroCircuit::MacroCircuit():
     m_circuit = nullptr;
     m_solutions = 0;
     m_bookshelf = nullptr;
-    
-    m_gcd_w = 0;
-    m_gcd_h = 0;
 }
 
 /**
@@ -128,20 +125,7 @@ void MacroCircuit::build_circuit()
             std::thread area_estimator(&MacroCircuit::area_estimator, this);
             area_estimator.join();
 
-            //this->calculate_gcd();
-
             m_logger->min_die_area(m_estimated_area);
-
-            //auto biggest_macro = this->biggest_macro();
-            //std::cout << "Biggest Macro " << biggest_macro.first << " " << biggest_macro.second << std::endl;
-
-            //size_t max_size = std::max(biggest_macro.first, biggest_macro.second);
-            //m_layout_x = std::ceil(sqrt(m_estimated_area)) + max_size;
-            //m_layout_y = std::ceil(sqrt(m_estimated_area)) + max_size;
-            
-            //std::cout << "Setting Layout to: " << m_layout_x << ":" << m_layout_y << std::endl;
-            
-            //m_lut->init_lookup_table(m_layout_x, m_layout_y);
 
             std::thread macro_worker(&MacroCircuit::add_macros, this);
             std::thread cell_worker(&MacroCircuit::add_cells, this);
@@ -370,10 +354,8 @@ void MacroCircuit::add_macros()
         Macro* m = new Macro(macro_definition.name,
                              macro_definition.id,
                              macro_definition.width,
-                             macro_definition.height/*,
-                             m_layout_x/m_gcd_w,
-                             m_layout_y/m_gcd_h,
-                             m_lut*/);
+                             macro_definition.height);
+
         for (PinDefinition pin_definition: macro_definition.pin_definitions){
             Pin* p = new Pin(pin_definition.parent,
                              pin_definition.name,
@@ -587,35 +569,6 @@ void MacroCircuit::create_image(size_t const solution)
         
         std::string cmd = "gnuplot " + gnu_plot_script;
         system(cmd.c_str());
-
-#if 0 //  Grid Approach
-    std::string gnu_plot_script = "script_" + std::to_string(solution) + ".plt";
-
-    size_t die_ux = std::ceil(sqrt(m_estimated_area))/*+std::max(this->biggest_macro().first, this->biggest_macro().second)*/;
-    size_t die_uy = std::ceil(sqrt(m_estimated_area))/*+std::max(this->biggest_macro().first, this->biggest_macro().second)*/;
-  
-    std::stringstream img_name;
-    img_name << "placement_" << this->get_design_name() << "_" << solution << ".png";
-    std::ofstream gnu_plot_file(gnu_plot_script);
-    gnu_plot_file << "set terminal png size 400,300;"  << std::endl;
-    gnu_plot_file << "set output '" << img_name.str() << "';" << std::endl;
-    
-    gnu_plot_file << "set xrange[" << 0 << ":" << std::to_string(die_ux) << "];" << std::endl;
-    gnu_plot_file << "set yrange[" << 0 << ":" << std::to_string(die_uy) << "];" << std::endl;
-
-    for(size_t j = 0; j < m_macros.size(); ++j){
-        gnu_plot_file  << "set object " << j+1 << " rect from " << std::to_string(m_macros[j]->get_solution_root().first) << "," << 
-                                                                   std::to_string(m_macros[j]->get_solution_root().second) << " to "  << 
-                                                                   std::to_string(m_macros[j]->get_solution_root().first + m_macros[j]->get_width().get_numeral_uint())<< ","<< std::to_string(m_macros[j]->get_solution_root().second + m_macros[j]->get_height().get_numeral_uint()) <<" lw 5;"<< std::endl;
-                                                                   
-      }
-      
-    gnu_plot_file << "plot x " << std::endl,
-    gnu_plot_file.close();
-        
-    std::string cmd = "gnuplot " + gnu_plot_script;
-    system(cmd.c_str());
-#endif
 }
 
 /**
@@ -853,16 +806,6 @@ void MacroCircuit::dump(std::ostream& stream)
 }
 
 /**
- * @brief Get minimal needed die area possible for given problem
- * 
- * @return size_t
- */
-size_t MacroCircuit::get_minimal_die_size_prediction()
-{
-    return m_estimated_area;
-}
-
-/**
  * @brief Calculate the minimum possible die are for given problem
  */
 void MacroCircuit::area_estimator()
@@ -876,92 +819,6 @@ void MacroCircuit::area_estimator()
     m_layout->set_min_die_predition(m_estimated_area);
 }
 
-/**
- * @brief Store generated results to filesystem
- */
-void MacroCircuit::store_results()
-{
-    if(!m_layout->get_ux().is_const()){
-        std::ofstream results(this->get_results_directory() + "/" + std::to_string(this->get_results_id()) + "/results.txt");
-        for(size_t i = 0; i < m_solutions; i++){
-            results << "Solution: " << i << std::endl;
-            results << "die_ux:" << m_layout->get_solution_ux(i) << std::endl;
-            results << "die_uy:" << m_layout->get_solution_uy(i) << std::endl;
-            results << "die_area:" << ((((double)m_layout->get_solution_ux(i)) * ((double)m_layout->get_solution_uy(i)))/1000000);
-            results << std::endl;
-        }
-
-        size_t best_area = m_layout->get_idx_best_solution();
-        results << "Best Result [Geometric]: " << best_area << std::endl;
-        results << "die_ux:" << m_layout->get_solution_ux(best_area) << std::endl;
-        results << "die_uy:" << m_layout->get_solution_uy(best_area) << std::endl;
-        results << "die_area:" << std::fixed << ((((double)m_layout->get_solution_ux(best_area)) * ((double)m_layout->get_solution_uy(best_area)))/1000000);
-
-        results.close();
-    }
-}
-
-/**
- * @brief Calcualte the biggest used macro
- * 
- * @return std::pair< size_t, size_t >
- */
-std::pair<size_t, size_t> MacroCircuit::biggest_macro()
-{
-    size_t w = 0;
-    size_t h = 0;
-
-    for (MacroDefinition macro_definition: m_macro_definitions){
-        if(macro_definition.width > w){
-            w = macro_definition.width;
-        }
-        if(macro_definition.height > h){
-            h = macro_definition.height;
-        }
-    }
-
-    return std::make_pair(w,h);
-}
-
-/**
- * @brief Get access to the used macros
- * 
- * @return std::vector< Placer::Macro* >&
- */
-std::vector<Macro*>& MacroCircuit::get_macros()
-{
-    return m_macros;
-}
-
-/**
- * @brief Get access to the used partitions
- * 
- * @return std::vector< Placer::Partition* >&
- */
-std::vector<Partition *> & MacroCircuit::get_partitions()
-{
-    return m_partitons;
-}
-
-/**
- * @brief Get access to the used terminals
- * 
- * @return std::vector< Placer::Terminal* >
- */
-std::vector<Terminal*> MacroCircuit::get_terminals()
-{
-    return m_terminals;
-}
-
-/**
- * @brief Get access to the used components
- * 
- * @return std::vector< Placer::Component* >
- */
-std::vector<Component*> MacroCircuit::get_components()
-{
-    return m_components;
-}
 
 /**
  * @brief Get access to the connectivity tree
@@ -1494,10 +1351,9 @@ void MacroCircuit::solve()
                 if (this->get_minimize_die_mode()){
                     size_t ux =  m.eval(m_layout->get_ux()).get_numeral_uint();
                     size_t uy =  m.eval(m_layout->get_uy()).get_numeral_uint();
-                        
-                    double area_estimation = (((ux) * (uy)));
-                    double min_area = this->get_minimal_die_size_prediction();
-                    double white_space = 100 - ((min_area/area_estimation)*100.0);
+    
+                    double area_estimation = ux * uy;
+                    double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
                     m_logger->result_die_area(area_estimation);
                     m_logger->white_space(white_space);
 
@@ -1615,74 +1471,10 @@ void MacroCircuit::dump_smt_instance()
     out_file << "(get-value(die_uy))" << std::endl;
     out_file << "(get-model)" << std::endl;
     out_file.close();
-    }
-
-/**
- * @brief Search for best result in terms of die area
- */
-void MacroCircuit::best_result()
-{
-    if (this->get_minimize_die_mode()){
-        std::pair<size_t, size_t> results;
-        results.first = UINT_MAX;
-        results.second = UINT_MAX;
-        
-        for (size_t i = 0; i < m_solutions;++i){
-                size_t x = m_layout->get_solution_ux(i);
-                size_t y = m_layout->get_solution_uy(i);
-                size_t a = x*y;
-                
-                if (a < results.second){
-                    results = std::make_pair(i, a);
-                }
-        }
-        std::cout << "Min Die Area: " << results.second << std::endl;
-    }
-  
-
-#if 0
-   std::pair<size_t, size_t> max_coordinate;
-   max_coordinate.first = 0;
-   max_coordinate.second = 0;
-   
-   size_t x = 0;
-   size_t y = 0;
-   
-   for (Macro* m: m_macros){
-       std::pair <size_t, size_t> root = m->get_solution_root();
-       
-       if ((root.first + root.second) > (max_coordinate.first + max_coordinate.second)){
-           max_coordinate = root;
-            x = m->get_width().get_numeral_uint();
-            y = m->get_height().get_numeral_uint();
-        }
-   }
-   
-   std::cout << "Max Coordinate: " << max_coordinate.first << ":" << max_coordinate.second << std::endl;
-   std::cout << "Layout: " << max_coordinate.first + x << ":" << max_coordinate.second + y << std::endl;
-   std::cout << "Die Area Solution: " <<  (max_coordinate.first + x) * (max_coordinate.second + y) << std::endl;
-#endif
-}
-
-void MacroCircuit::calculate_gcd()
-{
-    std::vector<size_t> w;
-    std::vector<size_t> h;
-    
-    for (MacroDefinition macro_def : m_macro_definitions){
-        w.push_back(macro_def.width);
-        h.push_back(macro_def.height);
-    }
-    
-    m_gcd_h = Utils::Utils::gcd(h);
-    m_gcd_w = Utils::Utils::gcd(w);
-    
-    std::cout << "GCD W: " << m_gcd_w << std::endl;
-    std::cout << "GCD H: " << m_gcd_h << std::endl;
 }
 
 /**
- * @brief 
+ * @brief Fill Database with the Obtained Results
  */
 void MacroCircuit::results_to_db()
 {
@@ -1690,5 +1482,9 @@ void MacroCircuit::results_to_db()
         for (Macro* macro: m_macros){
             m_db->place_macro(i, macro);
         }
+        for (Terminal* terminal: m_terminals){
+            m_db->place_terminal(i, terminal);
+        }
     }
+    m_db->export_as_csv("results.csv");
 }

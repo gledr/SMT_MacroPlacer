@@ -33,15 +33,103 @@ std::vector<std::string> Utils::tokenize(std::string const & str, std::string co
     while (std::string::npos != pos || std::string::npos != lastPos) {
         // found a token, add it to the vector.
         tokens.push_back(str.substr(lastPos, pos - lastPos));
-        
+
         // skip delimiters.  Note the "not_of"
         lastPos = str.find_first_not_of(delimiters, pos);
-        
+
         // find next "non-delimiter"
         pos = str.find_first_of(delimiters, lastPos);
     }
 
     return tokens;
+}
+
+/**
+ * @brief Execute a Tool on the Host System
+ * 
+ * @param binary Name of the binary
+ * @param args Command line arguments
+ * @param output Path for the logfile
+ * @param wait_for_termination: Wait until the subprocess has terminated
+ * @return int
+ */
+int Utils::system_execute(std::string const & binary,
+                          std::vector<std::string> & args,
+                          std::string const & output,
+                          bool wait_for_termination)
+{
+    int pid;
+    return Utils::Utils::system_execute(binary,
+                                        args,
+                                        output,
+                                        pid,
+                                        wait_for_termination);
+}
+
+/**
+ * @brief Execute a Tool on the Host System
+ * 
+ * @param binary Name of the binary
+ * @param args Command line arguments
+ * @param output Path for the logfile
+ * @param pid: Pid of the current subprocess 
+ * @param wait_for_termination: Wait until the subprocess has terminated.
+ * @return int
+ */
+int Utils::system_execute(std::string const & binary,
+                          std::vector<std::string> & args,
+                          std::string const & output,
+                          int & pid,
+                          bool wait_for_termination)
+{
+    try {
+        boost::process::ipstream pipe_stream;
+        boost::filesystem::path bin_url(binary);
+        
+        if(binary.find("/") == std::string::npos){
+            bin_url = boost::process::search_path(binary);
+        }
+
+        if(output.empty()){
+            boost::process::child bin(bin_url, boost::process::args(args));
+            pid = bin.id();
+            
+            if(wait_for_termination){
+                bin.wait();
+                return bin.exit_code();
+            } else {
+                bin.detach();
+                return 0;
+            }
+        } else {
+            std::ofstream log(output);
+            std::string line;
+            boost::process::child bin(bin_url,
+                                      boost::process::args(args),
+                                      boost::process::std_err > pipe_stream);
+            pid = bin.id();
+
+            while (pipe_stream && std::getline(pipe_stream, line) && !line.empty()){
+                log << line << std::endl;
+            }
+
+            if(wait_for_termination){
+                bin.wait();
+                return bin.exit_code();
+            } else {
+                bin.detach();
+            }
+
+            log.close();
+
+            return 0;
+        }
+
+    } catch (boost::process::process_error const & exp){
+        throw std::runtime_error(exp.what());
+    } catch (std::exception const & exp){
+        throw std::runtime_error(exp.what());
+    }
 }
 
 /**
@@ -80,14 +168,14 @@ std::string Utils::get_bash_string_purple(const std::string& str)
  * @return std::string
  */
 std::string Utils::get_base_path()
-{   
+{
     std::string file_content;
     std::string home_folder = getenv("HOME");
     std::string path = home_folder + "/.smt_placer/config.txt";
     std::fstream in_file(path, std::ios::in);
     std::getline(in_file, file_content);
     in_file.close();
-    
+
     return Utils::tokenize(file_content, "=")[1];
 }
 
@@ -150,7 +238,7 @@ std::string Utils::get_current_time()
 {
     auto time_now = std::chrono::system_clock::now();
     std::time_t now = std::chrono::system_clock::to_time_t(time_now);
-    
+
     return std::ctime(&now);
 }
 
@@ -163,7 +251,7 @@ std::string Utils::get_current_user()
 {
     char buf[50];
     getlogin_r(buf, 50);
-    
+
     return std::string(buf);
 }
 
@@ -178,65 +266,4 @@ std::string Utils::get_plattform()
     uname(&name);
 
     return std::string(name.sysname) + " " + std::string(name.release) + " " + std::string(name.machine);
-}
-
-/**
- * @brief Execute a Tool on the Host System
- * 
- * @param binary Name of the binary
- * @param args Command line arguments
- * @param output Path for the logfile
- * @param wait_for_termination: Wait until the subprocess has terminated.
- * @return int
- */
-int Utils::system_execute(std::string const & binary,
-                          std::vector<std::string> & args,
-                          std::string const & output,
-                          bool wait_for_termination)
-{
-    try {
-        boost::process::ipstream pipe_stream;
-        boost::filesystem::path bin_url(binary);
-        int pid = 0;
-        
-        if(binary.find("/") == std::string::npos){
-            bin_url = boost::process::search_path(binary);
-        }
-
-        if(output.empty()){
-            boost::process::child bin(bin_url, boost::process::args(args));
-            pid = bin.id();
-
-            if(wait_for_termination){
-                bin.wait();
-                return bin.exit_code();
-            } else {
-                bin.detach();
-                return 0;
-            }
-        } else {
-            std::ofstream log(output);
-            std::string line;
-            boost::process::child bin(bin_url, boost::process::args(args), boost::process::std_err > pipe_stream);
-            pid = bin.id();
-
-            while (pipe_stream && std::getline(pipe_stream, line) && !line.empty()){
-                log << line << std::endl;
-            }
-
-            if(wait_for_termination){
-                bin.wait();
-                return bin.exit_code();
-            } else {
-                bin.detach();
-            }
-
-            log.close();
-            
-            return 0;
-        }
-
-    } catch (boost::process::process_error const & exp){
-        assert (0);
-    }
 }

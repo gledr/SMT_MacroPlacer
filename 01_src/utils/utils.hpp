@@ -26,6 +26,18 @@ namespace Placer::Utils {
 
 class Utils {
 public:
+
+    static int system_execute(std::string const & bin,
+                              std::vector<std::string> & args,
+                              std::string const & output,
+                              int & pid,
+                              bool wait_for_termination);
+
+    static int system_execute(std::string const & bin,
+                              std::vector<std::string> & args,
+                              std::string const & output,
+                              bool wait_for_termination);
+
     static std::vector<std::string> tokenize(std::string const & str,
                                              std::string const & delimiters);
 
@@ -52,11 +64,6 @@ public:
     static std::string get_current_user();
 
     static std::string get_plattform();
-
-    static int system_execute(std::string const & bin,
-                              std::vector<std::string> & args,
-                              std::string const & output,
-                              bool wait_for_termination);
 
     template<typename T>
     static T gcd(std::vector<T> const & input);

@@ -219,7 +219,7 @@ e_pin_direction Terminal::get_direction() const
 /**
  * @brief Set Direction
  * 
- * @param direction Direction of the Termin
+ * @param direction Direction of the Terminal
  */
 void Terminal::set_direction(e_pin_direction const direction)
 {

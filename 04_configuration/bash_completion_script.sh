@@ -1,4 +1,8 @@
 #! /bin/bash
+#
+# Generted File! Do not modify!
+# Mon May 18 12:14:44 2020
+#
 
 #
 # Howto Z-Shell:
@@ -34,6 +38,7 @@ local cur
 			--parquet \
 			--partition \
 			--minimize-area \
+			--minimize-hpwl \
 			--free-terminals \
 			--partition-size \
 			--def \

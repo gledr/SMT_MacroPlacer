@@ -1,3 +1,13 @@
+#==================================================================
+# Author       : Pointner Sebastian
+# Company      : Johannes Kepler University
+# Name         : SMT Macro Placer
+# Workfile     : install_placer.sh
+#
+# Date         : 18.May 2020
+# Copyright    : Johannes Kepler University
+# Description  : Script to Install the Tool on the Host System
+#==================================================================
 #! /bin/bash
 
 python extract_version.py
@@ -21,5 +31,3 @@ if [ -d $BASE_PATH/01_src/version.hpp ]; then
 fi
 
 mv $BASE_PATH/04_configuration/version.hpp $BASE_PATH/01_src/
-
-

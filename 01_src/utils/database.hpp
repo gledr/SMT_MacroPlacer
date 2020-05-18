@@ -14,9 +14,9 @@
 
 #include <object.hpp>
 #include <base_database.hpp>
-
 #include <macro.hpp>
 #include <terminal.hpp>
+#include <logger.hpp>
 
 namespace Placer::Utils {
 
@@ -35,11 +35,15 @@ public:
 
     void place_terminal(size_t const solution, Terminal* terminal);
 
+    void export_as_csv(std::string const & filename);
+
 private:
     Database (Database const & db);
     Database operator= (Database const & db);
     bool operator== (Database const & db);
     
+    Logger* m_logger;
+
     enum db_transaction {
         e_init                      = 0  ///<
     };

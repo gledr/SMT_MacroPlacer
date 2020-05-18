@@ -1,3 +1,15 @@
+#==================================================================
+# Author       : Pointner Sebastian
+# Company      : Johannes Kepler University
+# Name         : SMT Macro Placer
+# Workfile     : extract_version.py
+# Interpreter  : Python 3.8.2  
+#
+# Date         : 18.May 2020
+# Copyright    : Johannes Kepler University
+# Description  : Script to extract current Git Information
+#==================================================================
+
 #! /bin/env/python
 
 import os

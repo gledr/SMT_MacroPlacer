@@ -21,7 +21,7 @@ using namespace Placer::Utils;
 BaseDatabase::BaseDatabase(std::string const & url)
 {
     p_db_url = url;
-    p_debug = true;
+    p_debug = false;
 }
 
 /**
@@ -42,7 +42,7 @@ void BaseDatabase::db_command(std::string const & command)
 {
     this->open_database();
     p_debug && std::cout << Utils::Utils::get_bash_string_orange("db_command: " + command) << std::endl;
-   
+
     char const * str = command.c_str();
     if(sqlite3_exec(p_db, str, c_callback, this, NULL) != 0){
         std::cout << "here" << std::endl;

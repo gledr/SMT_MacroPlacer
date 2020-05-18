@@ -320,6 +320,19 @@ size_t Layout::get_idx_best_solution()
 }
 
 /**
+ * @brief Check if a particular solution exists
+ * 
+ * @param solution Solution ID to check
+ * @return bool
+ */
+bool Layout::has_solution(int const solution)
+{
+    assert (m_solutions_ux.size() == m_solutions_ux.size());
+
+    return m_solutions_ux.size() > solution;
+}
+
+/**
  * @brief Set clauses for ux
  * 
  * @param formula UX Clauses

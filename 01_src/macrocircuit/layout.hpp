@@ -68,6 +68,7 @@ public:
     bool is_free_ux();
 
     size_t get_idx_best_solution();
+    bool has_solution(int const solution);
 
     void set_min_die_predition(double const & val);
     double get_min_die_prediction();

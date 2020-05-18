@@ -37,7 +37,7 @@ MacroPlacer::~MacroPlacer()
     Utils::Logger::destroy();
     
     delete m_options_functions; m_options_functions = nullptr;
-    delete m_timer;  m_timer = nullptr; 
+    delete m_timer; m_timer = nullptr;
     delete m_mckt; m_mckt = nullptr;
 }
 
@@ -66,6 +66,7 @@ void MacroPlacer::read_configuration()
             ("parquet",             "Utilize Parquet Floorplanning")
             ("partition",           "Enable Partitioning Mode")
             ("minimize-area",       "Add Die Area as Minimization Target")
+            ("minimize-hpwl",       "Add HPWL as Minimization Target")
             ("free-terminals",      "Ignore Any Existing Terminal Placement")
             ("partition-size",      boost::program_options::value<size_t>(),        "Parition Size")
             ("def",                 boost::program_options::value<std::string>(),   "Circuit as DEF File")
@@ -193,6 +194,7 @@ void MacroPlacer::read_configuration()
             }
         }
         this->set_logic(eInt);
+        this->set_base_path(Utils::Utils::get_base_path());
         this->set_working_directory(boost::filesystem::current_path().string());
         this->set_results_directory("results");
         this->set_results_id(this->existing_results() + 1);
@@ -201,6 +203,7 @@ void MacroPlacer::read_configuration()
         this->set_parquet_directory("parquet");
         this->set_log_name("placer.log");
         this->set_database_file("results.db");
+        this->set_db_to_csv_script(this->get_base_path() + "/04_configuration/db_to_csv.sh");
 
         boost::filesystem::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));
 
@@ -224,17 +227,20 @@ void MacroPlacer::read_configuration()
 void MacroPlacer::bash_completion_script()
 {
     std::stringstream script;
-
-    script << "#! /bin/bash"                        << std::endl;
-    script                                          << std::endl;
-    script << "#"                                   << std::endl;
-    script << "# Howto Z-Shell:"                    << std::endl;
-    script << "# $ autoload bashcompinit"           << std::endl;
-    script << "# $ bashcompinit"                    << std::endl;
-    script << "# $ source *.sh"                     << std::endl;
+    script << "#! /bin/bash"                                         << std::endl;
+    script << "#"                                                    << std::endl;
+    script << "# Generted File! Do not modify!"                      << std::endl;
+    script << "# " << Utils::Utils::get_current_time()                           ;
+    script << "#"                                                    << std::endl;
+    script                                                           << std::endl;
+    script << "#"                                                    << std::endl;
+    script << "# Howto Z-Shell:"                                     << std::endl;
+    script << "# $ autoload bashcompinit"                            << std::endl;
+    script << "# $ bashcompinit"                                     << std::endl;
+    script << "# $ source *.sh"                                      << std::endl;
     script << "# $ complete -F _smt_placer() -o filename smt_placer" << std::endl;
-    script << "#"                                   << std::endl;
-    script                                          << std::endl;
+    script << "#"                                                    << std::endl;
+    script                                                           << std::endl;
 
     script << "_smt_placer()"                       << std::endl;
     script << "{"                                   << std::endl;
@@ -274,7 +280,7 @@ void MacroPlacer::print_header()
     size_t max_len = 0;
     std::stringstream headerstream;
 
-    std::ifstream header (Utils::Utils::get_base_path() + "/01_src/utils/header.ascii");
+    std::ifstream header (this->get_base_path() + "/01_src/utils/header.ascii");
     std::string line;
     while(std::getline(header, line)){
         if (line.size() > max_len){
@@ -320,7 +326,6 @@ void MacroPlacer::run ()
  */
 void MacroPlacer::post_process()
 {
-    m_mckt->store_results();
     if(this->get_save_all()){
         m_mckt->save_all();
     }
@@ -335,7 +340,6 @@ void MacroPlacer::post_process()
         m_mckt->dump_best();
     }
 
-    m_mckt->best_result();
     m_mckt->results_to_db();
 }
 
@@ -361,7 +365,7 @@ size_t MacroPlacer::existing_results ()
 }
 
 /**
- * @brief Store Used Configuration to Filesystem 
+ * @brief Store Used Configuration to Filesystem
  */
 void MacroPlacer::store_configuration ()
 {
@@ -378,6 +382,10 @@ void MacroPlacer::store_configuration ()
     config << std::endl;
     config << "bookshelf:" << this->get_bookshelf_file() << std::endl;
     config << "pareto:" << this->get_pareto_optimizer() << std::endl;
+    config << "lex:" << this->get_lex_optimizer() << std::endl;
+    config << "box:" << this->get_box_optimizer() << std::endl;
     config << "solutions:" << this->get_max_solutions() << std::endl;
+    config << "min_die_mode:" << this->get_minimize_die_mode() << std::endl;
+    config << "min_hpwl_mode:" << this->get_minimize_hpwl_mode() << std::endl;
     config.close();
 }

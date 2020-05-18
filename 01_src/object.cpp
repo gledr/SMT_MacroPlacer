@@ -26,10 +26,13 @@ std::string Object::m_bookshelf_file;
 std::string Object::m_design_name;
 std::string Object::m_binary_name;
 std::string Object::m_database_file;
+std::string Object::m_db_to_csv_script;
+std::string Object::m_base_path;
 std::vector<std::string> Object::m_lef;
 bool Object::m_verbose = false;
 bool Object::m_log = false;
 bool Object::m_min_die_mode = false;
+bool Object::m_min_hpwl_mode = false;
 bool Object::m_allsat;
 bool Object::m_smt_to_filesystem = false;
 bool Object::m_save_all = false;
@@ -214,6 +217,16 @@ bool Object::get_minimize_die_mode() const
 void Object::set_minimize_die_mode(bool const val)
 {
     m_min_die_mode = val;
+}
+
+bool Object::get_minimize_hpwl_mode() const
+{
+    return m_min_hpwl_mode;
+}
+
+void Object::set_minimize_hpwl_mode(bool const val)
+{
+    m_min_hpwl_mode = val;
 }
 
 bool Object::get_allsat() const
@@ -448,6 +461,26 @@ void Object::set_database_file(std::string const & name)
 std::string Object::get_database_dir()
 {
     return m_results_directory + "/" + std::to_string(m_results_id) + "/";
+}
+
+std::string Object::get_db_to_csv_script() const
+{
+    return m_db_to_csv_script;
+}
+
+void Object::set_db_to_csv_script(std::string const & url)
+{
+    m_db_to_csv_script = url;
+}
+
+std::string Object::get_base_path() const
+{
+    return m_base_path;
+}
+
+void Object::set_base_path(std::string const & path)
+{
+    m_base_path = path;
 }
 
 std::string Object::orientation_to_string(eOrientation const orientation)

@@ -21,7 +21,6 @@
 #include <chrono>
 #include <mutex>
 #include <cmath>
-#include <omp.h>
 
 #include <z3++.h>
 
@@ -60,12 +59,10 @@ class ParquetFrontend;
  */
 class MacroCircuit: public virtual Object {
 public:
-    
-    MacroCircuit();
-    
-    virtual ~MacroCircuit();
 
-    size_t get_solutions();
+    MacroCircuit();
+
+    virtual ~MacroCircuit();
 
     void build_circuit();
     void partitioning();
@@ -80,25 +77,11 @@ public:
 
     void results_to_db();
 
-    void best_result();
-
     void dump(std::ostream & stream = std::cout);
 
-    void store_results();
-
-    std::vector<Macro*>& get_macros();
-    std::vector<Partition*>& get_partitions();
-    std::vector<Terminal*> get_terminals();
-    std::vector<Component*> get_components();
-
-    Tree* get_tree();
-    Layout* get_layout();
-
-    size_t get_minimal_die_size_prediction();
-
-    std::pair<size_t, size_t> biggest_macro();
-
 private:
+    friend class Evaluate;
+    
     // Microsoft Z3
     z3::optimize* m_z3_opt;
 
@@ -134,9 +117,6 @@ private:
     size_t m_layout_x;
     size_t m_layout_y;
 
-    size_t m_gcd_h;
-    size_t m_gcd_w;
-
     Layout* m_layout;
 
     double m_standard_cell_height;
@@ -158,10 +138,13 @@ private:
 
     void build_tree();
     void create_macro_definitions();
-    void calculate_gcd();
 
     void create_image(size_t const solution);
     void write_def(std::string const & name, size_t const solution);
+
+    Tree* get_tree();
+    Layout* get_layout();
+    size_t get_solutions();
 
     /**
      * SMT Encoding

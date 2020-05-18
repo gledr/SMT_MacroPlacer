@@ -22,6 +22,7 @@ Database::Database(std::string const & db_file):
     Object(),
     BaseDatabase(db_file)
 {
+    m_logger = Logger::getInstance();
 }
 
 /**
@@ -29,6 +30,7 @@ Database::Database(std::string const & db_file):
  */
 Database::~Database()
 {
+    m_logger = nullptr;
 }
 
 /**
@@ -56,6 +58,23 @@ void Database::init_database()
     stream << "id VARCHAR(50),";
     stream << "lx INTEGER,",
     stream << "ly INTEGER);",
+    this->db_command(stream.str());
+
+    stream.str("");
+    stream << "CREATE TABLE layout(",
+    stream << "solution INTEGER,";
+    stream << "lx INTEGER,";
+    stream << "ly INTEGER,";
+    stream << "ux INTEGER,";
+    stream << "uy INTEGER,";
+    stream << "orientation VARCHAR(10));";
+    this->db_command(stream.str());
+
+    stream.str("");
+    stream << "CREATE TABLE results(";
+    stream << "solution INTEGER,";
+    stream << "area INTEGER,";
+    stream << "hpwl INTEGER);";
     this->db_command(stream.str());
 }
 
@@ -119,15 +138,38 @@ void Database::place_macro(size_t const solution, Macro* macro)
 void Database::place_terminal(size_t const solution, Terminal* terminal)
 {
     assert (terminal != nullptr);
-    assert (terminal->has_solution(solution));
 
-    std::string sol  = std::to_string(solution);
-    std::string name = terminal->get_name();
-    std::string x    = std::to_string(terminal->get_solution_pos_x(solution));
-    std::string y    = std::to_string(terminal->get_solution_pos_y(solution));
+    if (terminal->has_solution(solution)){
 
-    std::stringstream query;
-    query << "INSERT INTO terminals VALUES (" 
-          << sol << ",'" << name << "'," << x << "," << y << ");";
-    this->db_command(query.str());
+        std::string sol  = std::to_string(solution);
+        std::string name = terminal->get_name();
+        std::string x    = std::to_string(terminal->get_solution_pos_x(solution));
+        std::string y    = std::to_string(terminal->get_solution_pos_y(solution));
+
+        std::stringstream query;
+        query << "INSERT INTO terminals VALUES (" 
+            << sol << ",'" << name << "'," << x << "," << y << ");";
+        this->db_command(query.str());
+    }
+}
+
+/**
+ * @brief Export Database Content as CSV File
+ * 
+ * @param filename Filename to Store to
+ */
+void Database::export_as_csv(std::string const & filename)
+{
+    m_logger->export_db_to_csv(filename);
+
+    std::string db = p_db_url;
+    std::string csv = this->get_database_dir() + "/" + filename;
+    std::string script = this->get_db_to_csv_script();
+
+    std::vector<std::string> args;
+    args.push_back(script);
+    args.push_back(db);
+    args.push_back(csv);
+
+    Utils::Utils::system_execute("bash", args, "", false);
 }

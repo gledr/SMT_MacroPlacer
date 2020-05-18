@@ -1,5 +1,4 @@
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
-find_package(OpenMP)
 
 ############################################################
 # include directories 
@@ -108,5 +107,4 @@ target_link_libraries(smt_placer
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
     pthread
     dl
-    OpenMP::OpenMP_CXX
 )

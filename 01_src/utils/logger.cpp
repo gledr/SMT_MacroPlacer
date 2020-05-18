@@ -317,7 +317,7 @@ void Logger::print_version(std::string const & date,
     std::stringstream date_stream;
     std::stringstream commit_stream;
     std::stringstream author_stream;
-    
+
     commit_stream << std::left << std::setw(outline) << std::setfill(' ') << "Git Hash: "  << commit;
     author_stream << std::left << std::setw(outline) << std::setfill(' ') << "Last Author: "  << author;
     date_stream << std::left << std::setw(outline) << std::setfill(' ') << "Last Changes: " << date;
@@ -327,4 +327,12 @@ void Logger::print_version(std::string const & date,
     LOG(eStdOut) << date_stream.str();
     LOG(eStdOut) << std::string (max_len, '-');
     LOG(eStdOut) << "";
+}
+
+void Logger::export_db_to_csv(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Exporting Database to CSV (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
 }

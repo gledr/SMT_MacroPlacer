@@ -94,6 +94,9 @@ protected:
     void set_minimize_die_mode(bool const val);
     bool get_minimize_die_mode() const;
 
+    void set_minimize_hpwl_mode(bool const val);
+    bool get_minimize_hpwl_mode() const;
+
     void set_allsat(bool const val);
     bool get_allsat() const;
 
@@ -162,7 +165,13 @@ protected:
     void set_database_file(std::string const & name);
     std::string get_database_file();
     std::string get_database_dir();
-    
+
+    void set_db_to_csv_script(std::string const & url);
+    std::string get_db_to_csv_script() const;
+
+    void set_base_path(std::string const & path);
+    std::string get_base_path() const;
+
     std::string orientation_to_string(eOrientation const orientation);
 
     static z3::context m_z3_ctx;
@@ -172,6 +181,7 @@ private:
     static std::string m_def;
     static std::string m_site;
     static std::string m_supplement;
+    static std::string m_base_path;
     static std::string m_working_directory;
     static std::string m_results_directory;
     static std::string m_image_directory;
@@ -182,12 +192,14 @@ private:
     static std::string m_design_name;
     static std::string m_binary_name;
     static std::string m_database_file;
+    static std::string m_db_to_csv_script;
     static size_t m_timeout;
     static size_t m_bitwidth_orientation;
     static size_t m_partition_id;
     static bool m_verbose;
     static bool m_log;
     static bool m_min_die_mode;
+    static bool m_min_hpwl_mode;
     static bool m_allsat;
     static bool m_smt_to_filesystem;
     static bool m_save_all;

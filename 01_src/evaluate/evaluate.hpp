@@ -32,17 +32,27 @@ public:
     ~Evaluate();
 
     std::pair<size_t, size_t> best_hpwl();
-    
+
     std::vector<std::pair<size_t, size_t>> all_hpwl();
-    
+
+    std::vector<std::pair<size_t, size_t>> all_area();
+
+    std::pair<size_t, size_t> best_area();
+
     void plot_hpwl_distribution();
 
 private:
+    friend class MacroCircuit;
+
     MacroCircuit* m_mckt;
-    
+
     size_t calculate_hpwl(size_t const solution);
-    
+    size_t calculate_area(size_t const solution);
+
     size_t euclidean_distance(std::pair<size_t, size_t> const & from,
+                              std::pair<size_t, size_t> const & to);
+
+    size_t manhattan_distance(std::pair<size_t, size_t> const & from,
                               std::pair<size_t, size_t> const & to);
 };
 

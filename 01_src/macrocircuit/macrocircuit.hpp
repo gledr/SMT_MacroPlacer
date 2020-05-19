@@ -27,11 +27,8 @@
 #include <boost/filesystem.hpp>
 
 #include <object.hpp>
+#include <components.hpp>
 #include <lefdefIO.h>
-#include <macro.hpp>
-#include <macro_definition.hpp>
-#include <cell.hpp>
-#include <terminal.hpp>
 #include <tree.hpp>
 #include <evaluate.hpp>
 #include <logger.hpp>
@@ -39,13 +36,12 @@
 #include <supplement.hpp>
 #include <bookshelf.hpp>
 #include <layout.hpp>
-#include <partition.hpp>
 #include <partitioning.hpp>
 #include <parquet.hpp>
 #include <encoding_utils.hpp>
 #include <utils.hpp>
-#include <costfunction.hpp>
 #include <database.hpp>
+#include <exception.hpp>
 
 namespace Placer {
 
@@ -106,7 +102,6 @@ private:
     Partitioning* m_partitioning;
     ParquetFrontend* m_parquet;
     EncodingUtils* m_encode;
-    CostFunction* m_lut;
 
     std::map<std::string, Macro*> m_id2macro;
     std::map<std::string, Terminal*> m_id2terminal;
@@ -131,8 +126,6 @@ private:
     void add_macros();
     void add_cells();
     void area_estimator();
-    void grid_builder();
-    std::mutex mtx;
 
     void add_cell(LefDefParser::defiComponent const & cmp);
 
@@ -151,7 +144,6 @@ private:
      */
     void encode_smt();
     void encode_parquet();
-    void encode_grid();
 
     void config_z3();
     void run_encoding();

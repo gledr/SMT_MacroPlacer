@@ -12,12 +12,13 @@
 #include "evaluate.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 Evaluate::Evaluate(MacroCircuit* mckt):
     Object(),
     m_mckt(mckt)
 {
-    assert (mckt != nullptr);
+    nullpointer_check (mckt);
 }
 
 Evaluate::~Evaluate()
@@ -142,9 +143,9 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                 from_y = from->get_macro()->get_solution_ly(solution);
             } else if (from->has_cell()){
                 continue;
-                assert (0 && "Not Implemented");
+                notimplemented_check();
             } else {
-                assert (0);
+                notsupported_check("Only Macros and Cells are Supported!");
             }
         } else if (from->is_terminal()){
             Terminal* terminal = from->get_terminal();
@@ -157,9 +158,9 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                 from_y = terminal->get_pos_y().get_numeral_uint();
             }
         } else {
-            assert (0);
+            notsupported_check("Only Macros and Terminals are Supported!");
         }
-        
+
         Node* to = edge->get_to();
         if(to->is_node()){
             if(to->has_macro()){
@@ -167,9 +168,9 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                 to_y = to->get_macro()->get_solution_ly(solution);
             } else if (to->has_cell()){
                 continue;
-                 assert (0 && "Not Implemented");
+                notimplemented_check();
             } else {
-                assert (0);
+                notsupported_check("Only Macros and Cells are Supported!");
             }
         } else if (to->is_terminal()){
             Terminal* terminal = to->get_terminal();
@@ -182,9 +183,9 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                 to_y = terminal->get_pos_y().get_numeral_uint();
             }
         } else {
-            assert (0);
+            notsupported_check("Only Macros and Terminals are Supported!");
         }
-        
+
         std::cout << "From_x: " << from_x << " From_y: " << from_y << std::endl;
         std::cout << "To_x: " << to_x << " To_y: " << to_y << std::endl;
         
@@ -215,7 +216,10 @@ void Evaluate::plot_hpwl_distribution()
     plot_script << "plot 'hpwl.dat' using 2:xtic(1)" << std::endl;
     plot_script.close();
 
-    system("gnuplot hpwl_script.plt");
+    std::vector<std::string> args;
+    args.push_back("hpwl_script.plt");
+
+    Utils::Utils::system_execute("gnuplot", args, "", false);
 }
 
 /**
@@ -227,7 +231,7 @@ void Evaluate::plot_hpwl_distribution()
 size_t Evaluate::calculate_area(size_t const solution)
 {
     Layout* layout = m_mckt->get_layout();
-    assert (layout->has_solution(solution));
+    assertion_check (layout->has_solution(solution));
 
     size_t lx = layout->get_lx().get_numeral_uint();
     size_t ly = layout->get_ly().get_numeral_uint();
@@ -243,29 +247,6 @@ size_t Evaluate::calculate_area(size_t const solution)
     }
 
     return (ux - lx) * (uy -ly);
-
-#if 0
-   std::pair<size_t, size_t> max_coordinate;
-   max_coordinate.first = 0;
-   max_coordinate.second = 0;
-   
-   size_t x = 0;
-   size_t y = 0;
-   
-   for (Macro* m: m_macros){
-       std::pair <size_t, size_t> root = m->get_solution_root();
-       
-       if ((root.first + root.second) > (max_coordinate.first + max_coordinate.second)){
-           max_coordinate = root;
-            x = m->get_width().get_numeral_uint();
-            y = m->get_height().get_numeral_uint();
-        }
-   }
-   
-   std::cout << "Max Coordinate: " << max_coordinate.first << ":" << max_coordinate.second << std::endl;
-   std::cout << "Layout: " << max_coordinate.first + x << ":" << max_coordinate.second + y << std::endl;
-   std::cout << "Die Area Solution: " <<  (max_coordinate.first + x) * (max_coordinate.second + y) << std::endl;
-#endif
 }
 
 /**

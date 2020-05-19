@@ -15,6 +15,8 @@
 #include <object.hpp>
 #include <component.hpp>
 #include <macrocircuit.hpp>
+#include <exception.hpp>
+#include <utils.hpp>
 
 #include <cmath>
 #include <algorithm>

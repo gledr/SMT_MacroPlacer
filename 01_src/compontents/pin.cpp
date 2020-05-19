@@ -177,7 +177,7 @@ std::string Pin::enum2string(e_pin_direction const direction)
     } else if (direction == eUnknown){
         return "UNKOWN";
     } else {
-        assert(0);
+        notsupported_check("Invalid Pin Direction!");
     }
 }
 

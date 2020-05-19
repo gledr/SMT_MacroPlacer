@@ -12,6 +12,7 @@
 #include "component.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 /**
  * @brief Constructor
@@ -89,7 +90,7 @@ z3::expr& Component::get_width()
  */
 size_t Component::get_height_numeral()
 {
-    assert (m_height.is_numeral());
+    assertion_check (m_height.is_numeral());
 
     return m_height.get_numeral_uint();
 }
@@ -101,7 +102,7 @@ size_t Component::get_height_numeral()
  */
 size_t Component::get_width_numeral()
 {
-    assert (m_width.is_numeral());
+    assertion_check(m_width.is_numeral());
 
     return m_width.get_numeral_uint();
 }
@@ -173,7 +174,7 @@ z3::expr Component::get_lx(eOrientation const orientation)
     } else if (orientation == eEast){
         return m_lx;
     } else {
-        assert (0);
+        notimplemented_check();
     }
 }
 
@@ -194,7 +195,7 @@ z3::expr Component::get_ly(eOrientation const orientation)
     } else if (orientation == eEast){
         return m_encode->sub(m_ly, m_width);
     } else {
-        assert (0);
+        notimplemented_check();
     }
 }
 
@@ -215,7 +216,7 @@ z3::expr Component::get_ux(eOrientation const orientation)
     } else if (orientation == eEast){
         return m_encode->add(m_lx, m_height);
     } else {
-        assert (0);
+        notimplemented_check();
     }
 }
 
@@ -236,7 +237,7 @@ z3::expr Component::get_uy(eOrientation const orientation)
     } else if (orientation == eEast){
         return m_ly;
     } else {
-        assert (0);
+        notimplemented_check();
     }
 }
 
@@ -248,8 +249,8 @@ z3::expr Component::get_uy(eOrientation const orientation)
  */
 size_t Component::get_solution_ly(size_t const id)
 {
-    assert (id < m_sol_ly.size());
-    
+    assertion_check(id < m_sol_ly.size());
+
     return  m_sol_ly[id];
 }
 
@@ -261,8 +262,8 @@ size_t Component::get_solution_ly(size_t const id)
  */
 size_t Component::get_solution_lx(size_t const id)
 {
-    assert (id < m_sol_lx.size());
-    
+    assertion_check (id < m_sol_lx.size());
+
     return m_sol_lx[id];
 }
 
@@ -274,8 +275,8 @@ size_t Component::get_solution_lx(size_t const id)
  */
 eOrientation Component::get_solution_orientation(size_t const id)
 {
-    assert (id < m_sol_orientation.size());
-    
+    assertion_check (id < m_sol_orientation.size());
+
     return m_sol_orientation[id];
 }
 
@@ -287,8 +288,8 @@ eOrientation Component::get_solution_orientation(size_t const id)
  */
 bool Component::has_solution(size_t const id)
 {
-    assert (m_sol_lx.size() == m_sol_ly.size());
-    assert (m_sol_ly.size() == m_sol_orientation.size());
-    
+    assertion_check (m_sol_lx.size() == m_sol_ly.size());
+    assertion_check (m_sol_ly.size() == m_sol_orientation.size());
+
     return (m_sol_lx.size()) > id;
 }

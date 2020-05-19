@@ -12,6 +12,7 @@
 #include "bookshelf.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 /**
  * @brief Constructor
@@ -20,7 +21,7 @@ Bookshelf::Bookshelf():
     Object()
 {
     m_tree = new Tree();
-    m_lut = new CostFunction();
+    m_logger = Logger::getInstance();
 }
 
 /**
@@ -29,7 +30,7 @@ Bookshelf::Bookshelf():
 Bookshelf::~Bookshelf()
 {
     m_tree = nullptr;
-    delete m_lut; m_lut = nullptr;
+    m_logger = nullptr;
 }
 
 /**
@@ -80,10 +81,10 @@ void Bookshelf::read_files()
     
     this->read_blocks();
     this->calc_estimated_die_area();
-    //this->locate_biggest_macro();
-    //this->calculate_gcd();
     this->read_pl();
-    this->deduce_layout();
+    if (!this->get_minimize_die_mode()){
+        this->deduce_layout();
+    }
     this->read_nets();
 }
 
@@ -137,7 +138,7 @@ void Bookshelf::read_blocks()
             std::string name = token[0];
 
             std::vector<std::string> macro_token = Utils::Utils::tokenize(line, "(");
-            assert (macro_token.size() == 5);
+            assertion_check (macro_token.size() == 5);
             std::string expr = macro_token[3];
 
             size_t comma_pos = expr.find(',');
@@ -196,7 +197,7 @@ void Bookshelf::read_nets()
     nets_stream.close();
     
     if(nets_content[0] != "UCLA nets 1.0"){
-        throw std::runtime_error("Bookshelf Nets Header invalid!");
+        throw PlacerException("Bookshelf Nets Header invalid!");
     }
     
     for(size_t i = 0; i < nets_content.size(); ++i){
@@ -229,7 +230,7 @@ void Bookshelf::read_nets()
                 std::vector<std::string> sub_token = Utils::Utils::tokenize(nets_content[j], " ");
                
                 if (sub_token[0] == "NetDegree"){
-                    assert (sub_net_degree == nodes.size());
+                    assertion_check (sub_net_degree == nodes.size());
                     break;
                 }
 
@@ -244,7 +245,7 @@ void Bookshelf::read_nets()
                     std::string direction = sub_token[1];
                     // Pin has relative position
                     if (sub_token.size() > 2) {
-                        assert (sub_token[2] == ":");
+                        assertion_check (sub_token[2] == ":");
                         std::string rel_pos_x = sub_token[3];
                         std::string rel_pos_y = sub_token[4];
                         std::string pin = rel_pos_x + "_" + rel_pos_y;
@@ -261,13 +262,13 @@ void Bookshelf::read_nets()
                     nodes.push_back(n);
                     
                 } else {
-                    assert (0);
+                    notsupported_check("Only Terminals and Macros are allowed!");
                 }
             }
             // Sub-State Machine ended -continue global
             i = j-1;
 
-            assert (nodes.size() >= 2);
+            assertion_check (nodes.size() >= 2);
             char from_case = 0;
             if (nodes[0]->is_terminal()){
                 from_case = 't';
@@ -276,7 +277,7 @@ void Bookshelf::read_nets()
             } else if (nodes[0]->has_cell()){
                 from_case = 'c';
             } else {
-                assert (0);
+                notimplemented_check();
             }
 
             for(size_t node_index = 1; node_index < nodes.size(); ++node_index){
@@ -288,7 +289,7 @@ void Bookshelf::read_nets()
                 } else if (nodes[node_index]->has_cell()){
                     to_case = 'c';
                 } else {
-                    assert (0);
+                    notimplemented_check();
                 }
 
                 if (from_case == 'm' && to_case == 'm'){
@@ -298,10 +299,10 @@ void Bookshelf::read_nets()
                 } else if (from_case == 'm' && to_case == 't'){
                     m_tree->insert_edge<Macro, Terminal>(nodes[0]->get_macro(), nodes[node_index]->get_terminal(), "", "", "");
                 } else {
-                    assert (0);
+                    notimplemented_check();
                 }
             }
-            
+
             for(auto itor: nodes){
                 delete itor; itor = nullptr;
             }
@@ -331,13 +332,6 @@ void Bookshelf::read_pl()
     
     this->calc_estimated_die_area();
 
-#if 0
-    size_t max_size = std::max(m_max_h, m_max_w);
-    size_t xy = std::ceil(sqrt(m_estimated_area))+max_size;
-    m_lut->init_lookup_table(xy, xy);
-    
-    std::cout << "Using Grid: " << xy/m_gcd_h << std::endl;
-#endif
     while(std::getline(place_stream, line)){
         place_content.push_back(line);
     }
@@ -380,10 +374,7 @@ void Bookshelf::read_pl()
                 Macro* m = new Macro(macro->name,
                                      macro->name,
                                      macro->width,
-                                     macro->height/*,
-                                     xy/m_gcd_w,
-                                     xy/m_gcd_h,
-                                     m_lut*/);
+                                     macro->height);
                 m_macros.push_back(m);
             } else if((x != 0) || (y != 0)){
                // m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
@@ -410,8 +401,7 @@ void Bookshelf::read_pl()
                 m_terminals.push_back(tmp);
             }
         } else {
-            std::cout << line << std::endl;
-            assert (0);
+            notsupported_check(line);
         }
     }
    
@@ -482,7 +472,7 @@ Tree* Bookshelf::get_tree()
  */
 void Bookshelf::set_tree(Tree* tree)
 {
-    assert (tree != nullptr);
+    nullpointer_check (tree);
     
     m_tree = tree;
 }
@@ -585,19 +575,19 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
         if (direction == "B"){
             dir = eBidirectional;
         } else {
-            assert (0);
+            notimplemented_check();
         }
         
         if (!((m != nullptr) || (t != nullptr))){
             std::string msg = "Macro/Terminal " + macro + " does not exist";
-            throw std::runtime_error(msg);
+            throw PlacerException(msg);
         }
 
         if (m){
             // Pin does not yet exist
             if (!m->get_pin(pin)){
                 p = new Pin(pin, macro, dir);
-                assert (p != nullptr);
+                nullpointer_check (p);
                 
                 if (!rel_pos_x.empty()){
                     std::string x = rel_pos_x.substr(1 ,rel_pos_x.size());
@@ -724,48 +714,17 @@ void Bookshelf::write_pl()
     plFile.close();
 }
 
-void Bookshelf::calculate_gcd()
-{
-    std::vector<size_t> w;
-    std::vector<size_t> h;
-    for (auto xy : m_macro_definitions){
-        w.push_back(xy.width);
-        h.push_back(xy.height);
-    }
-    
-    m_gcd_w = Utils::Utils::gcd(w);
-    m_gcd_h = Utils::Utils::gcd(h);
-    
-    std::cout << "GCD W: " << m_gcd_w << std::endl;
-    std::cout << "GCD H: " << m_gcd_h << std::endl;
-}
-
-void Bookshelf::locate_biggest_macro()
-{
-    m_max_w = 0;
-    m_max_h = 0;
-    
-    for (auto m : m_macro_definitions){
-        if (m.width > m_max_w){
-            m_max_w = m.width;
-        }
-        if (m.height > m_max_h){
-            m_max_h = m.height;
-        }
-    }
-    
-    std::cout << "MAX_H: " << m_max_h << std::endl;
-    std::cout << "MAX_W: " << m_max_w << std::endl;
-}
-
+/**
+ * @brief Deduce Layout from Placed Terminals
+ */
 void Bookshelf::deduce_layout()
 {
     size_t x = 0;
     size_t y = 0;
 
     for (Terminal* terminal: m_terminals){
-        assert (terminal->get_pos_x().is_numeral());
-        assert (terminal->get_pos_y().is_numeral());
+        assertion_check (terminal->get_pos_x().is_numeral());
+        assertion_check (terminal->get_pos_y().is_numeral());
 
         if (terminal->get_pos_x().get_numeral_uint() > x){
             x = terminal->get_pos_x().get_numeral_uint();
@@ -775,17 +734,26 @@ void Bookshelf::deduce_layout()
         }
     }
 
-    std::cout << "Layout Deduced: " << x << ":" << y << std::endl;
-
+    m_logger->deduce_layout(x,y);
     m_could_duduce_layout = (x != 0) && (y != 0);
     m_deduced_layout = std::make_pair(x,y);
 }
 
+/**
+ * @brief Check if layout could be deduced from placed terminals
+ * 
+ * @return bool
+ */
 bool Bookshelf::could_deduce_layout()
 {
     return m_could_duduce_layout;
 }
 
+/**
+ * @brief Deduce Layout from Placed Terminals
+ * 
+ * @return std::pair< size_t, size_t >
+ */
 std::pair<size_t, size_t> Bookshelf::get_deduced_layout()
 {
     return m_deduced_layout;

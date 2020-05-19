@@ -300,7 +300,7 @@ void Layout::set_solution_uy(size_t const val)
  */
 size_t Layout::get_idx_best_solution()
 {
-    assert (m_solutions_uy.size() == m_solutions_ux.size());
+    assertion_check (m_solutions_uy.size() == m_solutions_ux.size());
 
     size_t idx = 0;
     double best_area  = std::numeric_limits<double>::max();
@@ -327,7 +327,7 @@ size_t Layout::get_idx_best_solution()
  */
 bool Layout::has_solution(int const solution)
 {
-    assert (m_solutions_ux.size() == m_solutions_ux.size());
+    assertion_check (m_solutions_ux.size() == m_solutions_ux.size());
 
     return m_solutions_ux.size() > solution;
 }

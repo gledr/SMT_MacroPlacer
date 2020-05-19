@@ -20,6 +20,7 @@
 
 #include <object.hpp>
 #include <encoding_utils.hpp>
+#include <exception.hpp>
 
 namespace Placer {
 

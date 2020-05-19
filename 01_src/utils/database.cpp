@@ -109,17 +109,28 @@ int Database::__callback__(int argc, char **argv, char **azColName)
 void Database::place_macro(size_t const solution, Macro* macro)
 {
     assert (macro != nullptr);
-    assert (macro->has_solution(solution));
 
     std::string s    = std::to_string(solution);
     std::string name = macro->get_name();
     std::string id   = macro->get_id();
     std::string free = std::to_string(macro->is_free());
-    std::string lx   = std::to_string(macro->get_solution_lx(solution));
-    std::string ly   = std::to_string(macro->get_solution_ly(solution));
     std::string w    = std::to_string(macro->get_width_numeral());
     std::string h    = std::to_string(macro->get_height_numeral());
-    std::string o    = this->orientation_to_string(macro->get_solution_orientation(solution));
+
+    std::string lx;
+    std::string ly;
+    std::string o;
+
+    if (macro->is_free()){
+        assert (macro->has_solution(solution));
+        lx  = std::to_string(macro->get_solution_lx(solution));
+        ly  = std::to_string(macro->get_solution_ly(solution));
+        o   = this->orientation_to_string(macro->get_solution_orientation(solution));
+    } else {
+        lx  = std::to_string(macro->get_lx().get_numeral_uint());
+        ly  = std::to_string(macro->get_ly().get_numeral_uint());
+        o   = "D"; // Default for the Moment -Bookshelf has no Orientation afaik TODO
+    }
 
     std::stringstream query;
     query << "INSERT INTO macros VALUES (" << s << ",'" << name << "','"
@@ -139,18 +150,23 @@ void Database::place_terminal(size_t const solution, Terminal* terminal)
 {
     assert (terminal != nullptr);
 
-    if (terminal->has_solution(solution)){
+    std::string sol = std::to_string(solution);
+    std::string name = terminal->get_name();
+    std::string x;
+    std::string y;
 
-        std::string sol  = std::to_string(solution);
-        std::string name = terminal->get_name();
-        std::string x    = std::to_string(terminal->get_solution_pos_x(solution));
-        std::string y    = std::to_string(terminal->get_solution_pos_y(solution));
-
-        std::stringstream query;
-        query << "INSERT INTO terminals VALUES (" 
-            << sol << ",'" << name << "'," << x << "," << y << ");";
-        this->db_command(query.str());
+    if (terminal->is_free()){
+        assert(terminal->has_solution(solution));
+        x    = std::to_string(terminal->get_solution_pos_x(solution));
+        y    = std::to_string(terminal->get_solution_pos_y(solution));
+    } else {
+        x = std::to_string(terminal->get_pos_x().get_numeral_uint());
+        y = std::to_string(terminal->get_pos_y().get_numeral_uint());
     }
+    std::stringstream query;
+    query << "INSERT INTO terminals VALUES (" 
+        << sol << ",'" << name << "'," << x << "," << y << ");";
+    this->db_command(query.str());
 }
 
 /**

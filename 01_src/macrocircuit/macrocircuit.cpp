@@ -33,7 +33,6 @@ MacroCircuit::MacroCircuit():
     m_timer = new Utils::Timer();
     m_partitioning = new Partitioning();
     m_parquet = new ParquetFrontend();
-    m_lut = new CostFunction();
 
     m_circuit = nullptr;
     m_solutions = 0;
@@ -64,10 +63,11 @@ MacroCircuit::~MacroCircuit()
     if(m_circuit != nullptr){
         delete m_circuit; m_circuit = nullptr;
     }
-    
+
     if(m_bookshelf != nullptr){
         delete m_bookshelf; m_bookshelf = nullptr;
     }
+
     //delete m_tree; m_tree = nullptr;
     delete m_z3_opt; m_z3_opt = nullptr;
     delete m_eval; m_eval = nullptr;
@@ -77,7 +77,6 @@ MacroCircuit::~MacroCircuit()
     delete m_parquet; m_parquet = nullptr;
     delete m_encode; m_encode = nullptr;
     delete m_timer; m_timer = nullptr;
-    delete m_lut; m_lut = nullptr;
     delete m_db; m_db = nullptr;
 
     m_logger = nullptr;
@@ -169,7 +168,7 @@ void MacroCircuit::build_circuit()
                     }
                 }
             }
-            
+
             m_layout->set_min_die_predition(m_estimated_area);
             m_macros = m_bookshelf->get_macros();
             m_terminals = m_bookshelf->get_terminals();
@@ -193,13 +192,13 @@ void MacroCircuit::create_macro_definitions()
             auto idx = m_circuit->lefMacroMap.find(itor.name());
             LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
             std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
-            
+
             MacroDefinition macro_definition;
             macro_definition.name = itor.name();
             macro_definition.id = itor.id();
             macro_definition.width = lef_data.sizeX();
             macro_definition.height = lef_data.sizeY();
-            
+
             for(auto pin: lef_pins){
                 PinDefinition pin_def;
                 pin_def.parent = itor.name();
@@ -241,7 +240,7 @@ void MacroCircuit::encode()
     } else {
         std::copy(m_macros.begin(), m_macros.end(), std::back_inserter(m_components));
     }
-    
+
     if (this->get_parquet_fp()){
         this->encode_parquet();
     } else {
@@ -275,53 +274,6 @@ void MacroCircuit::encode_smt()
 
     this->config_z3();
     this->run_encoding();
-#if 0
-    this->encode_grid();
-#endif
-}
-
-void MacroCircuit::encode_grid()
-{
-    this->grid_builder();
-    
-    for (size_t i = 0; i < m_macros.front()->get_grid_coordinates().size(); ++i){
-        z3::expr_vector unique_cell(m_z3_ctx);
-        
-        for (Macro* m: m_macros){
-             unique_cell.push_back(m->get_grid_coordinates()[i]);
-        }
-        std::vector<int> cell_val(unique_cell.size(), 1);
-        int cell_val_arr[cell_val.size()];
-        std::copy(cell_val.begin(), cell_val.end(), cell_val_arr);
-        z3::expr sum_cell = z3::pble(unique_cell, cell_val_arr, 1);
-        m_z3_opt->add(sum_cell);
-    }
-    
-    for (Macro* m : m_macros){
-        z3::expr_vector costs(m_z3_ctx);
-        z3::expr_vector c = m->get_grid_costs();
-        
-        for (size_t i = 0; i < c.size(); ++i){
-            costs.push_back(c[i]);
-        }
-        z3::expr cost_funtion = m_encode->mk_sum(costs);
-        m_z3_opt->minimize(cost_funtion);
-    }
-}
-
-void MacroCircuit::grid_builder()
-{
-    try {
-        for (size_t i = 0; i < m_macros.size(); i++){
-            Macro *m = m_macros[i];
-            std::cout << "Initializing " << m->get_id()  << " (" << i+1 << "/" << m_macros.size() << ")" << std::endl;
-            m->init_grid();
-            m_z3_opt->add(m->encode_grid());
-        }
-    } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        assert (0);
-    }
 }
 
 /**
@@ -339,7 +291,7 @@ void MacroCircuit::place()
     } else {
         this->solve();
     }
-    
+
     m_timer->stop_timer("total");
 }
 
@@ -404,13 +356,13 @@ void MacroCircuit::add_terminals()
             int x = itor.placementX();
             int y = itor.placementY();
             tmp = new Terminal(itor.pinName(), x, y, direction);
-            
+
         } else {
             tmp = new Terminal(itor.pinName(), direction);
         }
 
         assert(tmp != nullptr);
-        
+
         m_terminals.push_back(tmp);
         m_id2terminal[itor.pinName()] = tmp;
     }
@@ -691,7 +643,7 @@ void MacroCircuit::build_tree()
             }
         }
     }
-    
+
     m_tree->construct_tree();
 }
 
@@ -794,7 +746,7 @@ void MacroCircuit::dump(std::ostream& stream)
     stream << "DieArea (" << m_layout->get_ux().get_numeral_uint() -
                              m_layout->get_lx().get_numeral_uint() 
                           << " x " << m_layout->get_uy().get_numeral_uint()-
-                              m_layout->get_lx().get_numeral_uint() << ")" << std::endl;
+                            m_layout->get_lx().get_numeral_uint() << ")" << std::endl;
     stream << "Units: " << m_layout->get_units().get_numeral_uint() << std::endl;
     for(auto itor: m_macros){
         itor->dump(stream);
@@ -1213,7 +1165,6 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
         }
 
         m_components_non_overlapping = z3::mk_and(clauses);
-        
     } catch (z3::exception const & exp){
         std::cout << exp.msg() << std::endl;
         assert (0);
@@ -1301,19 +1252,19 @@ void MacroCircuit::encode_terminals_non_overlapping()
                 z3::expr_vector case_1(m_z3_ctx);
                 case_1.push_back(a->get_pos_x() > b->get_pos_x());
                 case_1.push_back(a->get_pos_x() < b->get_pos_x());
-                
+
                 // Case 2: y moveable
                 z3::expr_vector case_2(m_z3_ctx);
                 case_2.push_back(a->get_pos_y() > b->get_pos_y());
                 case_2.push_back(a->get_pos_y() < b->get_pos_y());
-                
+
                 subclause.push_back(z3::mk_or(case_1));
                 subclause.push_back(z3::mk_or(case_2));
                 clauses.push_back(z3::mk_or(subclause));
             }
         }
         m_terminals_non_overlapping = z3::mk_and(clauses);
-        
+
     } catch (z3::exception const & exp){
         std::cout << exp.msg() << std::endl;
         assert (0);
@@ -1331,7 +1282,7 @@ void MacroCircuit::solve()
         if(this->get_store_smt()){
             this->dump_smt_instance();
         }
-        
+
         if(this->get_pareto_optimizer()){
             m_logger->pareto_solutions(this->get_max_solutions());
         }
@@ -1351,7 +1302,7 @@ void MacroCircuit::solve()
                 if (this->get_minimize_die_mode()){
                     size_t ux =  m.eval(m_layout->get_ux()).get_numeral_uint();
                     size_t uy =  m.eval(m_layout->get_uy()).get_numeral_uint();
-    
+
                     double area_estimation = ux * uy;
                     double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
                     m_logger->result_die_area(area_estimation);
@@ -1380,7 +1331,7 @@ void MacroCircuit::solve()
                 for (Terminal* terminal: m_terminals){
                     z3::expr clause_x = m.eval(terminal->get_pos_x());
                     z3::expr clause_y = m.eval(terminal->get_pos_y());
-                    
+
                     if (clause_x.is_numeral() && clause_y.is_numeral()){
                         size_t pos_x = clause_x.get_numeral_uint();
                         size_t pos_y = clause_y.get_numeral_uint();
@@ -1402,54 +1353,12 @@ void MacroCircuit::solve()
                     break;
                 }
             } while (sat == z3::check_result::sat);
-#if 0
-                 z3::model model = m_z3_opt->get_model();
 
-                for (Macro* m: m_macros){
-                    
-                    z3::expr orient = model.eval(m->get_bool_orientation());
-                    std::stringstream ss;
-                    ss << orient;
-
-                   if(ss.str() == "false"){
-                        m->add_solution_orientation(eNorth);
-                    } else if(ss.str() == "true"){
-                        m->add_solution_orientation(eWest);
-                    } else {
-                        assert (0);
-                    }
-                    
-                    for (size_t i = 0; i < m->get_grid_coordinates().size(); i++){
-                        z3::expr tmp = model.eval(m->get_grid_coordinates()[i]);
-                        std::stringstream ss;
-                        ss << tmp;
-
-                        if(ss.str() == "true"){
-                            std::stringstream id;
-                            id << m->get_grid_coordinates()[i];
-                            std::string sid = id.str();
-                           
-                            std::vector<std::string> token = Placer::Utils::Utils::tokenize(sid, "_");
-                          
-                            size_t y = std::stoi(token[token.size()-1]);
-                            size_t x = std::stoi(token[token.size()-3]);
-                            m->add_solution_grid(x, y);
-                        }
-                    }
-                }
-                
-                m_solutions = 1;
-                
-                for (Macro* m : m_macros){
-                    m->calculate_root();
-                }
-#endif
-            } else {
-            assert (0);
-            }
+        } else {
+            throw std::runtime_error("Must not happen!");
+        }
     } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        exit(0);
+        throw std::runtime_error(exp.msg());
     }
 }
 
@@ -1488,3 +1397,4 @@ void MacroCircuit::results_to_db()
     }
     m_db->export_as_csv("results.csv");
 }
+

@@ -19,7 +19,8 @@
 #include <macro.hpp>
 #include <terminal.hpp>
 #include <tree.hpp>
-#include <costfunction.hpp>
+#include <logger.hpp>
+#include <exception.hpp>
 
 #include <boost/filesystem.hpp>
 #include <z3++.h>
@@ -63,8 +64,6 @@ public:
     void set_tree(Tree * tree);
 
 private:
-    CostFunction* m_lut;
-    
     void read_blocks();
     void read_nets();
     void read_pl();
@@ -72,12 +71,6 @@ private:
     void write_blocks();
     void write_nets();
     void write_pl();
-    
-    size_t m_gcd_h;
-    size_t m_gcd_w;
-    
-    size_t m_max_h;
-    size_t m_max_w;
 
     std::string m_design_name;
     std::string m_blocks_file;
@@ -90,6 +83,7 @@ private:
     std::vector<Terminal*> m_terminals;
     std::vector<TerminalDefinition> m_terminal_definitions;
     Tree* m_tree;
+    Utils::Logger* m_logger;
 
     size_t m_expected_macros;
     size_t m_excepted_terminals;
@@ -105,9 +99,6 @@ private:
 
     Macro* find_macro(std::string const & name);
     Terminal* find_terminal(std::string const & name);
-    
-    void calculate_gcd();
-    void locate_biggest_macro();
     void deduce_layout();
 };
 

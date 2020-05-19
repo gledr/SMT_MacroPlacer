@@ -100,6 +100,7 @@ public:
                        size_t const y);
 
     void run_partitioning();
+    void deduce_layout(size_t const x, size_t const y);
 
     void add_free_terminal(std::string const & name);
     void add_fixed_terminal(std::string const & name,

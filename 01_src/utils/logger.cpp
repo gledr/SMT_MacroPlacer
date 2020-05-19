@@ -336,3 +336,11 @@ void Logger::export_db_to_csv(std::string const & filename)
 
     LOG(eInfo) << msg.str();
 }
+
+void Logger::deduce_layout(size_t const x, size_t const y)
+{
+    std::stringstream msg;
+    msg << "Layout Deduced From Terminals (" << x << ":" << y << ")";
+
+    LOG(eInfo) << msg.str();
+}

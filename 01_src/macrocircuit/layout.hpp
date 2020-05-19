@@ -14,6 +14,7 @@
 
 #include <object.hpp>
 #include <logger.hpp>
+#include <exception.hpp>
 #include <encoding_utils.hpp>
 
 #include <string>

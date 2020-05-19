@@ -14,6 +14,7 @@
 
 #include <object.hpp>
 #include <encoding_utils.hpp>
+#include <exception.hpp>
 
 #include <cassert>
 #include <z3++.h>

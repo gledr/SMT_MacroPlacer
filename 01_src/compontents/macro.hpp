@@ -19,7 +19,6 @@
 #include <layout.hpp>
 #include <pin.hpp>
 #include <supplement.hpp>
-#include <costfunction.hpp>
 
 namespace Placer {
 
@@ -42,23 +41,9 @@ public:
          size_t const pos_x,
          size_t const pos_y,
          size_t const orientation);
-   
-   Macro(std::string const & name,
-         std::string const & id,
-         size_t const width,
-         size_t const height,
-         size_t const layout_x,
-         size_t const layout_y,
-         CostFunction* lut);
 
     virtual ~Macro();
-    
-    void init_grid();
-    z3::expr encode_grid();
-    z3::expr_vector get_grid_costs();
-    z3::expr_vector get_grid_coordinates();
-    void calculate_root();
-    
+
     void set_supplement(Supplement* supplement);
 
     void add_pin(Pin* const pin);
@@ -69,10 +54,10 @@ public:
 
     std::vector<Pin*> get_pins();
     bool is_free();
-    
+
     void add_solution_root(size_t const x, size_t const y);
     std::pair<size_t, size_t> get_solution_root() const;
-    
+
     void add_solution_grid(size_t const x, size_t const y);
 
     void encode_pins();
@@ -82,27 +67,14 @@ public:
     z3::expr is_W();
     z3::expr is_S();
     z3::expr is_E();
-    
-    z3::expr is_bool_N();
-    z3::expr is_bool_W();
-    
-    z3::expr get_bool_orientation();
 
 private:
     std::map<std::string, Pin*> m_pins;
     Pin* m_active_pin;
     Supplement* m_supplement;
-    CostFunction* m_lut;
 
     bool m_free;
-    bool m_init_grid;
-    
-    std::pair<size_t, size_t> m_root_solution;
-    std::vector<std::pair<size_t, size_t>> m_grid_solutions;
-    
-    z3::expr_vector m_grid_coordinates;
-    z3::expr_vector m_cost_distribution;
-    
+
     size_t m_layout_x;
     size_t m_layout_y;
     
@@ -122,8 +94,6 @@ private:
     z3::expr m_encode_pins_not_overlapping;
     z3::expr m_encode_pins_center_of_macro;
     z3::expr m_encode_pins_relative_to_center;
-    
-    z3::expr m_bool_orientation;
 };
 
 }

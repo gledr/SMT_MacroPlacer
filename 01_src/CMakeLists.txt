@@ -77,7 +77,7 @@ add_executable(smt_placer
     utils/utils.cpp
     utils/base_database.cpp
     utils/database.cpp
-    utils/costfunction.cpp
+    utils/exception.cpp
     clustering/centroid.cpp
     clustering/cluster.cpp
     clustering/kmeans.cpp

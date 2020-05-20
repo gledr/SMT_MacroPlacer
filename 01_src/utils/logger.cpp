@@ -43,7 +43,7 @@ Logger::Logger():
     p_log_stream->set_dump_to_shell(this->get_verbose());
     p_log_stream->set_dump_to_file(this->get_log_active());
 
-    p_log_stream->set_working_directory(this->get_log_directory());
+    p_log_stream->set_working_directory(this->get_active_results_directory());
     p_log_stream->set_file_name(this->get_log_name());
 }
 
@@ -337,10 +337,42 @@ void Logger::export_db_to_csv(std::string const & filename)
     LOG(eInfo) << msg.str();
 }
 
+void Logger::export_hypergraph(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Exporting Hyphergraph (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
 void Logger::deduce_layout(size_t const x, size_t const y)
 {
     std::stringstream msg;
     msg << "Layout Deduced From Terminals (" << x << ":" << y << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::bookshelf_read_nets(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Parsing Bookshelf Nets (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::bookshelf_read_blocks(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Parsing Bookshelf Blocks (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::bookshelf_read_place(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Parsing Bookshelf Place (" << filename << ")";
 
     LOG(eInfo) << msg.str();
 }

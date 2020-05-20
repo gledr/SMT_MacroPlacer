@@ -161,7 +161,7 @@ std::set<Edge*> Node::get_edges()
 void Node::insert_edge(Edge* _edge)
 {
     assert (_edge != nullptr);
-    
+
     m_edges.insert(_edge);
 }
 
@@ -180,7 +180,7 @@ void Node::dump(std::ostream& stream)
     } else if(this->has_macro()){
         m_macro->dump();
     }
-    
+
     for(auto itor: m_edges){
         itor->dump(stream);
     }

@@ -108,11 +108,17 @@ public:
                            size_t const y);
 
     void export_db_to_csv(std::string const & filename);
+    void export_hypergraph(std::string const & filename);
     void print_header(std::stringstream const & header);
     void print_version(std::string const & date,
                       std::string const & commit,
                       std::string const & author,
                       size_t const max_len);
+    
+    void bookshelf_read_nets(std::string const & filename);
+    void bookshelf_read_blocks(std::string const & filename);
+    void bookshelf_read_place(std::string const & filename);
+    
 private:
     Logger();
     virtual ~Logger();

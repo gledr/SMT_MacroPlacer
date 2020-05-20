@@ -22,6 +22,7 @@ Bookshelf::Bookshelf():
 {
     m_tree = new Tree();
     m_logger = Logger::getInstance();
+    m_design_read = false;
 }
 
 /**
@@ -38,36 +39,49 @@ Bookshelf::~Bookshelf()
  */
 void Bookshelf::read_files()
 {
+    this->read_aux();
+    this->read_blocks();
+    this->read_pl();
+    this->read_nets();
+
+    m_design_read = true;
+}
+
+/**
+ * @brief Read Bookshelf Aux File
+ */
+void Bookshelf::read_aux()
+{
     std::string aux_file = this->get_bookshelf_file();
-    
+
     if(!boost::filesystem::exists(aux_file)){
-        throw std::runtime_error("Bookshelf File does not exits!");
+        throw PlacerException("Bookshelf Aux File does not exits!");
     }
-    
+
     std::vector<std::string> aux_content;
     std::string line;
-    
+
     std::ifstream aux_filestream(aux_file);
     while(std::getline(aux_filestream, line)){
         aux_content.push_back(line);
     }
     aux_filestream.close();
-    
+
     if(aux_content.size() != 1){
-        throw std::runtime_error("Aux file must contain excatly one line!");
+        throw PlacerException("Aux file must contain excatly one line!");
     }
-    
+
     std::vector<std::string> token = Utils::Utils::tokenize(aux_content[0], " ");
-    
+
     m_design_name = Utils::Utils::tokenize(aux_content[0], ".")[0];
-    
+
     for(auto& file : token){
         std::vector<std::string> parts = Utils::Utils::tokenize(file, ".");
         
         if(parts.size() != 2){
-            throw std::runtime_error("Bad Syntax used in Aux file!");
+            throw PlacerException("Bad Syntax used in Aux file!");
         }
-        
+
         if(parts[1] == "nets"){
             m_nets_file = file;
         } else if (parts[1] == "blocks"){
@@ -75,17 +89,9 @@ void Bookshelf::read_files()
         } else if (parts[1] == "pl"){
             m_pl_file = file;
         } else {
-            throw std::runtime_error("Unknown Format used in Aux file!");
+            throw PlacerException("Unknown Format used in Aux file!");
         }
     }
-    
-    this->read_blocks();
-    this->calc_estimated_die_area();
-    this->read_pl();
-    if (!this->get_minimize_die_mode()){
-        this->deduce_layout();
-    }
-    this->read_nets();
 }
 
 /**
@@ -93,10 +99,10 @@ void Bookshelf::read_files()
  */
 void Bookshelf::read_blocks()
 {
-    this->get_verbose() && std::cout << "[Debug]: Reading Bookshelf Blocks File" << std::endl;
-    
+    m_logger->bookshelf_read_blocks(m_blocks_file);
+
     if(!boost::filesystem::exists(m_blocks_file)){
-        throw std::runtime_error("Can not open blocks file (" + m_blocks_file + ")");
+        throw PlacerException("Can not open blocks file (" + m_blocks_file + ")");
     }
 
     std::ifstream blocks_stream(m_blocks_file);
@@ -107,9 +113,9 @@ void Bookshelf::read_blocks()
         blocks_content.push_back(line);
     }
     blocks_stream.close();
-    
+
     if(blocks_content[0] != "UCSC blocks 1.0"){
-        throw std::runtime_error("Bookshelf Blocks Header invalid!");
+        throw PlacerException("Bookshelf Blocks Header invalid!");
     }
 
     for(auto line : blocks_content){
@@ -159,18 +165,20 @@ void Bookshelf::read_blocks()
             m_terminal_definitions.push_back(terminal_definition);
 
         } else {
-            std::cout << line << std::endl;
-            assert (0);
+            notsupported_check(line);
         }
     }
-    
+
     if(m_excepted_terminals != m_terminal_definitions.size()){
-        throw std::runtime_error("Invalid Number of Terminal Specified in Blocks File!");
+        throw PlacerException("Invalid Number of Terminal Specified in Blocks File!");
     }
-    
+
     if(m_expected_macros != m_macro_definitions.size()){
-        throw std::runtime_error("Invalid Number of Macros Specified in Blocks File!");
+        throw PlacerException
+        ("Invalid Number of Macros Specified in Blocks File!");
     }
+
+    this->calc_estimated_die_area();
 }
 
 /**
@@ -178,12 +186,12 @@ void Bookshelf::read_blocks()
  */
 void Bookshelf::read_nets()
 {
-    this->get_verbose() && std::cout << "[Debug]: Reading Bookshelf Nets File" << std::endl;
-    
+    m_logger->bookshelf_read_nets(m_nets_file);
+
     if(!boost::filesystem::exists(m_nets_file)){
-        throw std::runtime_error("Can not open nets file (" + m_nets_file + ")");
+        throw PlacerException("Can not open nets file (" + m_nets_file + ")");
     }
-    
+
     std::ifstream nets_stream(m_nets_file);
     std::vector<std::string> nets_content;
     std::string line;
@@ -213,16 +221,16 @@ void Bookshelf::read_nets()
             continue;
         // NumNets : 42
         } else if (token[0] == "NumNets"){
-            assert (token[1] == ":");
+            assertion_check (token[1] == ":");
             num_nets = std::stoi(token[2]);
         // NumPins : 42
         } else if (token[0] == "NumPins"){
-            assert (token[1] == ":");
+            assertion_check (token[1] == ":");
             num_pins = std::stoi(token[2]);
         } else if (token[0] == "NetDegree"){
             num_nets++;
 
-            assert (token[1] == ":");
+            assertion_check (token[1] == ":");
             size_t sub_net_degree = std::stoi(token[2]);
             size_t j = i+1;
             std::vector<Node*> nodes;
@@ -315,28 +323,28 @@ void Bookshelf::read_nets()
  */
 void Bookshelf::read_pl()
 {
-    this->get_verbose() && std::cout << "[Debug]: Reading Bookshelf Place File" << std::endl;
-    
+    m_logger->bookshelf_read_place(m_pl_file);
+
     bool force_free = true;
-    
+
     if(!boost::filesystem::exists(m_pl_file)){
-        throw std::runtime_error("Can not open place file (" + m_pl_file + ")");
+        throw PlacerException("Can not open place file (" + m_pl_file + ")");
     }
-    
+
     std::ifstream place_stream(m_pl_file);
     std::vector<std::string> place_content;
     std::string line;
-    
+
     std::vector<std::string> processed_terminals;
     std::vector<std::string> processed_macros;
-    
+
     this->calc_estimated_die_area();
 
     while(std::getline(place_stream, line)){
         place_content.push_back(line);
     }
     place_stream.close();
-    
+
     for(auto& line : place_content){
         if(line.empty()){
             continue;
@@ -351,24 +359,24 @@ void Bookshelf::read_pl()
         } else if ((token[0].compare("UCSC") == 0)){
             continue;
         }
-        
+
         auto macro = std::find_if(m_macro_definitions.begin(), m_macro_definitions.end(), 
                     [token](MacroDefinition const & def)
                     {
                         return def.name == token[0];
                     });
-        
+
         auto terminal = std::find_if(m_terminal_definitions.begin(), m_terminal_definitions.end(),
                     [token](TerminalDefinition const & def)
                     {
                         return token[0] == def.name;
                     });
-        
+
         if(macro != m_macro_definitions.end()){
             size_t x = std::stoi(token[1]);
             size_t y = std::stoi(token[2]);
             processed_macros.push_back(macro->name);
-            
+
             // Placed Macro
             if(force_free) {
                 Macro* m = new Macro(macro->name,
@@ -404,12 +412,16 @@ void Bookshelf::read_pl()
             notsupported_check(line);
         }
     }
-   
+
     if(processed_macros.size() < m_expected_macros){
-        throw std::runtime_error("Not all Macros have been processed!");
-    } 
+        throw PlacerException("Not all Macros have been processed!");
+    }
     if (processed_terminals.size() < m_excepted_terminals){
-        throw std::runtime_error("Not all Terminals have been processed!");
+        throw PlacerException("Not all Terminals have been processed!");
+    }
+
+    if (!this->get_minimize_die_mode()){
+        this->deduce_layout();
     }
 }
 
@@ -483,7 +495,7 @@ void Bookshelf::set_tree(Tree* tree)
 void Bookshelf::calc_estimated_die_area ()
 {
     m_estimated_area = 0;
-  
+
     for (auto itor: m_macro_definitions){
         size_t x = itor.width;
         size_t y = itor.height;
@@ -521,7 +533,7 @@ std::string Bookshelf::get_design_name () const
 Macro* Bookshelf::find_macro(std::string const & name)
 {
     Macro* ret_val = nullptr;
-    
+
     for (auto itor: m_macros){
         if (itor->get_name() == name){
             ret_val = itor;
@@ -540,7 +552,7 @@ Macro* Bookshelf::find_macro(std::string const & name)
 Terminal* Bookshelf::find_terminal(std::string const & name)
 {
     Terminal* ret_val = nullptr;
-    
+
     for (auto itor: m_terminals){
         if (itor->get_name() == name){
             ret_val = itor;
@@ -571,13 +583,13 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
         Pin* p = nullptr;
         Terminal* t = this->find_terminal(macro);
         e_pin_direction dir = eUnknown;
-        
+
         if (direction == "B"){
             dir = eBidirectional;
         } else {
             notimplemented_check();
         }
-        
+
         if (!((m != nullptr) || (t != nullptr))){
             std::string msg = "Macro/Terminal " + macro + " does not exist";
             throw PlacerException(msg);
@@ -588,12 +600,12 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
             if (!m->get_pin(pin)){
                 p = new Pin(pin, macro, dir);
                 nullpointer_check (p);
-                
+
                 if (!rel_pos_x.empty()){
                     std::string x = rel_pos_x.substr(1 ,rel_pos_x.size());
                     int x_i = std::stoi(x);
                     p->set_x_offset_percentage(x_i);
-                } 
+                }
                 if (!rel_pos_y.empty()){
                     std::string y = rel_pos_x.substr(1 ,rel_pos_y.size());
                     int y_i = std::stoi(y);
@@ -605,8 +617,7 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
         }
 
     } catch (std::exception const & exp){
-        std::cerr << exp.what() << std::endl;
-        exit (0);
+        throw PlacerException(exp.what());
     }
 }
 

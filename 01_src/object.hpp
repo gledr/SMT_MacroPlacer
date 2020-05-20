@@ -23,6 +23,7 @@ namespace Placer {
 enum eEncodingProblem { eMacroCircuit, ePartition, eInit };
 enum eRotation { eFixed, e2D, e4D };
 enum eLogic { eInt, eBitVector };
+enum eInputFormat {eLEFDEF, eBookshelf};
 
 double const layout_factor = 1.2;
 
@@ -80,7 +81,7 @@ protected:
 
     void set_log_name(std::string const & log_name);
     std::string get_log_name() const;
-    std::string get_log_directory();
+    std::string get_active_results_directory();
 
     void set_parquet_directory(std::string const & directory);
     std::string get_parquet_directory() const;

@@ -64,6 +64,7 @@ public:
     void set_tree(Tree * tree);
 
 private:
+    void read_aux();
     void read_blocks();
     void read_nets();
     void read_pl();
@@ -77,6 +78,7 @@ private:
     std::string m_nets_file;
     std::string m_pl_file;
     size_t m_estimated_area;
+    bool m_design_read;
 
     std::vector<Macro*> m_macros;
     std::vector<MacroDefinition> m_macro_definitions;

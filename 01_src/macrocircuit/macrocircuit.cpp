@@ -94,11 +94,29 @@ void MacroCircuit::build_circuit()
         m_db->init_database();
 
         if(!this->get_def().empty() && !this->get_lef().empty()) {
-            m_circuit = new Circuit::Circuit(this->get_lef(),
-                                             this->get_def());
+           this->build_circuit_lefdef();
+
+        } else if (!this->get_bookshelf_file().empty()){
+            this->build_circuit_bookshelf();
+
+        } else {
+            notsupported_check("Invalid Input Files Defined!");
+        }
+    } catch (std::exception const & exp){
+        throw PlacerException(exp.what());
+    }
+}
+
+/**
+ * @brief Build Macro Circuit from LEFDEF Input Files
+ */
+void MacroCircuit::build_circuit_lefdef()
+{
+     m_circuit = new Circuit::Circuit(this->get_lef(),
+                                      this->get_def());
             m_tree = new Tree();
-            assert (m_tree != nullptr);
-            assert (m_circuit != nullptr);
+            nullpointer_check (m_tree );
+            nullpointer_check (m_circuit);
             this->set_design_name(m_circuit->defDesignName);
 
             bool found = false;
@@ -136,11 +154,15 @@ void MacroCircuit::build_circuit()
 
             m_layout->set_units(m_circuit->defUnit);
 
-            this->build_tree();
-            //m_tree->visualize();
+            this->init_tree(eLEFDEF);
+}
 
-        } else if (!this->get_bookshelf_file().empty()){
-            m_bookshelf = new Bookshelf();
+/**
+ * @brief Build Circuit from Bookshelf Input Files
+ */
+void MacroCircuit::build_circuit_bookshelf()
+{
+      m_bookshelf = new Bookshelf();
             m_bookshelf->read_files();
             this->set_design_name(m_bookshelf->get_design_name());
             m_estimated_area = m_bookshelf->get_estimated_area();
@@ -154,7 +176,7 @@ void MacroCircuit::build_circuit()
                         m_layout->set_ux(upper_corner.first);
                         m_layout->set_ly(0);
                         m_layout->set_uy(upper_corner.second);
-                        
+
                     } else {
                            if (!m_supplement->has_layout()){
                         throw std::runtime_error("No Layout Supplement Defined!");
@@ -173,18 +195,34 @@ void MacroCircuit::build_circuit()
             m_macros = m_bookshelf->get_macros();
             m_terminals = m_bookshelf->get_terminals();
             this->set_design_name(m_bookshelf->get_design_name());
-            m_tree = m_bookshelf->get_tree();
-            m_tree->construct_tree();
-            //m_tree->visualize();
-        } else {
-            throw("Invalid Input Files Defined!");
-        }
-    } catch (std::exception const & exp){
-        std::cerr << exp.what() << std::endl;
-        exit(0);
-    }
+
+            this->init_tree(eBookshelf);
 }
 
+/**
+ * @brief Initialize Conectivity Tree for Given Input Format
+ * 
+ * @param type Input Format Type
+ */
+void MacroCircuit::init_tree(eInputFormat const type)
+{
+    if (type == eLEFDEF){
+          this->build_tree_from_lefdef();
+    } else if (type == eBookshelf){
+            m_tree = m_bookshelf->get_tree();
+    } else {
+        notsupported_check("Only LEF/DEF and Bookshelf are supported!");
+    }
+
+    m_tree->construct_tree();
+    //m_tree->dump();
+    m_tree->export_hypergraph();
+    //m_tree->visualize();
+}
+
+/**
+ * @brief Create Macro Definitions from Parser Ouput
+ */
 void MacroCircuit::create_macro_definitions()
 {
     for(auto& itor: m_circuit->defComponentStor){
@@ -539,7 +577,6 @@ void MacroCircuit::save_all()
  */
 void MacroCircuit::save_best()
 {
-    std::cout << "in save best" << std::endl;
     std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
     std::string name = "best_" + this->get_def();
     this->write_def(name, best_hpwl.first);
@@ -548,7 +585,7 @@ void MacroCircuit::save_best()
 /**
  * @brief Build Connectivity Tree from DEF file
  */
-void MacroCircuit::build_tree()
+void MacroCircuit::build_tree_from_lefdef()
 {
     for(auto itor: m_circuit->defNetStor){
         if(itor.numConnections() < 2){
@@ -1397,4 +1434,3 @@ void MacroCircuit::results_to_db()
     }
     m_db->export_as_csv("results.csv");
 }
-

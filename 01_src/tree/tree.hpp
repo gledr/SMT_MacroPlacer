@@ -22,13 +22,12 @@
 #include <object.hpp>
 #include <node.hpp>
 #include <edge.hpp>
-#include <macro.hpp>
-#include <cell.hpp>
-#include <terminal.hpp>
+#include <components.hpp>
 #include <logger.hpp>
+#include <exception.hpp>
 
 namespace Placer {
-    
+
 class Node;
 class Edge;
 
@@ -50,15 +49,11 @@ public:
 
     void dump(std::ostream & stream = std::cout);
 
-    void iterate_tree(std::ofstream & stream);
-    void iterate_tree_recursive(Node* _root,
-                                Node* current_root,
-                                std::ofstream & stream,
-                                std::vector<Node*> & fringe);
-
     std::vector<Edge*> get_edges();
-    
+
     void visualize();
+
+    void export_hypergraph();
 
 private:
     Utils::Logger* m_logger;
@@ -70,10 +65,17 @@ private:
     Node* find_node(std::string const & name,
                     std::string const & id);
     void new_element(Node* _node);
-    
+
     void export_dot_file();
     void dot_to_png();
     void show_png();
+
+    void iterate_tree(std::ofstream & stream);
+    void iterate_tree_recursive(Node* _root,
+                                Node* current_root,
+                                std::ofstream & stream,
+                                std::vector<Node*> & fringe);
+
 };
 
 }

@@ -54,11 +54,18 @@ std::vector<Edge *> Tree::get_edges()
     return m_edges;
 }
 
+/**
+ * @brief Find Node by its ID and Name
+ * 
+ * @param name Node Name
+ * @param id Node ID
+ * @return Placer::Node*
+ */
 Node* Tree::find_node(std::string const & name,
                       std::string const & id)
 {
     Node* retval = nullptr;
-    
+
     for(auto itor: m_nodes){
         if(itor->get_macro() != nullptr){
             if(itor->get_macro()->get_id() == id){
@@ -84,6 +91,11 @@ Node* Tree::find_node(std::string const & name,
     return retval;
 }
 
+/**
+ * @brief Dump Tree Components to Given Stream
+ * 
+ * @param stream Stream to Dump to
+ */
 void Tree::dump(std::ostream& stream)
 {
     for(auto itor: m_terminals){
@@ -94,34 +106,47 @@ void Tree::dump(std::ostream& stream)
     }
 }
 
+/**
+ * @brief Construct Tree from Pre Inserted Edges
+ */
 void Tree::construct_tree()
 {
     m_logger->construct_tree(m_edges.size());
-    
+
     for(auto edge: m_edges){
         Node* from = edge->get_from();
         Node* to   = edge->get_to();
-        
+
         //assert (from != to);
-        
+
         from->insert_edge(edge);
         to->insert_edge(edge);
     }
 }
 
+/**
+ * @brief Allocate new Element 
+ * 
+ * @param _node Node to Add
+ */
 void Tree::new_element(Node* _node)
 {
-    assert (_node != nullptr);
-    
+    nullpointer_check (_node );
+
     if(_node->is_node()){
         m_nodes.push_back(_node);
     } else if (_node->is_terminal()){
         m_terminals.push_back(_node);
     } else {
-        assert(0);
+        notimplemented_check();
     }
 }
 
+/**
+ * @brief Iterator over the Tree
+ * 
+ * @param stream Stream to dump information to
+ */
 void Tree::iterate_tree(std::ofstream & stream)
 {
     std::vector<Node*> fringe;
@@ -140,19 +165,28 @@ void Tree::iterate_tree(std::ofstream & stream)
     }
 }
 
+/**
+ * @brief Recursive Core Function to Iterate over Tree
+ * 
+ * @param _root Root Node
+ * @param current_root Current Root Node
+ * @param stream Stream to Dump to
+ * @param fringe Nodes in the current fringe left to iterate
+ */
 void Tree::iterate_tree_recursive(Node* _root,
                                   Node* current_root,
                                   std::ofstream & stream,
                                   std::vector<Node*> & fringe)
 {
-    assert (current_root != nullptr);
+    nullpointer_check (current_root);
+
     for(auto itor: current_root->get_edges()){
         if(itor->get_to() != current_root){
             Node* from = itor->get_from();
             Node* to   = itor->get_to();
-            assert (from != nullptr);
-            assert (to != nullptr);
-            
+            nullpointer_check (from);
+            nullpointer_check (to);
+            std::cout << from->get_id() << " -> " << to->get_id() << ";" << std::endl;
             stream << "\t" << from->get_id() << " -> " << to->get_id() << ";" << std::endl;
 
             if(itor->get_to()->is_terminal()){
@@ -162,7 +196,7 @@ void Tree::iterate_tree_recursive(Node* _root,
                     fringe.push_back(itor->get_to());
                     return;
                 } else {
-                    assert (0);
+                    notimplemented_check();
                 }
             } else {
                 this->iterate_tree_recursive(_root, itor->get_to(), stream, fringe);
@@ -188,34 +222,33 @@ void Tree::export_dot_file()
 {
     try {
         std::string img_dir = this->get_image_directory();
-        
+
         if(!boost::filesystem::exists(img_dir)){
             boost::filesystem::create_directories(img_dir);
         }
-        
+
         boost::filesystem::current_path(img_dir);
-        
+
         std::string dot_name = this->get_design_name() + ".dot";
         std::ofstream dot_stream(img_dir + "/" + dot_name);
-        
+
          if(!dot_stream.is_open()){
             throw "Could not create dot stream file!";
         }
-        
+
         dot_stream << "digraph " << this->get_design_name() << std::endl;
         dot_stream << "{" << std::endl;
         this->iterate_tree(dot_stream);
         dot_stream << "}" << std::endl;
-        
+
         dot_stream.close();
-        
+
         if(!boost::filesystem::exists(dot_name)){
-            throw "No dot file created!";
+            throw PlacerException("No dot file created!");
     }
-        
+
     } catch (std::exception const & exp){
-        std::cout << exp.what() << std::endl;
-        assert (0);
+        throw PlacerException(exp.what());
     }
 }
 
@@ -229,17 +262,17 @@ void Tree::dot_to_png()
     std::string input = this->get_design_name() + ".dot";
     std::string output= this->get_design_name() + ".png";
     bool wait_for_termination = true;
-    
+
     std::vector<std::string> args;
     args.push_back("-Tpng");
     args.push_back(input);
     args.push_back("-o");
     args.push_back(output);
-    
+
     Utils::Utils::system_execute(bin, args, "", wait_for_termination);
-    
+
     if(!boost::filesystem::exists(output)){
-        throw "No png file created!";
+        throw PlacerException("No png file created!");
     }
 }
 
@@ -254,6 +287,36 @@ void Tree::show_png()
     bool wait_for_termination = false;
     std::vector<std::string> args;
     args.push_back(input);
-    
+
     Utils::Utils::system_execute(bin, args, "", wait_for_termination);
+}
+
+/**
+ * @brief Export Tree as Hypergraph using *.hgr format
+ */
+void Tree::export_hypergraph()
+{
+    std::string filename = this->get_design_name() + ".hgr";
+    m_logger->export_hypergraph(filename);
+
+    std::ofstream hgr_file (this->get_active_results_directory() +
+                            "/" +
+                            filename);
+
+    std::map<std::string, std::set<std::string>> steiner_tree;
+
+    for (Edge* edge: m_edges){
+        steiner_tree[edge->get_from()->get_id()].insert(edge->get_to()->get_id());
+    }
+
+   hgr_file << m_nodes.size() << " " << steiner_tree.size() << std::endl;
+    for (auto edge: steiner_tree){
+        hgr_file << edge.first << " ";
+
+        for (auto itor: edge.second){
+            hgr_file << itor << " ";
+        }
+        hgr_file << std::endl;
+    }
+    hgr_file.close();
 }

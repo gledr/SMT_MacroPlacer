@@ -77,7 +77,7 @@ public:
 
 private:
     friend class Evaluate;
-    
+
     // Microsoft Z3
     z3::optimize* m_z3_opt;
 
@@ -116,6 +116,9 @@ private:
 
     double m_standard_cell_height;
 
+    void build_circuit_lefdef();
+    void build_circuit_bookshelf();
+
     bool is_macro(LefDefParser::defiComponent const & macro);
     bool is_standard_cell(LefDefParser::defiComponent const & cell);
 
@@ -129,7 +132,9 @@ private:
 
     void add_cell(LefDefParser::defiComponent const & cmp);
 
-    void build_tree();
+    void build_tree_from_lefdef();
+    void init_tree(eInputFormat const type);
+
     void create_macro_definitions();
 
     void create_image(size_t const solution);

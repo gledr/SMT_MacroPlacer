@@ -154,7 +154,7 @@ void Object::set_log_active(bool const val)
     m_log = val;
 }
 
-std::string Object::get_log_directory()
+std::string Object::get_active_results_directory()
 {
     return m_results_directory + "/" + std::to_string(m_results_id);
 }

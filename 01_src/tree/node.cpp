@@ -12,6 +12,7 @@
 #include "node.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 static bool debug = false;
 
@@ -25,8 +26,8 @@ Node::Node(Macro* _macro):
     m_terminal(nullptr),
     m_cell(nullptr)
 {
-    assert (_macro != nullptr);
-    
+    nullpointer_check (_macro);
+
     debug && std::cout << "[Info]: New Macro Node: " 
                        << _macro->get_id() << "(" 
                        << _macro->get_name() << ")" << std::endl;
@@ -42,8 +43,8 @@ Node::Node(Terminal* _terminal):
     m_terminal(_terminal),
     m_cell(nullptr)
 {
-    assert (_terminal != nullptr);
-    
+    nullpointer_check (_terminal);
+
     debug && std::cout << "[Info]: New Terminal Node: " 
                        << _terminal->get_name() << std::endl;
 }
@@ -58,8 +59,8 @@ Node::Node(Cell* _cell):
     m_terminal(nullptr),
     m_cell(_cell)
 {
-    assert (_cell != nullptr);
-    
+    nullpointer_check (_cell);
+
     debug && std::cout << "[Info]: New Cell Node: " 
                        << _cell->get_id() << "(" 
                        << _cell->get_name() << ")" << std::endl;
@@ -160,7 +161,7 @@ std::set<Edge*> Node::get_edges()
  */
 void Node::insert_edge(Edge* _edge)
 {
-    assert (_edge != nullptr);
+    nullpointer_check (_edge);
 
     m_edges.insert(_edge);
 }
@@ -201,7 +202,7 @@ std::string Node::get_id()
     } else if (m_macro != nullptr){
         return m_macro->get_id();
     } else {
-        assert (0);
+        notsupported_check("Only Macros, Terminals and Cells are supported!")
     }
 }
 
@@ -219,6 +220,6 @@ std::string Node::get_name()
     } else if (m_macro != nullptr){
         return m_macro->get_name();
     } else {
-        assert (0);
+        notsupported_check("Only Macros, Terminals and Cells are supported!")
     }
 }

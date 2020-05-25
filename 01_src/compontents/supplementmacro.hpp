@@ -14,7 +14,7 @@
 
 #include <string>
 #include <map>
-#include <iostream>
+#include <logger.hpp>
 
 #include <supplementpin.hpp>
 
@@ -25,12 +25,13 @@ public:
     SupplementMacro(std::string const & macro_id);
 
     virtual ~SupplementMacro();
-    
+
     bool has_pins();
     bool has_pin(std::string const & id);
     void add_pin(SupplementPin * pin);
     SupplementPin* get_pin(std::string const & name);
 private:
+    Utils::Logger* m_logger;
     std::string m_id;
     std::map<std::string, SupplementPin*> m_pins;
 };

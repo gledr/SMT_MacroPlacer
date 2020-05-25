@@ -73,9 +73,11 @@ public:
 
     void set_bitwidth(size_t const width);
     size_t get_bitwidth () const;
+    bool has_bitwidth();
 
     void set_frequency(size_t const frequency);
     size_t get_frequency() const;
+    bool has_frequency();
 
     static e_pin_direction string2enum(std::string const & name);
     static std::string enum2string(e_pin_direction const direction);

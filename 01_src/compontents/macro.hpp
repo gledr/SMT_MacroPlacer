@@ -34,7 +34,7 @@ public:
           size_t const widht,
           size_t const height);
 
-   Macro(std::string const & name,
+    Macro(std::string const & name,
          std::string const & id,
          size_t const width,
          size_t const height,
@@ -62,7 +62,7 @@ public:
 
     void encode_pins();
     z3::expr get_pin_constraints();
-    
+
     z3::expr is_N();
     z3::expr is_W();
     z3::expr is_S();
@@ -72,6 +72,7 @@ private:
     std::map<std::string, Pin*> m_pins;
     Pin* m_active_pin;
     Supplement* m_supplement;
+    Utils::Logger* m_logger;
 
     bool m_free;
 
@@ -80,7 +81,7 @@ private:
     
     void handle_supplement();
     void resolve_pin_position();
-    
+//     
     /**
      * SMT Encoding
      */

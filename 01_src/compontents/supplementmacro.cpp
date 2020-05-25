@@ -12,14 +12,13 @@
 #include "supplementmacro.hpp"
 
 using namespace Placer;
-
-static bool debug = true;
+using namespace Placer::Utils;
 
 SupplementMacro::SupplementMacro(std::string const & macro_id):
     m_id(macro_id)
 {
-    debug && std::cout << "[Info]: New Supplement Macro: " 
-                       << macro_id << std::endl;
+    m_logger = Logger::getInstance();
+    m_logger->add_supplement_macro(macro_id);
 }
 
 SupplementMacro::~SupplementMacro()
@@ -27,6 +26,7 @@ SupplementMacro::~SupplementMacro()
     for(auto itor: m_pins){
         delete itor.second; itor.second = nullptr;
     }
+    m_logger = nullptr;
 }
 
 void SupplementMacro::add_pin(SupplementPin * pin)

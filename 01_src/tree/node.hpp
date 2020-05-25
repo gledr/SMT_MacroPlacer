@@ -21,6 +21,7 @@
 #include <edge.hpp>
 #include <cell.hpp>
 #include <terminal.hpp>
+#include <exception.hpp>
 
 namespace Placer {
 

@@ -20,7 +20,6 @@
 #include <macro.hpp>
 #include <encoding_utils.hpp>
 #include <cluster.hpp>
-
 #include <kmeans.hpp>
 
 namespace Placer {
@@ -33,14 +32,16 @@ namespace Placer {
 class Partitioning: public virtual Object {
 public:
     Partitioning();
-    
+
     virtual ~Partitioning();
-    
+
     void set_problem(std::vector<Macro*> & macros,
                      size_t partion_size);
 
     void run();
-    
+
+    void hypergraph_partitioning();
+
     void kmeans_clustering();
 
     std::vector<Component*> get_partitions();

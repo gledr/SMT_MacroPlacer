@@ -15,13 +15,14 @@
 #include <iostream>
 #include <cassert>
 #include <string>
+#include <exception.hpp>
 
 namespace Placer {
 
 class Node;
 
 /** 
- * @class Edge 
+ * @class Edge
  * 
  * @brief Tree Connection Edge between Nodes
  */
@@ -48,8 +49,17 @@ public:
     bool is_cell_to_terminal();
     bool is_macro_to_terminal();
 
+    std::string get_from_pin() const;
+    std::string get_to_pin() const;
+
     Node* get_to();
     Node* get_from();
+
+    size_t get_frequency_from();
+    size_t get_frequency_to();
+
+    size_t get_bitwidth_from();
+    size_t get_bitwidth_to();
 
 private:
     Node* m_to;

@@ -60,6 +60,14 @@ public:
     bool is_input();
     bool is_output();
     bool is_bidirectional();
+    
+    void set_bitwidth(size_t const width);
+    size_t get_bitwidth () const;
+    bool has_bitwidth();
+
+    void set_frequency(size_t const frequency);
+    size_t get_frequency() const;
+    bool has_frequency();
 
     virtual void dump(std::ostream & stream = std::cout);
 
@@ -69,6 +77,9 @@ private:
     std::string m_name;
     bool m_free;
     e_pin_direction m_direction;
+
+    size_t m_bitwidth;
+    size_t m_frequency;
 
     z3::expr m_pos_x;
     z3::expr m_pos_y;

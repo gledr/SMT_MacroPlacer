@@ -39,6 +39,13 @@ public:
     void execution_start();
     void execution_end();
 
+    void add_free_macro(std::string const & id,
+                        size_t const w,
+                        size_t const h);
+    void add_fixed_macro(std::string const & id);
+
+    void add_supplement_macro(std::string const & id);
+
     void dump_all();
     void solver_version(std::string const & version);
 
@@ -69,6 +76,7 @@ public:
 
     void construct_tree(size_t const edges);
     void insert_edge(std::string const & from, std::string const & to);
+    
 
     void min_die_area(double const & area);
     void result_die_area(double const & area);

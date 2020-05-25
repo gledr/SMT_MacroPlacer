@@ -67,6 +67,7 @@ add_executable(smt_placer
     compontents/cell.cpp
     compontents/supplementmacro.cpp
     compontents/supplementpin.cpp
+    compontents/supplementterminal.cpp
     tree/edge.cpp
     tree/node.cpp
     tree/tree.cpp

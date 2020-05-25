@@ -43,9 +43,9 @@ Macro::Macro(std::string const & name,
     m_height = m_encode->get_value(height);
     //m_orientation = m_encode->get_value(eNorth);
     m_orientation = m_encode->get_constant(id + "_orientation");
+    m_logger = Logger::getInstance();
 
-    this->get_verbose() && std::cout << "[Info]: Adding Free Macro " 
-                       << id << " (" << width << "x" << height << ")"<< std::endl;
+    m_logger->add_free_macro(id, width, height);
 }
 
 /**
@@ -70,8 +70,8 @@ Macro::Macro(std::string const & name,
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_encode_pins_relative_to_center(m_encode->get_value(0)),
-    m_pin_constraints(m_encode->get_value(0))
+    m_pin_constraints(m_encode->get_value(0)),
+    m_encode_pins_relative_to_center(m_encode->get_value(0))
 {
     m_lx = m_encode->get_value(pos_lx);
     m_ly = m_encode->get_value(pos_ly);
@@ -82,8 +82,9 @@ Macro::Macro(std::string const & name,
     m_id = id;
     m_free = false;
     m_supplement = nullptr;
-    
-    this->get_verbose() && std::cout << "[Info]: Adding Fixed Macro " << id << std::endl;
+    m_logger = Logger::getInstance();
+
+    m_logger->add_fixed_macro(id);
 }
 
 /**
@@ -96,6 +97,7 @@ Macro::~Macro()
     }
 
     m_supplement = nullptr;
+    m_logger = nullptr;
 }
 
 /**

@@ -35,7 +35,8 @@ void Logger::destroy()
 }
 
 Logger::Logger():
-    BaseLogger(), Object()
+    BaseLogger(),
+    Object()
 {
     p_log_stream->set_enabled(true);
     p_log_stream->set_quiet(false);
@@ -49,6 +50,29 @@ Logger::Logger():
 
 Logger::~Logger()
 {
+}
+
+void Logger::add_free_macro(std::string const & id,
+                            size_t const w,
+                            size_t const h)
+{
+    std::stringstream msg;
+    msg << "Create Free Macro " << id << " (" << " : " << h << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::add_fixed_macro(std::string const & id)
+{
+    std::stringstream msg;
+    msg << "Create Fixed Macro: " << id;
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::add_supplement_macro(std::string const & id)
+{
+    LOG(eInfo) << "Adding Supplement Macro (" << id << ")";
 }
 
 void Logger::supplement_file(std::string const & file)

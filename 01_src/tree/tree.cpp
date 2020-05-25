@@ -79,7 +79,7 @@ Node* Tree::find_node(std::string const & name,
             }
         }
     }
-    
+
     if(!retval){
         for(auto itor: m_terminals){
             if(itor->get_terminal()->get_name() == id){
@@ -306,10 +306,14 @@ void Tree::export_hypergraph()
     std::map<std::string, std::set<std::string>> steiner_tree;
 
     for (Edge* edge: m_edges){
-        steiner_tree[edge->get_from()->get_id()].insert(edge->get_to()->get_id());
+        if (edge->get_from()->is_terminal() || edge->get_to()->is_terminal()){
+            continue;
+        } else {
+            steiner_tree[edge->get_from()->get_id()].insert(edge->get_to()->get_id());
+        }
     }
 
-   hgr_file << m_nodes.size() << " " << steiner_tree.size() << std::endl;
+    hgr_file << m_nodes.size() << " " << steiner_tree.size() << std::endl;
     for (auto edge: steiner_tree){
         hgr_file << edge.first << " ";
 
@@ -319,4 +323,21 @@ void Tree::export_hypergraph()
         hgr_file << std::endl;
     }
     hgr_file.close();
+}
+
+/**
+ * @brief Check if Edges are Valid
+ * 
+ * Check if Bitwidth and Frequency of the Nodes connected to the edge match
+ */
+void Tree::verify_edges()
+{
+    for (Edge* edge: m_edges){
+        if (edge->get_bitwidth_from() != edge->get_bitwidth_to()){
+            throw PlacerException("Invalid Bitwidth in Edge Detected!");
+        }
+        if (edge->get_frequency_from() != edge->get_frequency_to()){
+            throw PlacerException("Invalid Frequency in Edge Detected!");
+        }
+    }
 }

@@ -45,6 +45,8 @@ public:
                      std::string const & to_pin,
                      std::string const & edge_name);
 
+    void verify_edges();
+
     void construct_tree();
 
     void dump(std::ostream & stream = std::cout);

@@ -13,8 +13,7 @@
 #include "node.hpp"
 
 using namespace Placer;
-
-static bool debug = false;
+using namespace Placer::Utils;
 
 /**
  * @brief Constructor
@@ -31,8 +30,8 @@ Edge::Edge(Node* from, Node* to,
            std::string const & edge_name):
     m_name(edge_name)
 {
-    assert (from != nullptr);
-    assert (to != nullptr); 
+    nullpointer_check (from);
+    nullpointer_check (to);
     //assert (from != to); FIXME
     
     // Case I: Input 
@@ -59,9 +58,6 @@ Edge::Edge(Node* from, Node* to,
         m_from_pin = from_pin;
         m_to_pin = to_pin;
     }
-    
-    debug && std::cout << "[Info]: New Edge " << m_from->get_id()
-                       << " -> " << m_to->get_id() << std::endl;
 }
 
 /**
@@ -119,7 +115,7 @@ void Edge::dump(std::ostream& stream)
                << m_from->get_cell()->get_id() 
                << " -> " << m_to->get_terminal()->get_id() << std::endl;
     } else {
-        assert (0);
+        notimplemented_check();
     }
 }
 
@@ -211,4 +207,96 @@ bool Edge::is_cell_to_terminal()
 bool Edge::is_macro_to_terminal()
 {
     return m_from->has_macro() && m_to->is_terminal();
+}
+
+/**
+ * @brief Edge From Pin
+ * 
+ * @return std::string
+ */
+std::string Edge::get_from_pin() const
+{
+    return m_from_pin;
+}
+
+/**
+ * @brief Edge To Pin
+ * 
+ * @return std::string
+ */
+std::string Edge::get_to_pin() const
+{
+    return m_to_pin;
+}
+
+/**
+ * @brief Get BitWidth of From Edge Element
+ * 
+ * @return size_t
+ */
+size_t Edge::get_bitwidth_from()
+{
+    if (m_from->is_terminal()){
+        return m_from->get_terminal()->get_bitwidth();
+    } else if (m_from->has_macro()){
+        return m_from->get_macro()->get_pin(m_from_pin)->get_bitwidth();
+    } else {
+        notimplemented_check();
+    }
+
+    return 0; // Never Reached
+}
+
+/**
+ * @brief Get BitWidth of To Edge Element
+ * 
+ * @return size_t
+ */
+size_t Edge::get_bitwidth_to()
+{
+    if (m_to->is_terminal()){
+        return m_to->get_terminal()->get_bitwidth();
+    } else if (m_to->has_macro()){
+        return m_to->get_macro()->get_pin(m_to_pin)->get_bitwidth();
+    } else {
+        notimplemented_check();
+    }
+
+    return 0; // Never Reached
+}
+
+/**
+ * @brief Get Frequency of From Edge Element
+ * 
+ * @return size_t
+ */
+size_t Edge::get_frequency_from()
+{
+    if (m_from->is_terminal()){
+        return m_from->get_terminal()->get_frequency();
+    } else if (m_from->has_macro()){
+        return m_from->get_macro()->get_pin(m_from_pin)->get_frequency();
+    } else {
+        notimplemented_check();
+    }
+
+    return 0; // Never Reached
+}
+
+/**
+ * @brief Get Frequency of To Edge Element
+ * 
+ * @return size_t
+ */
+size_t Edge::get_frequency_to()
+{
+    if (m_to->is_terminal()){
+        return m_to->get_terminal()->get_frequency();
+    } else if (m_to->has_macro()){
+        return m_to->get_macro()->get_pin(m_to_pin)->get_frequency();
+    } else {
+        notimplemented_check();
+    }
+
+    return 0; // Never Reached
 }

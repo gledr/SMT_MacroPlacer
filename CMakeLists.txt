@@ -2,6 +2,10 @@ cmake_minimum_required(VERSION 3.1)
 
 project(SMT_MacroPlacer)
 
+set(EXECUTABLE_OUTPUT_PATH ${PROJECT_SOURCE_DIR}/bin)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
+
 find_program(CCACHE_PROGRAM ccache)
 if(CCACHE_PROGRAM)
     set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CCACHE_PROGRAM}")
@@ -19,12 +23,12 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(DEFLIB_HOME${PROJECT_SOURCE_DIR}/02_module/def)
 set(LEFLIB_HOME${PROJECT_SOURCE_DIR}/02_module/lef)
+set(ABKCOMMON_HOME ${PROJECT_SOURCE_DIR}/02_module/ABKCommon)
+set(PARQUET_HOME ${PROJECT_SOURCE_DIR}/02_module/ParquetFP)
 
 set(THIRD_PARTY_INCLUDE ${PROJECT_SOURCE_DIR}/05_third_party/include)
 set(THIRD_PARTY_LIB ${PROJECT_SOURCE_DIR}/05_third_party/lib)
 set(THIRD_PARTY_LIB64 ${PROJECT_SOURCE_DIR}/05_third_party/lib64)
-set(ABKCOMMON_HOME ${PROJECT_SOURCE_DIR}/02_module/ABKCommon)
-set(PARQUET_HOME ${PROJECT_SOURCE_DIR}/02_module/ParquetFP)
 
 add_subdirectory(01_src)
 add_subdirectory(02_module)

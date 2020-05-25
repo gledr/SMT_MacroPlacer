@@ -32,6 +32,8 @@ Terminal::Terminal(std::string const & name,
     m_pos_y(m_encode->get_constant("terminal_" + name + "_y"))
 {
     m_free = true;
+    m_bitwidth = 0;
+    m_frequency = 0;
     m_logger->add_free_terminal(name);
 }
 
@@ -57,6 +59,8 @@ Terminal::Terminal(std::string const & name,
     m_pos_y(m_encode->get_value(pos_y))
 {
     m_free = false;
+    m_bitwidth = 0;
+    m_frequency = 0;
     m_logger->add_fixed_terminal(name, pos_x, pos_y);
 }
 
@@ -237,4 +241,62 @@ bool Terminal::has_solution(size_t const solution)
     assert (m_solutions_x.size() == m_solutions_y.size());
 
     return solution < m_solutions_x.size();
+}
+
+/**
+ * @brief Get Terminal BitWidth
+ * 
+ * @return size_t
+ */
+size_t Terminal::get_bitwidth() const
+{
+    return m_bitwidth;
+}
+
+/**
+ * @brief Get Terminal Frequency
+ * 
+ * @return size_t
+ */
+size_t Terminal::get_frequency() const
+{
+    return m_frequency;
+}
+
+/**
+ * @brief Check if Terminal has BitWidth
+ * 
+ * @return bool
+ */
+bool Terminal::has_bitwidth()
+{
+    return m_bitwidth != 0;
+}
+
+/**
+ * @brief Check if Terminal has Frequency
+ */
+bool Terminal::has_frequency()
+{
+    return m_frequency != 0;
+}
+
+/**
+ * @brief Set Terminal BitWidth
+ * 
+ * @param width: BitWidth
+ */
+void Terminal::set_bitwidth(size_t const width)
+{
+    m_bitwidth = width;
+}
+
+/**
+ * @brief Set Terminal Frequency
+ * 
+ * @param frequency Frequency
+ */
+void Terminal::set_frequency(size_t const frequency)
+{
+    m_frequency = frequency;
 }

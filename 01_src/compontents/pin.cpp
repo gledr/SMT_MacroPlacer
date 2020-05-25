@@ -33,15 +33,18 @@ Pin::Pin(std::string const & name,
     m_pin_pos_y(m_encode->get_value(y)),
     m_is_placed(true)
 {
+    m_bitwidht = 0;
+    m_frequency = 0;
+    
     this->get_verbose() && std::cout << "[Info]: Adding Placed Pin " << name << std::endl;
 }
 
 /**
  * @brief Pin Name
  * 
- * @param pin_name p_pin_name:...
- * @param macro_name p_macro_name:...
- * @param direction p_direction:...
+ * @param pin_name PinName
+ * @param macro_name Parent Macro Name
+ * @param direction Pin Direction
  */
 Pin::Pin(std::string const & pin_name,
          std::string const & macro_name,
@@ -57,6 +60,9 @@ Pin::Pin(std::string const & pin_name,
     m_offset_y_percentage(0),
     m_is_placed(false)
 {
+    m_bitwidht = 0;
+    m_frequency = 0;
+    
     this->get_verbose() && std::cout << "[Info]: Adding Free Pin " << macro_name << "_" << pin_name << std::endl;
 }
 
@@ -99,6 +105,16 @@ size_t Pin::get_bitwidth() const
 }
 
 /**
+ * @brief Check if bitwidth has every been assigned
+ * 
+ * @return bool
+ */
+bool Pin::has_bitwidth()
+{
+    return m_bitwidht != 0;
+}
+
+/**
  * @brief Get Macro name Pin belongs to
  * 
  * @return std::string
@@ -126,6 +142,16 @@ void Pin::set_frequency(size_t const frequency)
 size_t Pin::get_frequency() const
 {
     return m_frequency;
+}
+
+/**
+ * @brief Check if frequency has ever been assigned
+ * 
+ * @return bool
+ */
+bool Pin::has_frequency()
+{
+    return m_frequency != 0;
 }
 
 /**

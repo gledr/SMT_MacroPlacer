@@ -124,8 +124,16 @@ void Supplement::read_supplement_file()
 SupplementMacro* Supplement::get_macro(std::string const & id)
 {
     SupplementMacro* retval = m_macros[id];
-    assert (retval != nullptr);
-    
+    nullpointer_check (retval);
+
+    return retval;
+}
+
+SupplementTerminal* Supplement::get_terminal(std::string const & id)
+{
+    SupplementTerminal* retval = m_terminals[id];
+    nullpointer_check(retval);
+
     return retval;
 }
 
@@ -137,6 +145,11 @@ SupplementLayout* Supplement::get_layout()
 bool Supplement::has_macro(std::string const & id)
 {
     return m_macros[id] != nullptr;
+}
+
+bool Supplement::has_terminal(std::string const & id)
+{
+    return m_terminals[id] != nullptr;
 }
 
 bool Supplement::has_layout()

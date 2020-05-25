@@ -14,11 +14,13 @@
 
 #include <object.hpp>
 #include <logger.hpp>
+#include <exception.hpp>
 #include <supplementmacro.hpp>
 #include <supplementlayout.hpp>
+#include <supplementterminal.hpp>
 
 #include <json/json.h>
-#include <map>
+#include <unordered_map>
 #include <iostream>
 
 namespace Placer {
@@ -40,15 +42,20 @@ public:
 
     bool has_macro(std::string const & id);
 
+    bool has_terminal(std::string const & id);
+
     bool has_layout();
 
     SupplementMacro* get_macro(std::string const & id);
 
     SupplementLayout* get_layout();
 
+    SupplementTerminal* get_terminal(std::string const & id);
+
 private:
     Utils::Logger* m_logger;
-    std::map<std::string, SupplementMacro*> m_macros;
+    std::unordered_map<std::string, SupplementMacro*> m_macros;
+    std::unordered_map<std::string, SupplementTerminal*> m_terminals;
     SupplementLayout* m_layout;
 };
 

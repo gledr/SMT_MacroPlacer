@@ -271,7 +271,6 @@ size_t Edge::get_bitwidth_to()
     } else if (m_to->has_macro()){
         Macro*m = m_to->get_macro();
         nullpointer_check(m);
-
         Pin* p = m->get_pin(m_to_pin);
         nullpointer_check(p);
 
@@ -291,9 +290,16 @@ size_t Edge::get_bitwidth_to()
 size_t Edge::get_frequency_from()
 {
     if (m_from->is_terminal()){
-        return m_from->get_terminal()->get_frequency();
+        Terminal* t = m_from->get_terminal();
+        return t->get_frequency();
     } else if (m_from->has_macro()){
-        return m_from->get_macro()->get_pin(m_from_pin)->get_frequency();
+        Macro* m = m_from->get_macro();
+        nullpointer_check(m);
+
+        Pin* p = m->get_pin(m_from_pin);
+        nullpointer_check(p);
+
+        return p->get_frequency();
     } else {
         notimplemented_check();
     }
@@ -309,9 +315,18 @@ size_t Edge::get_frequency_from()
 size_t Edge::get_frequency_to()
 {
     if (m_to->is_terminal()){
-        return m_to->get_terminal()->get_frequency();
+        Terminal* t = m_to->get_terminal();
+        nullpointer_check(t);
+
+        return t->get_frequency();
     } else if (m_to->has_macro()){
-        return m_to->get_macro()->get_pin(m_to_pin)->get_frequency();
+        Macro* m = m_to->get_macro();
+        nullpointer_check(m);
+
+        Pin* p = m->get_pin(m_to_pin);
+        nullpointer_check(p);
+
+        return p->get_frequency();
     } else {
         notimplemented_check();
     }

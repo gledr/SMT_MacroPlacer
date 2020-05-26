@@ -234,9 +234,10 @@ void Bookshelf::read_nets()
             size_t sub_net_degree = std::stoi(token[2]);
             size_t j = i+1;
             std::vector<Node*> nodes;
+            std::vector<std::string> pins;
             for(; j < nets_content.size(); ++j){
                 std::vector<std::string> sub_token = Utils::Utils::tokenize(nets_content[j], " ");
-               
+
                 if (sub_token[0] == "NetDegree"){
                     assertion_check (sub_net_degree == nodes.size());
                     break;
@@ -258,6 +259,7 @@ void Bookshelf::read_nets()
                         std::string rel_pos_y = sub_token[4];
                         std::string pin = rel_pos_x + "_" + rel_pos_y;
                         this->add_pin_to_macro(id, pin, direction, rel_pos_x, rel_pos_y);
+                        pins.push_back(pin);
                     // Pin is center
                     } else {
                         this->add_pin_to_macro(id, "center", direction, "", "");
@@ -268,6 +270,7 @@ void Bookshelf::read_nets()
                 } else if ((t = this->find_terminal(id))){
                     Node* n = new Node(this->find_terminal(id));
                     nodes.push_back(n);
+                    pins.push_back(id);
                     
                 } else {
                     notsupported_check("Only Terminals and Macros are allowed!");
@@ -300,12 +303,33 @@ void Bookshelf::read_nets()
                     notimplemented_check();
                 }
 
+                std::string from_pin = pins[0];
+                std::string to_pin = pins[node_index];
+                
                 if (from_case == 'm' && to_case == 'm'){
-                    m_tree->insert_edge<Macro, Macro>(nodes[0]->get_macro(), nodes[node_index]->get_macro(), "", "", "");
+                    Macro* from = nodes[0]->get_macro();
+                    nullpointer_check(from);
+
+                    Macro* to = nodes[node_index]->get_macro();
+                    nullpointer_check(to);
+
+                    m_tree->insert_edge<Macro, Macro>(from, to, from_pin, to_pin, "");
                 } else if (from_case == 't' && to_case == 'm'){
-                    m_tree->insert_edge<Terminal, Macro>(nodes[0]->get_terminal(), nodes[node_index]->get_macro(), "", "", "");
+                    Terminal* from = nodes[0]->get_terminal();
+                    nullpointer_check(from);
+
+                    Macro* to = nodes[node_index]->get_macro();
+                    nullpointer_check(to);
+
+                    m_tree->insert_edge<Terminal, Macro>(from, to, from_pin, to_pin, "");
                 } else if (from_case == 'm' && to_case == 't'){
-                    m_tree->insert_edge<Macro, Terminal>(nodes[0]->get_macro(), nodes[node_index]->get_terminal(), "", "", "");
+                    Macro* from = nodes[0]->get_macro();
+                    nullpointer_check(from);
+
+                    Terminal* to = nodes[node_index]->get_terminal();
+                    nullpointer_check(to);
+
+                    m_tree->insert_edge<Macro, Terminal>(from, to, from_pin, to_pin, "");
                 } else {
                     notimplemented_check();
                 }
@@ -597,7 +621,7 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
 
         if (m){
             // Pin does not yet exist
-            if (!m->get_pin(pin)){
+            if (!m->has_pin(pin)){
                 p = new Pin(pin, macro, dir);
                 nullpointer_check (p);
 

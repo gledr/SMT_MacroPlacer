@@ -163,6 +163,7 @@ void Pin::dump(std::ostream& stream)
 {
     stream << std::string(30, '~') << std::endl;
     stream << "Pin (" << m_pin_name << ")" << std::endl;
+    stream << "Parent (" << m_macro_name << ")" << std::endl;
     stream << "Direction (" << Pin::enum2string(m_direction) << ")" << std::endl;
     stream << std::string(30, '~') << std::endl;
 }

@@ -347,8 +347,8 @@ void MacroCircuit::add_macros()
                              macro_definition.height);
 
         for (PinDefinition pin_definition: macro_definition.pin_definitions){
-            Pin* p = new Pin(pin_definition.parent,
-                             pin_definition.name,
+            Pin* p = new Pin(pin_definition.name,
+                             pin_definition.parent,
                              Pin::string2enum(pin_definition.direction));
             assert (p != nullptr);
             m->add_pin(p);

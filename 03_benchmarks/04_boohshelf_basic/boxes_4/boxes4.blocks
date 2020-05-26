@@ -5,10 +5,12 @@ UCSC blocks 1.0
 
 NumSoftRectangularBlocks : 0
 NumHardRectilinearBlocks : 4
-NumTerminals : 0
+NumTerminals : 2
 
 a hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
 b hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
 c hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
 d hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
 
+in terminal
+out terminal

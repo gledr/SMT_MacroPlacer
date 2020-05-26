@@ -158,11 +158,11 @@ void Macro::set_supplement(Supplement* supplement)
  * 
  * @param pin Pointer to Pin 
  */
-void Macro::add_pin(Pin *const pin)
+void Macro::add_pin(Pin* const pin)
 {
     nullpointer_check (pin);
-    pin->dump();
 
+    pin->dump();
     m_pins[pin->get_id()] = pin;
 }
 
@@ -174,10 +174,21 @@ void Macro::add_pin(Pin *const pin)
  */
 Pin* Macro::get_pin(std::string const & id)
 {
+    assertion_check (id != "");
     Pin* p = m_pins[id];
     nullpointer_check(p);
-    
+
     return p;
+}
+
+/**
+ * @brief Check if Pin already exists
+ * 
+ * @return bool
+ */
+bool Macro::has_pin(std::string const & id)
+{
+    return m_pins[id] != nullptr;
 }
 
 /**
@@ -490,8 +501,7 @@ void Macro::encode_pins_on_macro_frontier()
         
         m_encode_pin_macro_frontier = z3::mk_and(clauses);
     } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        assert (0);
+        throw PlacerException(exp.msg());
     }
 }
 

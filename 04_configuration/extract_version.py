@@ -3,7 +3,7 @@
 # Company      : Johannes Kepler University
 # Name         : SMT Macro Placer
 # Workfile     : extract_version.py
-# Interpreter  : Python 3.8.2  
+# Interpreter  : Python 3.8.2
 #
 # Date         : 18.May 2020
 # Copyright    : Johannes Kepler University
@@ -24,13 +24,13 @@ class CodeGenerator:
 
     def set_date(self, date):
         self.__date = date
-        
+
     def set_name(self, name):
         self.__name = name
-    
+
     def set_hash(self, hashval):
         self.__hash = hashval
-        
+
     def generate(self):
         outfile = open(self.__filename, "w+")
         outfile.write("#ifndef PLACER_VERSION_HPP\n")
@@ -51,16 +51,16 @@ class CodeGenerator:
         outfile.write("\n")
         outfile.write("#endif /*PLACER_VERSION_HPP*/\n")
         outfile.write("\n")
-        
+
         outfile.close()
-        
+
 
 if __name__ == "__main__":
     code_gen = CodeGenerator("version.hpp")
     __date = os.popen(DATE).read()
     __hash = os.popen(HASH).read()
     __name = os.popen(NAME).read()
-    
+
     code_gen.set_date(__date)
     code_gen.set_name(__name)
     code_gen.set_hash(__hash[:-1])

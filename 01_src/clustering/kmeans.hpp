@@ -51,7 +51,7 @@ public:
     std::vector<Cluster*> get_cluster();
 
 private:
-    
+
     void generate_initial_centroid_positions();
     void map_macros_to_cluster();
 

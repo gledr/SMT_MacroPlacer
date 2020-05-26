@@ -20,10 +20,10 @@
 #include <pin.hpp>
 
 namespace Placer {
-    
+
 class Cell: public virtual Component{
 public:
-   
+
     Cell(std::string const & name,
          std::string const & id);
 
@@ -32,10 +32,10 @@ public:
     virtual void dump(std::ostream & stream = std::cout);
 
     void add_pin(Pin* _pin);
-    
+
     virtual size_t get_area();
     
-private: 
+private:
 
     std::vector<Pin*> m_pins;
 };

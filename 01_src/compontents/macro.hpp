@@ -48,6 +48,7 @@ public:
 
     void add_pin(Pin* const pin);
     Pin* get_pin(std::string const & id);
+    bool has_pin(std::string const & id);
 
     virtual size_t get_area();
     virtual void dump(std::ostream & stream = std::cout);
@@ -78,10 +79,10 @@ private:
 
     size_t m_layout_x;
     size_t m_layout_y;
-    
+
     void handle_supplement();
     void resolve_pin_position();
-//     
+
     /**
      * SMT Encoding
      */
@@ -89,7 +90,7 @@ private:
     void encode_pins_non_overlapping();
     void encode_pins_center_of_macro();
     void encode_pins_relative_to_center();
-    
+
     z3::expr m_pin_constraints;
     z3::expr m_encode_pin_macro_frontier;
     z3::expr m_encode_pins_not_overlapping;

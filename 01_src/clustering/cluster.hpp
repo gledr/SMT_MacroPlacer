@@ -28,7 +28,7 @@ public:
             size_t const x,
             size_t const y,
             size_t const max_size);
-    
+
     virtual ~Cluster();
 
     void insert_partition(Partition* p);
@@ -36,7 +36,7 @@ public:
     double eucledian_distance(Component* c);
 
     std::vector<Partition*> get_partitions();
-    
+
     bool has_space();
 
     std::string get_id();

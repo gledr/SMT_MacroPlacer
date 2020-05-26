@@ -27,16 +27,16 @@ class Centroid: public virtual Object {
 public:
     Centroid (size_t const x,
               size_t const y);
-    
+
     virtual ~Centroid();
-    
+
     void update_centroid(size_t const x,
                          size_t const y);
 
     double eucledian_distance(Component* c);
 
     void dump(std::ostream & stream = std::cout);
-    
+
     size_t get_height();
     size_t get_width();
 

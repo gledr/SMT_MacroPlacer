@@ -14,7 +14,6 @@
 
 #include <exception>
 #include <iostream>
-#include <execinfo.h>
 #include <sstream>
 
 namespace Placer::Utils {
@@ -25,10 +24,15 @@ namespace Placer::Utils {
  */
 class RunTimeCheck {
 public:
-    static void __nullpointer_check__(std::string const & file, size_t const line);
-    static void __assertion_check__(std::string const & file, size_t const line);
-    static void __notimplemented_check__(std::string const & file, size_t const line);
-    static void __notsupported_check__(std::string const & msg, std::string const & file, size_t const line);
+    static void __nullpointer_check__(std::string const & file,
+                                      size_t const line);
+    static void __assertion_check__(std::string const & file,
+                                    size_t const line);
+    static void __notimplemented_check__(std::string const & file,
+                                         size_t const line);
+    static void __notsupported_check__(std::string const & msg,
+                                       std::string const & file,
+                                       size_t const line);
 };
 
 } /* namespace Placer::Utils */
@@ -68,7 +72,8 @@ public:
     PlacerNotImplemented(std::string const & what):
         std::logic_error(what) 
     {
-
+        std::cerr << this->what() << std::endl;
+        exit (0);
     }
 };
 
@@ -86,7 +91,8 @@ public:
     PlacerNotSupported(std::string const & what):
         std::logic_error ("PlacerNotSupported: " + what) 
     {
-
+        std::cerr << this->what() << std::endl;
+        exit (0);
     }
 };
 
@@ -103,16 +109,9 @@ public:
      */
     PlacerException (std::string const & what):
         std::logic_error("PlacerException: " + what)
-        {
-
-        }
-
-        /**
-         * @brief Destructor
-         */
-        ~PlacerException()
     {
-        exit(-1);
+        std::cerr << this->what() << std::endl;
+        exit (0);
     }
 };
 
@@ -123,7 +122,7 @@ public:
 class PlacerNullPointerException: public std::exception {
 public:
     /**
-     * @brief Constructor 
+     * @brief Constructor
      * 
      * @param what Error Message
      */

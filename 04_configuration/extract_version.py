@@ -47,7 +47,7 @@ class CodeGenerator:
         outfile.write("std::string const GIT_DATE=\""  + str(self.__date) + "\";\n")
         outfile.write("std::string const GIT_NAME=\""  + str(self.__name) + "\";\n")
         outfile.write("\n")
-        outfile.write("}\n")
+        outfile.write("} /* namespace Placer */\n")
         outfile.write("\n")
         outfile.write("#endif /*PLACER_VERSION_HPP*/\n")
         outfile.write("\n")

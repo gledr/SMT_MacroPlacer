@@ -42,5 +42,6 @@ private:
     size_t m_frequency;
 };
 
-}
+} /* namespace Placer */
+
 #endif /* SUPPLEMENTPIN_HPP */

@@ -64,6 +64,6 @@ private:
     Cell* m_cell;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* NODE_HPP */

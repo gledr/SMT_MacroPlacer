@@ -141,43 +141,47 @@ z3::expr Macro::is_E()
 }
 
 /**
- * @brief 
+ * @brief Set Global Supplement 
  * 
- * @param supplement 
+ * @param supplement Pointer to Supplement
  */
 void Macro::set_supplement(Supplement* supplement)
 {
     nullpointer_check(supplement);
-    
+
     m_supplement = supplement;
     this->handle_supplement();
 }
 
 /**
- * @brief 
+ * @brief Add Pin to Macro
  * 
- * @param pin 
+ * @param pin Pointer to Pin 
  */
 void Macro::add_pin(Pin *const pin)
 {
-    assert (pin != nullptr);
-    
+    nullpointer_check (pin);
+    pin->dump();
+
     m_pins[pin->get_id()] = pin;
 }
 
 /**
- * @brief 
+ * @brief Get Access to a Pin
  * 
- * @param id 
+ * @param id Pin ID
  * @return Placer::Pin*
  */
 Pin* Macro::get_pin(std::string const & id)
 {
-    return m_pins[id];
+    Pin* p = m_pins[id];
+    nullpointer_check(p);
+    
+    return p;
 }
 
 /**
- * @brief 
+ * @brief Get all Pins of the Macro
  * 
  * @return std::vector< Placer::Pin* >
  */
@@ -203,17 +207,17 @@ bool Macro::is_free()
 }
 
 /**
- * @brief 
+ * @brief Check if Additional Information exists for the Macro
  */
 void Macro::handle_supplement()
 {
     if(!m_supplement->has_macro(m_name)){
         return;
     }
-    
+
     SupplementMacro* sm = m_supplement->get_macro(m_name);
     assert (sm != nullptr);
-    
+
     for(auto pin: m_pins){
         if(sm->has_pin(pin.second->get_id())){
             SupplementPin* p = sm->get_pin(pin.second->get_id());

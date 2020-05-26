@@ -66,6 +66,6 @@ private:
     void store_configuration();
 };
 
-}
+} /* namespace Placer */
 
 #endif /* MACRO_PLACER_HPP */

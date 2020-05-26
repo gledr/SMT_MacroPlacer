@@ -237,9 +237,18 @@ std::string Edge::get_to_pin() const
 size_t Edge::get_bitwidth_from()
 {
     if (m_from->is_terminal()){
-        return m_from->get_terminal()->get_bitwidth();
+        Terminal* t = m_from->get_terminal();
+        nullpointer_check(t);
+        return t->get_bitwidth();
+
     } else if (m_from->has_macro()){
-        return m_from->get_macro()->get_pin(m_from_pin)->get_bitwidth();
+        Macro* m = m_from->get_macro();
+        nullpointer_check(m);
+
+        Pin* p = m->get_pin(m_from_pin);
+        nullpointer_check(p);
+
+        return p->get_bitwidth();
     } else {
         notimplemented_check();
     }
@@ -255,9 +264,18 @@ size_t Edge::get_bitwidth_from()
 size_t Edge::get_bitwidth_to()
 {
     if (m_to->is_terminal()){
-        return m_to->get_terminal()->get_bitwidth();
+        Terminal* t = m_to->get_terminal();
+        nullpointer_check(t);
+
+        return t->get_bitwidth();
     } else if (m_to->has_macro()){
-        return m_to->get_macro()->get_pin(m_to_pin)->get_bitwidth();
+        Macro*m = m_to->get_macro();
+        nullpointer_check(m);
+
+        Pin* p = m->get_pin(m_to_pin);
+        nullpointer_check(p);
+
+        return p->get_bitwidth();
     } else {
         notimplemented_check();
     }

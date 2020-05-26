@@ -170,6 +170,6 @@ private:
     void dump_smt_instance();
 };
 
-}
+} /* namespace Placer */
 
 #endif /* MACROCIRCUIT_HPP */

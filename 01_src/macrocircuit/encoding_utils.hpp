@@ -152,6 +152,6 @@ public:
     }
 };
 
-}
+} /* namespace Placer */
 
 #endif /* ENCODINGUTILS_HPP */

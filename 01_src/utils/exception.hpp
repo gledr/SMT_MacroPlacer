@@ -31,7 +31,7 @@ public:
     static void __notsupported_check__(std::string const & msg, std::string const & file, size_t const line);
 };
 
-}
+} /* namespace Placer::Utils */
 
 #define nullpointer_check(expr)                                                         \
     if(!expr)                                                                           \
@@ -136,6 +136,6 @@ public:
     }
 };
 
-}
+} /* namespace Placer::Utils */
 
 #endif /* EXCEPTIONS_HPP */

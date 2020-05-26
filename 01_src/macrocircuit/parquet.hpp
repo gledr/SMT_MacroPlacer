@@ -65,6 +65,6 @@ private:
     Macro* find_macro(std::string const & name);
 };
 
-}
+} /* namespace Placer */
 
 #endif /* PARQUET_HPP */

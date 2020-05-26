@@ -23,6 +23,6 @@ struct TerminalDefinition {
     size_t pos_y;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* TERMINAL_DEFINITION */

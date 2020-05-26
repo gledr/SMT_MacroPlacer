@@ -16,6 +16,7 @@
 #include <map>
 #include <string>
 #include <iostream>
+#include <cstdlib>
 #include <sstream>
 #include <z3++.h>
 
@@ -80,7 +81,7 @@ private:
 
 };
 
-}
+} /* namespace Placer */
 
 #include <tree.inl>
 

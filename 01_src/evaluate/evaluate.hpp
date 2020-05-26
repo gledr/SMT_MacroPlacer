@@ -58,6 +58,6 @@ private:
                               std::pair<size_t, size_t> const & to);
 };
 
-}
+} /* namespace Placer */
 
 #endif /* EVALUATE_HPP */

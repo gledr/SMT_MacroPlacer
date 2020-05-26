@@ -79,6 +79,6 @@ private:
     void solve(Partition* next_partition);
 };
 
-}
+} /* namespace Placer */
 
 #endif /* PARTITIONING_HPP */

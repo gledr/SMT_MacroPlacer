@@ -57,7 +57,7 @@ void Logger::add_free_macro(std::string const & id,
                             size_t const h)
 {
     std::stringstream msg;
-    msg << "Create Free Macro " << id << " (" << " : " << h << ")";
+    msg << "Create Free Macro " << id << " (" << w << ":" << h << ")";
 
     LOG(eInfo) << msg.str();
 }

@@ -24,6 +24,6 @@ private:
     std::map<std::string, std::chrono::time_point<std::chrono::system_clock>> m_end;
 };
 
-}
+} /* namespace Placer::Utils */
 
 #endif /* TIMER_HPP */

@@ -70,6 +70,6 @@ private:
     std::string m_name;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* EDGE_HPP */

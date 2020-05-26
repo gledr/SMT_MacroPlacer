@@ -104,6 +104,6 @@ private:
     void deduce_layout();
 };
 
-}
+} /* namespace Placer */
 
 #endif /* BOOKSHELF_HPP */

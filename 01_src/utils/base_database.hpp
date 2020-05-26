@@ -46,6 +46,6 @@ protected:
     bool p_debug;
 };
 
-}
+} /* namespace Placer::Utils */
 
 #endif /* BASE_DATABASE_HPP */

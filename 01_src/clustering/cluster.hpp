@@ -61,6 +61,6 @@ private:
     std::vector<Partition*> m_partitons;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* CLUSTER_HPP */

@@ -221,6 +221,6 @@ private:
     static z3::expr_vector m_stored_constraints;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* OBJECT_HPP */

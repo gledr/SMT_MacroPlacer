@@ -79,6 +79,6 @@ protected:
     std::vector<eOrientation> m_sol_orientation;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* COMPONENT_HPP */

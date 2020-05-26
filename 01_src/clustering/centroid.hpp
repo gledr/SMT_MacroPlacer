@@ -48,6 +48,6 @@ private:
     std::vector<size_t> m_height_history;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* CENTROID_HPP */

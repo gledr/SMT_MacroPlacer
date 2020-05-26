@@ -40,6 +40,6 @@ private:
     std::vector<Pin*> m_pins;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* CELL_HPP */

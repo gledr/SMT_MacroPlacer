@@ -38,6 +38,6 @@ private:
     size_t m_ux;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* SUPPLEMENTLAYOUT_HPP */

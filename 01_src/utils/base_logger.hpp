@@ -296,6 +296,6 @@ protected:
     LogStream LOG(LogSeverity const & level);
 };
 
-}
+} /* namespace Placer::Utils */
 
 #endif /* BASELOGGER_HPP */

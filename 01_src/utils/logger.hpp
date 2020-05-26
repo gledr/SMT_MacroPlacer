@@ -135,6 +135,6 @@ private:
     static bool p_singleton;
 };
 
-}
+} /* namespace Placer::Utils */
 
 #endif /* LOGGER_HPP */

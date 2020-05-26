@@ -111,16 +111,22 @@ void Tree::dump(std::ostream& stream)
  */
 void Tree::construct_tree()
 {
-    m_logger->construct_tree(m_edges.size());
+    try {
+        m_logger->construct_tree(m_edges.size());
 
-    for(auto edge: m_edges){
-        Node* from = edge->get_from();
-        Node* to   = edge->get_to();
+        for(auto edge: m_edges){
+            Node* from = edge->get_from();
+            Node* to   = edge->get_to();
 
-        //assert (from != to);
+            //assert (from != to);
 
-        from->insert_edge(edge);
-        to->insert_edge(edge);
+          from->insert_edge(edge);
+          to->insert_edge(edge);
+        }
+          this->verify_edges();
+    } catch (PlacerException const & exp){
+        std::cout << "Could not create connectivity tree (" << exp.what() << ")" << std::endl;
+        exit(-1);
     }
 }
 
@@ -272,7 +278,7 @@ void Tree::dot_to_png()
     Utils::Utils::system_execute(bin, args, "", wait_for_termination);
 
     if(!boost::filesystem::exists(output)){
-        throw PlacerException("No png file created!");
+        throw Utils::PlacerException("No png file created!");
     }
 }
 
@@ -313,6 +319,11 @@ void Tree::export_hypergraph()
         }
     }
 
+    // Header: Edges Nodes Settings
+    // Settings 0  Unweigthed Hypergraph
+    //          1  Hypergraph with edge weights
+    //          10 Hypergraph with node weights
+    //          11 Hypergraph with node and edge weights
     hgr_file << m_nodes.size() << " " << steiner_tree.size() << std::endl;
     for (auto edge: steiner_tree){
         hgr_file << edge.first << " ";

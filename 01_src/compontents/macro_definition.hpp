@@ -28,6 +28,6 @@ struct MacroDefinition {
     std::vector<PinDefinition> pin_definitions;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* MACRO_DEFINITION_HPP */

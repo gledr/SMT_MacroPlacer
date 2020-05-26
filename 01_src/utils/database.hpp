@@ -51,6 +51,6 @@ private:
     db_transaction p_active_transaction;
 };
 
-}
+} /* namespace Placer::Utils */
 
 #endif /* DATABASE_HPP */

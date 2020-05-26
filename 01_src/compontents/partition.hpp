@@ -93,6 +93,6 @@ private:
     void calculate_white_space();
 };
 
-}
+} /* namespace Placer */
 
 #endif /* PARTITION_HPP */

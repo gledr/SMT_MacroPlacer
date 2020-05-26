@@ -64,6 +64,6 @@ private:
     size_t m_max_width;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* KMEANS_HPP */

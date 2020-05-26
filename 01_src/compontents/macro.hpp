@@ -97,6 +97,6 @@ private:
     z3::expr m_encode_pins_relative_to_center;
 };
 
-}
+} /* namespace Placer */
 
 #endif /*  MACRO_HPP */

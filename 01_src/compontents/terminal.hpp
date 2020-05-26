@@ -88,6 +88,6 @@ private:
     std::vector<size_t> m_solutions_y;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* TERMINAL_HPP */

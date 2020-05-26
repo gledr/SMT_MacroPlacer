@@ -96,6 +96,6 @@ private:
     z3::expr    m_units;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* LAYOUT_HPP */

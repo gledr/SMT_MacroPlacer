@@ -103,6 +103,6 @@ private:
     bool m_is_placed;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* PIN_HPP */

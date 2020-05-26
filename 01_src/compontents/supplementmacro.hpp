@@ -36,6 +36,6 @@ private:
     std::map<std::string, SupplementPin*> m_pins;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* SUPPLEMENTMACRO_HPP */

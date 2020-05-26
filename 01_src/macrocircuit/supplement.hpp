@@ -59,6 +59,6 @@ private:
     SupplementLayout* m_layout;
 };
 
-}
+} /* namespace Placer */
 
 #endif /* SUPPLEMENT_HPP */

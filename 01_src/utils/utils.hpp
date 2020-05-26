@@ -69,7 +69,7 @@ public:
     static T gcd(std::vector<T> const & input);
 };
 
-}
+} /* namespace Placer::Utils */
 
 #include <utils.inl>
 

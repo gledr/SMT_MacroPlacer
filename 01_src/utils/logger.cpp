@@ -400,3 +400,13 @@ void Logger::bookshelf_read_place(std::string const & filename)
 
     LOG(eInfo) << msg.str();
 }
+
+void Logger::start_kahypar()
+{
+    LOG(eInfo) << "Kahypar Hyphergraph Partitioning started...";
+}
+
+void Logger::kahypar_finished()
+{
+    LOG(eInfo) << "Kahypar Hyphergraph Partitioning finished...";
+}

@@ -68,7 +68,7 @@ MacroCircuit::~MacroCircuit()
         delete m_bookshelf; m_bookshelf = nullptr;
     }
 
-    //delete m_tree; m_tree = nullptr;
+    delete m_tree; m_tree = nullptr;
     delete m_z3_opt; m_z3_opt = nullptr;
     delete m_eval; m_eval = nullptr;
     delete m_supplement; m_supplement = nullptr;
@@ -257,7 +257,7 @@ void MacroCircuit::partitioning()
 {
     if(this->get_partitioning()){
         m_logger->run_partitioning();
-        m_partitioning->set_problem(m_macros, this->get_partition_size());
+        m_partitioning->set_problem(m_macros, this->get_partition_size(), m_tree);
         m_partitioning->run();
         std::vector<Component*> partitions = m_partitioning->get_partitions();
 

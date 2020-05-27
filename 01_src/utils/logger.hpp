@@ -127,6 +127,9 @@ public:
     void bookshelf_read_blocks(std::string const & filename);
     void bookshelf_read_place(std::string const & filename);
     
+    void start_kahypar();
+    void kahypar_finished();
+    
 private:
     Logger();
     virtual ~Logger();

@@ -13,12 +13,13 @@
 
 using namespace Placer;
 
-Cell::Cell(std::string const & _name,
-           std::string const & _id):
-    Component()
+Cell::Cell(std::string const & name,
+           std::string const & id):
+    Component(),
+    m_key(m_key_counter++)
 {
-    m_name = _name;
-    m_id = _id;
+    m_name = name;
+    m_id = id;
 }
 
 Cell::~Cell()
@@ -44,4 +45,9 @@ void Cell::dump(std::ostream& stream)
 size_t Cell::get_area()
 {
     assert (0);
+}
+
+size_t Cell::get_key()
+{
+    return m_key;
 }

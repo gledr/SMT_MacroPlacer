@@ -20,6 +20,7 @@ include_directories(
     ${THIRD_PARTY_LIB}
     ${PARQUET_HOME}/src
     ${ABKCOMMON_HOME}
+    ${KAHYPAR_HOME}/include
 
     compontents
     macrocircuit
@@ -106,6 +107,7 @@ target_link_libraries(smt_placer
     ${THIRD_PARTY_LIB}/libsqlite3.a
     ${PARQUET_HOME}/lib/libParquetFP.a
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
+    ${KAHYPAR_HOME}/build/lib/libkahypar.so
     pthread
     dl
 )

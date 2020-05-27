@@ -31,7 +31,8 @@ Macro::Macro(std::string const & name,
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
     m_encode_pins_relative_to_center(m_encode->get_value(0)),
-    m_pin_constraints(m_encode->get_value(0))
+    m_pin_constraints(m_encode->get_value(0)),
+    m_key(m_key_counter++)
 {
     m_free = true;
     m_supplement = nullptr;
@@ -71,7 +72,8 @@ Macro::Macro(std::string const & name,
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
     m_pin_constraints(m_encode->get_value(0)),
-    m_encode_pins_relative_to_center(m_encode->get_value(0))
+    m_encode_pins_relative_to_center(m_encode->get_value(0)),
+    m_key(m_key_counter++)
 {
     m_lx = m_encode->get_value(pos_lx);
     m_ly = m_encode->get_value(pos_ly);
@@ -162,7 +164,6 @@ void Macro::add_pin(Pin* const pin)
 {
     nullpointer_check (pin);
 
-    pin->dump();
     m_pins[pin->get_id()] = pin;
 }
 
@@ -215,6 +216,16 @@ std::vector<Pin*> Macro::get_pins()
 bool Macro::is_free()
 {
     return m_free;
+}
+
+/**
+ * @brief Get Macro Unique Key
+ * 
+ * @return size_t
+ */
+size_t Macro::get_key()
+{
+    return m_key;
 }
 
 /**

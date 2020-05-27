@@ -55,6 +55,7 @@ public:
 
     std::vector<Pin*> get_pins();
     bool is_free();
+    size_t get_key();
 
     void add_solution_root(size_t const x, size_t const y);
     std::pair<size_t, size_t> get_solution_root() const;
@@ -75,6 +76,7 @@ private:
     Supplement* m_supplement;
     Utils::Logger* m_logger;
 
+    size_t m_key;
     bool m_free;
 
     size_t m_layout_x;

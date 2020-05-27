@@ -15,6 +15,7 @@
 #include <vector>
 #include <string>
 #include <cassert>
+#include <functional>
 
 #include <z3++.h>
 
@@ -176,6 +177,7 @@ protected:
     std::string orientation_to_string(eOrientation const orientation);
 
     static z3::context m_z3_ctx;
+    static size_t m_key_counter;
 
 private:
     static std::vector<std::string> m_lef;

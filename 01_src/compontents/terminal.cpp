@@ -29,7 +29,8 @@ Terminal::Terminal(std::string const & name,
     m_free(true),
     m_direction(direction),
     m_pos_x(m_encode->get_constant("terminal_" + name + "_x")),
-    m_pos_y(m_encode->get_constant("terminal_" + name + "_y"))
+    m_pos_y(m_encode->get_constant("terminal_" + name + "_y")),
+    m_key(m_key_counter/*++*/)
 {
     m_free = true;
     m_bitwidth = 0;
@@ -56,7 +57,8 @@ Terminal::Terminal(std::string const & name,
     m_free(false),
     m_direction(direction),
     m_pos_x(m_encode->get_value(pos_x)),
-    m_pos_y(m_encode->get_value(pos_y))
+    m_pos_y(m_encode->get_value(pos_y)),
+    m_key(m_key_counter/*++*/)
 {
     m_free = false;
     m_bitwidth = 0;
@@ -91,6 +93,16 @@ std::string Terminal::get_name()
 std::string Terminal::get_id()
 {
     return m_name;
+}
+
+/**
+ * @brief Get Terminal Key
+ * 
+ * @return size_t
+ */
+size_t Terminal::get_key()
+{
+    return m_key;
 }
 
 /**

@@ -12,6 +12,7 @@
 #include "partitioning.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 
 /**
@@ -24,6 +25,7 @@ Partitioning::Partitioning():
     m_hpwl_cost_function(m_encode->get_value(0))
 {
     m_kmeans = new KMeans();
+    m_logger = Logger::getInstance();
 }
 
 /**
@@ -33,41 +35,17 @@ Partitioning::~Partitioning()
 {
     delete m_encode; m_encode = nullptr;
     delete m_kmeans; m_kmeans = nullptr;
+    m_tree = nullptr;
+    m_logger = nullptr;
 }
 
-/**
+/*
  * @brief Run Partitioning
  */
 void Partitioning::run()
 {
-    //this->create_initial_partitions();
-    
-    m_kmeans->set_problem(m_components, 11);
-    m_kmeans->initialize();
-    m_kmeans->run(50);
-
-    std::vector<Cluster*> clusters = m_kmeans->get_cluster();
-    m_components.clear();
-    for (auto cluster: clusters){
-        std::vector<Partition*> partitions = cluster->get_partitions();
-        std::cout << "Cluster: " << cluster->get_id() << " in progress..." << std::endl;
-        
-        if (partitions.size() > 0){
-            Partition* next_partition = new Partition();
-            m_z3_opt = new z3::optimize(m_z3_ctx);
-            next_partition->add_subparititions(partitions);
-            this->encode(next_partition);
-            this->solve(next_partition);
-            size_t w = next_partition->get_ux().get_numeral_uint();
-            size_t h = next_partition->get_uy().get_numeral_uint();
-            delete m_z3_opt; m_z3_opt = nullptr;
-            next_partition->set_height(h);
-            next_partition->set_witdh(w);
-            next_partition->free_lx();
-            next_partition->free_ly();
-            m_components.push_back(next_partition);
-        }
-    }
+    //this->kmeans_clustering();
+    this->hypergraph_partitioning();
 }
 
 /**
@@ -145,10 +123,14 @@ std::vector<Component*> Partitioning::get_partitions()
  * @param partition_size Number of Partitions
  */
 void Partitioning::set_problem(std::vector<Macro *> & macros,
-                               size_t partition_size)
+                               size_t partition_size,
+                               Tree* tree)
 {
+    nullpointer_check(tree);
+    
     m_macros = macros;
     m_partition_size = partition_size;
+    m_tree = tree;
 }
 
 /**
@@ -158,7 +140,9 @@ void Partitioning::set_problem(std::vector<Macro *> & macros,
  */
 void Partitioning::encode(Partition* next_partition)
 {
-    assert (next_partition != nullptr);
+    nullpointer_check (next_partition);
+    
+    std::cout << "Encode Partition..." << std::endl;
     
     next_partition->set_lx(0);
     next_partition->set_ly(0);
@@ -175,9 +159,9 @@ void Partitioning::encode(Partition* next_partition)
     m_z3_opt->add(m_components_in_partition);
     m_z3_opt->add(m_components_non_overlapping);
     
-    //m_z3_opt->minimize(next_partition->get_ux());
-    //m_z3_opt->minimize(next_partition->get_uy());
-    m_z3_opt->minimize(next_partition->get_ux() + next_partition->get_uy());
+    m_z3_opt->minimize(next_partition->get_ux());
+    m_z3_opt->minimize(next_partition->get_uy());
+    //m_z3_opt->minimize(next_partition->get_ux() + next_partition->get_uy());
 }
 
 /**
@@ -493,8 +477,10 @@ void Partitioning::encode_components_non_overlapping(Partition* next_partition,
  */
 void Partitioning::solve(Partition* next_partition)
 {
-    assert (next_partition != nullptr);
+    nullpointer_check (next_partition);
 
+    std::cout << "Solve Paritition" << std::endl;
+    
     z3::check_result sat = m_z3_opt->check();
 
     if(sat == z3::check_result::sat){
@@ -588,4 +574,156 @@ void Partitioning::encode_hpwl_cost_function(Partition* next_partition)
         assert (0);
     }
     */
+}
+
+void Partitioning::kmeans_clustering()
+{
+    //this->create_initial_partitions();
+
+    m_kmeans->set_problem(m_components, 11);
+    m_kmeans->initialize();
+    m_kmeans->run(50);
+
+    std::vector<Cluster*> clusters = m_kmeans->get_cluster();
+    m_components.clear();
+    for (auto cluster: clusters){
+        std::vector<Partition*> partitions = cluster->get_partitions();
+        std::cout << "Cluster: " << cluster->get_id() << " in progress..." << std::endl;
+        
+        if (partitions.size() > 0){
+            Partition* next_partition = new Partition();
+            m_z3_opt = new z3::optimize(m_z3_ctx);
+            next_partition->add_subparititions(partitions);
+            this->encode(next_partition);
+            this->solve(next_partition);
+            size_t w = next_partition->get_ux().get_numeral_uint();
+            size_t h = next_partition->get_uy().get_numeral_uint();
+            delete m_z3_opt; m_z3_opt = nullptr;
+            next_partition->set_height(h);
+            next_partition->set_witdh(w);
+            next_partition->free_lx();
+            next_partition->free_ly();
+            m_components.push_back(next_partition);
+        }
+    }
+}
+
+/**
+ * @brief Invoke Kahypar for Partitioning
+ */
+void Partitioning::hypergraph_partitioning()
+{
+    m_logger->start_kahypar();
+    
+    // Redirect Kahypar Output to File
+    std::ofstream out(this->get_active_results_directory() + "/kahypar.txt");
+    std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
+    std::cout.rdbuf(out.rdbuf()); //redirect std::cout to kahypar.txt!
+
+    kahypar_context_t* context = kahypar_context_new();
+    std::string config_file = this->get_base_path() + "/04_configuration/kahypar.ini";
+    kahypar_configure_context_from_file(context, config_file.c_str());
+
+    std::map<size_t, Node*> key_to_node;
+    std::map<size_t, std::set<size_t>> steiner_tree;
+
+    for (Edge* edge: m_tree->get_edges()){
+        if (edge->get_from()->is_terminal() || edge->get_to()->is_terminal()){
+            continue;
+        } else {
+            Node* from = edge->get_from();
+            Node* to   = edge->get_to();
+            size_t from_key = from->get_key();
+            size_t to_key = to->get_key();
+
+            key_to_node[from_key] = from;
+            key_to_node[to_key] = to;
+            steiner_tree[from_key].insert(to_key);
+        }
+    }
+
+    kahypar_hypernode_id_t num_vertices = m_macros.size();
+    kahypar_hyperedge_id_t num_hyperedges = steiner_tree.size();
+
+    size_t edge_cnt = 0;
+    for (auto itor: steiner_tree){
+        edge_cnt++;
+        for (auto itor2: itor.second){
+            edge_cnt++;
+        }
+    }
+
+    std::unique_ptr<kahypar_hyperedge_id_t[]> hyperedges =
+           std::make_unique<kahypar_hyperedge_id_t[]>(edge_cnt);
+
+    size_t pos = 0;
+    for(auto itor: steiner_tree){
+        hyperedges[pos] = itor.first;
+        pos++;
+        for (auto itor2: itor.second){
+            hyperedges[pos] = itor2;
+            pos++;
+        }
+    }
+
+    std::unique_ptr<size_t[]> hyperedge_indices = std::make_unique<size_t[]>(num_hyperedges+1);
+    size_t val = 0;
+    pos = 0;
+    for(auto itor: steiner_tree){
+        hyperedge_indices[pos] = val;
+        pos++;
+        val++;
+        for (auto itor2: itor.second){
+            val++;
+        }
+    }
+    hyperedge_indices[pos] = edge_cnt;
+
+    const double imbalance = 0.03;
+    const kahypar_partition_id_t k = 5;
+    std::vector<kahypar_partition_id_t> partition(num_vertices, -1);
+    kahypar_hyperedge_weight_t objective = 0;
+
+    kahypar_partition(num_vertices,
+                      num_hyperedges,
+                      imbalance,
+                      k,
+                     /*vertex_weights */ nullptr,
+                     nullptr,
+                     hyperedge_indices.get(),
+                      hyperedges.get(),
+                      &objective,
+                      context,
+                      partition.data());
+
+    // Partition ID as key, Values as Set of Macro IDs
+    std::map<size_t, std::set<size_t>> partition_map;
+
+    for(int i = 0; i != num_vertices; ++i) {
+        partition_map[partition[i]].insert(i);
+    }
+
+    for (auto itor: partition_map){
+        Partition* next_partition = new Partition();
+        m_z3_opt = new z3::optimize(m_z3_ctx);
+        for (auto itor2: itor.second){
+            Macro* m = key_to_node[itor2]->get_macro();
+            next_partition->add_macro(m);
+        }
+        this->encode(next_partition);
+        this->solve(next_partition);
+        size_t w = next_partition->get_ux().get_numeral_uint();
+        size_t h = next_partition->get_uy().get_numeral_uint();
+        delete m_z3_opt; m_z3_opt = nullptr;
+        next_partition->set_height(h);
+        next_partition->set_witdh(w);
+        next_partition->free_lx();
+        next_partition->free_ly();
+        m_components.push_back(next_partition);
+    }
+
+    kahypar_context_free(context);
+    std::cout.rdbuf(coutbuf); //reset to standard output again
+
+    m_logger->kahypar_finished();
 }

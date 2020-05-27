@@ -177,9 +177,9 @@ void Node::dump(std::ostream& stream)
     if(this->is_terminal()){
         m_terminal->dump(stream);
     } else if (this->has_cell()){
-        m_cell->dump();
+        m_cell->dump(stream);
     } else if(this->has_macro()){
-        m_macro->dump();
+        m_macro->dump(stream);
     }
 
     for(auto itor: m_edges){
@@ -204,6 +204,8 @@ std::string Node::get_id()
     } else {
         notsupported_check("Only Macros, Terminals and Cells are supported!")
     }
+
+    return ""; // Will never be executed
 }
 
 /**
@@ -222,4 +224,26 @@ std::string Node::get_name()
     } else {
         notsupported_check("Only Macros, Terminals and Cells are supported!")
     }
+
+    return ""; // Will never be executed
+}
+
+/**
+ * @brief Get Key of Element behind Node
+ * 
+ * @return size_t
+ */
+size_t Node::get_key()
+{
+    if(m_cell != nullptr){
+        return m_cell->get_key();
+    } else if (m_terminal != nullptr){
+        return m_terminal->get_key();
+    } else if (m_macro != nullptr){
+        return m_macro->get_key();
+    } else {
+        notsupported_check("Only Macros, Terminals and Cells are supported!")
+    }
+
+    return 0; // Will never be executed
 }

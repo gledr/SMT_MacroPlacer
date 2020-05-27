@@ -34,10 +34,12 @@ public:
     void add_pin(Pin* _pin);
 
     virtual size_t get_area();
+    size_t get_key();
     
 private:
 
     std::vector<Pin*> m_pins;
+    size_t m_key;
 };
 
 } /* namespace Placer */

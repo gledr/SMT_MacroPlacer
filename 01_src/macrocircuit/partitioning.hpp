@@ -13,7 +13,9 @@
 #define PARTITIONING_HPP
 
 #include <z3++.h>
+#include <libkahypar.h>
 #include <cmath>
+#include <memory>
 
 #include <object.hpp>
 #include <partition.hpp>
@@ -21,6 +23,8 @@
 #include <encoding_utils.hpp>
 #include <cluster.hpp>
 #include <kmeans.hpp>
+#include <exception.hpp>
+#include <tree.hpp>
 
 namespace Placer {
 
@@ -36,7 +40,8 @@ public:
     virtual ~Partitioning();
 
     void set_problem(std::vector<Macro*> & macros,
-                     size_t partion_size);
+                     size_t partion_size,
+                     Tree* tree);
 
     void run();
 
@@ -50,29 +55,31 @@ private:
     z3::optimize* m_z3_opt;
     EncodingUtils* m_encode;
     KMeans* m_kmeans;
-    
+    Tree* m_tree;
+    Utils::Logger* m_logger;
+
     std::vector<Component*> m_components;
     std::vector<Macro*> m_macros;
     size_t m_partition_size;
-    
+
     void create_initial_partitions();
-    
+
     /**
      * SMT Encoding
      */
     void encode(Partition* next_partition);
     void encode_components_in_partition(Partition* next_partition,
                                         eRotation const type);
-    
+
     void encode_components_non_overlapping(Partition* next_partition,
                                           eRotation const type);
-    
+
     void encode_hpwl_cost_function(Partition* next_partition);
 
     z3::expr m_components_in_partition;
     z3::expr m_components_non_overlapping;
     z3::expr m_hpwl_cost_function;
-    
+
     /**
      * SMT Solver
      */

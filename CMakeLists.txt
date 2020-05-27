@@ -20,15 +20,17 @@ set(CMAKE_CXX_FLAGS_DEBUG "-g -ggdb")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
 
 set(CMAKE_BUILD_TYPE Debug)
-
+set(RE2_BUILD_TESTING OFF)
 set(DEFLIB_HOME${PROJECT_SOURCE_DIR}/02_module/def)
 set(LEFLIB_HOME${PROJECT_SOURCE_DIR}/02_module/lef)
 set(ABKCOMMON_HOME ${PROJECT_SOURCE_DIR}/02_module/ABKCommon)
 set(PARQUET_HOME ${PROJECT_SOURCE_DIR}/02_module/ParquetFP)
+set(KAHYPAR_HOME "/media/Data/kahypar")
 
 set(THIRD_PARTY_INCLUDE ${PROJECT_SOURCE_DIR}/05_third_party/include)
 set(THIRD_PARTY_LIB ${PROJECT_SOURCE_DIR}/05_third_party/lib)
 set(THIRD_PARTY_LIB64 ${PROJECT_SOURCE_DIR}/05_third_party/lib64)
+
 
 add_subdirectory(01_src)
 add_subdirectory(02_module)

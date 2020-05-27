@@ -51,6 +51,7 @@ public:
 
     std::string get_id();
     std::string get_name();
+    size_t get_key();
 
     void insert_edge(Edge* _edge);
     std::set<Edge*> get_edges();

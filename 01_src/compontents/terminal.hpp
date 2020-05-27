@@ -55,6 +55,7 @@ public:
 
     std::string get_name();
     std::string get_id();
+    size_t get_key();
     bool has_solution(size_t const solution);
 
     bool is_input();
@@ -76,6 +77,7 @@ private:
     EncodingUtils* m_encode;
     std::string m_name;
     bool m_free;
+    size_t m_key;
     e_pin_direction m_direction;
 
     size_t m_bitwidth;

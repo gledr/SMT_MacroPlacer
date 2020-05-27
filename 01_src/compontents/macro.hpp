@@ -15,7 +15,6 @@
 #include <algorithm>
 
 #include <component.hpp>
-#include <lefdefIO.h>
 #include <layout.hpp>
 #include <pin.hpp>
 #include <supplement.hpp>

@@ -16,6 +16,8 @@
 #include <partition.hpp>
 #include <component.hpp>
 
+#include <cmath>
+
 namespace Placer {
 
 /**

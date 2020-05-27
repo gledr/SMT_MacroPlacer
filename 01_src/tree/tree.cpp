@@ -309,14 +309,14 @@ void Tree::export_hypergraph()
                             "/" +
                             filename);
 
-    std::map<std::string, std::set<std::string>> steiner_tree;
+    std::map<size_t, std::set<size_t>> steiner_tree;
 
     for (Edge* edge: m_edges){
-        if (edge->get_from()->is_terminal() || edge->get_to()->is_terminal()){
-            continue;
-        } else {
-            steiner_tree[edge->get_from()->get_id()].insert(edge->get_to()->get_id());
-        }
+        //if (edge->get_from()->is_terminal() || edge->get_to()->is_terminal()){
+            //continue;
+        //} else {
+            steiner_tree[edge->get_from()->get_key()].insert(edge->get_to()->get_key());
+        //}
     }
 
     // Header: Edges Nodes Settings

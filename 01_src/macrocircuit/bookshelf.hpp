@@ -69,6 +69,7 @@ private:
     void read_nets();
     void read_pl();
 
+    void write_aux();
     void write_blocks();
     void write_nets();
     void write_pl();

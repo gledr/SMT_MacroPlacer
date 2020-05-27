@@ -650,9 +650,24 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
  */
 void Bookshelf::write_placement()
 {
+    this->write_aux();
     this->write_blocks();
     this->write_nets();
     this->write_pl();
+}
+
+/**
+ * @brief Write Aux File
+ */
+void Bookshelf::write_aux()
+{
+    std::string filename = "export_" + this->get_design_name() + ".aux";
+
+    std::ofstream auxFile(filename);
+    auxFile << "export_" << this->get_design_name() << ".pl ";
+    auxFile << "export_" << this->get_design_name() << ".blk ";
+    auxFile << "export_" << this->get_design_name() << ".nets ";
+    auxFile.close();
 }
 
 /**

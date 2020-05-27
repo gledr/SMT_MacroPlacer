@@ -85,6 +85,28 @@ add_executable(smt_placer
     clustering/kmeans.cpp
 )
 
+add_executable(bookshelf_converter
+    utils/bookshelf_converter.cpp
+    object.cpp
+    macrocircuit/bookshelf.cpp
+    macrocircuit/supplement.cpp
+    macrocircuit/supplementlayout.cpp
+    tree/tree.cpp
+    tree/node.cpp
+    tree/edge.cpp
+    utils/exception.cpp
+    utils/logger.cpp
+    utils/base_logger.cpp
+    utils/utils.cpp
+    compontents/terminal.cpp
+    compontents/macro.cpp
+    compontents/component.cpp
+    compontents/pin.cpp
+    compontents/cell.cpp
+    compontents/supplementpin.cpp
+    compontents/supplementmacro.cpp
+)
+
 add_dependencies(smt_placer
     def
     lef
@@ -110,4 +132,11 @@ target_link_libraries(smt_placer
     ${KAHYPAR_HOME}/build/lib/libkahypar.so
     pthread
     dl
+)
+
+target_link_libraries(bookshelf_converter
+    ${Boost_LIBRARIES}
+    pthread
+    ${THIRD_PARTY_LIB}/libz3.so
+    ${THIRD_PARTY_LIB}/libjsoncpp.a
 )

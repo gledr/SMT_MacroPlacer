@@ -614,7 +614,7 @@ void Partitioning::kmeans_clustering()
 void Partitioning::hypergraph_partitioning()
 {
     m_logger->start_kahypar();
-    
+    std::cout << "Partition Size: " << this->get_partition_size() << std::endl;
     // Redirect Kahypar Output to File
     std::ofstream out(this->get_active_results_directory() + "/kahypar.txt");
     std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
@@ -679,10 +679,10 @@ void Partitioning::hypergraph_partitioning()
     }
     hyperedge_indices[pos] = edge_cnt;
 
-    const double imbalance = 0.03;
-    const kahypar_partition_id_t k = 5;
+    double imbalance = 0.03;
+    kahypar_partition_id_t k = 5;
     std::vector<kahypar_partition_id_t> partition(num_vertices, -1);
-    kahypar_hyperedge_weight_t objective = 0;
+    kahypar_hyperedge_weight_t objective = 1;
 
     kahypar_partition(num_vertices,
                       num_hyperedges,

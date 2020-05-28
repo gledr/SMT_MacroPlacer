@@ -54,6 +54,8 @@ public:
 
     std::vector<Edge*> get_edges();
 
+    void strip_terminals();
+
     void visualize();
 
     void export_hypergraph();

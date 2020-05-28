@@ -47,6 +47,8 @@ public:
 
     void write_placement();
 
+    void strip_terminals();
+
     size_t get_estimated_area();
 
     std::pair<size_t, size_t> get_deduced_layout();
@@ -101,7 +103,11 @@ private:
                           std::string const & pos_y);
 
     Macro* find_macro(std::string const & name);
+    bool has_macro(std::string const & name);
+
     Terminal* find_terminal(std::string const & name);
+    bool has_terminal(std::string const & name);
+
     void deduce_layout();
 };
 

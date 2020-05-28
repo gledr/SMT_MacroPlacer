@@ -450,3 +450,8 @@ void Logger::kahypar_finished()
 {
     LOG(eInfo) << "Kahypar Hyphergraph Partitioning finished...";
 }
+
+void Logger::strip_terminals()
+{
+    LOG(eInfo) << "Stripping Terminals from Circuit...";
+}

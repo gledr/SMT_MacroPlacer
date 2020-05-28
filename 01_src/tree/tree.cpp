@@ -380,3 +380,25 @@ void Tree::verify_edges()
         }
     }
 }
+
+/**
+ * @brief Remove all Edges connected with Terminals
+ */
+void Tree::strip_terminals()
+{
+    std::vector<Edge*> next_edges;
+    std::vector<Edge*> delete_me;
+    for(Edge* edge: m_edges){
+        Node* from = edge->get_from();
+        Node* to = edge->get_to();
+        
+        if (to->is_terminal() || from->is_terminal()){
+            delete_me.push_back(edge);
+        } else {
+            next_edges.push_back(edge);
+        }
+    }
+    
+    m_edges.clear();
+    std::copy(next_edges.begin(), next_edges.end(), std::back_inserter(m_edges));
+}

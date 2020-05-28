@@ -136,6 +136,8 @@ public:
     void start_kahypar();
     void kahypar_finished();
 
+    void strip_terminals();
+
 private:
     Logger();
     virtual ~Logger();

@@ -167,6 +167,9 @@ protected:
     void set_free_terminals(bool const value);
     bool get_free_terminals() const;
 
+    void set_strip_terminals(bool const val);
+    bool get_strip_terminals() const;
+
     void set_database_file(std::string const & name);
     std::string get_database_file();
     std::string get_database_dir();
@@ -220,6 +223,7 @@ private:
     static bool m_parquet_fp;
     static bool m_partitioning;
     static bool m_free_terminals;
+    static bool m_strip_terminals;
     static size_t m_partition_size;
     static size_t m_solutions;
     static size_t m_results_id;

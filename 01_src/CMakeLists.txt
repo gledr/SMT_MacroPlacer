@@ -20,7 +20,6 @@ include_directories(
     ${THIRD_PARTY_LIB}
     ${PARQUET_HOME}/src
     ${ABKCOMMON_HOME}
-    ${KAHYPAR_HOME}/include
 
     compontents
     macrocircuit
@@ -113,6 +112,7 @@ add_dependencies(smt_placer
     build_z3
     build_jsoncpp
     build_sqlite3
+    build_kahypar
     placer_config
     ABKCommon
     ParquetFP
@@ -127,9 +127,9 @@ target_link_libraries(smt_placer
     ${THIRD_PARTY_LIB}/libz3.so
     ${THIRD_PARTY_LIB}/libjsoncpp.a
     ${THIRD_PARTY_LIB}/libsqlite3.a
+    ${THIRD_PARTY_LIB}/libkahypar.so
     ${PARQUET_HOME}/lib/libParquetFP.a
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
-    ${KAHYPAR_HOME}/build/lib/libkahypar.so
     pthread
     dl
 )

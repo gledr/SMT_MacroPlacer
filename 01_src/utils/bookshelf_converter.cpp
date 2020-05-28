@@ -23,8 +23,18 @@ namespace po = boost::program_options;
 
 namespace Placer {
 
+/** @class Converter
+ *  @brief Convert Bookshelf Benchmarks into extended Bookshelf DAC2002
+ */
 class Converter: public virtual Object {
 public:
+    
+    /**
+     * @brief Constructor
+     * 
+     * @param _argc Commandline Arguments
+     * @param _argv Commandline Values
+     */
     Converter (int _argc, char** _argv):
         Object()
     {
@@ -32,18 +42,24 @@ public:
         m_argc = _argc;
     }
     
+    /**
+     * @brief Destructor
+     */
     virtual ~Converter()
     {
     }
     
+    /**
+     * @brief Read Commandline Arguments and Set Options
+     */
     void init(){
         try {
             std::cout << "SMT_MacroPlacer: Bookshelf Converter" << std::endl
                       << "Johannes Kepler University 2020 " << std::endl
                       << std::endl
                       << "This tool is used in order to convert existing " << std::endl
-                      << "Benchmark Circuits into the extended Bookshelf DAC2020 format" 
-                      << std::endl;
+                      << "Benchmark Circuits into the extended Bookshelf DAC2002 format" 
+                      << std::endl << std::endl;
 
             po::variables_map vm;
             po::options_description* options_functions =
@@ -52,7 +68,8 @@ public:
             options_functions->add_options()
                 ("help", "Displays information about usage")
                 ("in",   po::value<std::string>(), "Input Bookshelf Aux file")
-                ("out",  po::value<std::string>(), "Output Basefilename");
+                ("out",  po::value<std::string>(), "Output Basefilename")
+                ("strip-terminals", "Remove all Terminal Data");
 
             po::command_line_parser parser(m_argc, m_argv);
             parser.options(*options_functions).allow_unregistered().style(
@@ -72,6 +89,9 @@ public:
             if (vm.count("out")){
                 this->set_bookshelf_export(vm["out"].as<std::string>());
             }
+            if(vm.count("strip-terminals")){
+                this->set_strip_terminals(true);
+            }
             if (this->get_bookshelf_file() == ""){
                 throw Utils::PlacerException("No Bookshelf Input Files Defined!");
             }
@@ -83,10 +103,16 @@ public:
         }
     }
 
+    /**
+     * @brief Convert Bookshelf Files
+     */
     void run()
     {
         Bookshelf* bookshelf = new Bookshelf();
         bookshelf->read_files();
+        if (this->get_strip_terminals()){
+            bookshelf->strip_terminals();
+        }
         bookshelf->write_placement();
 
         delete bookshelf; bookshelf = nullptr;

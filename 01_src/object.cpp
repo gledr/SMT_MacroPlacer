@@ -47,6 +47,7 @@ bool Object::m_box_optimizer = false;
 bool Object::m_partitioning = false;
 bool Object::m_parquet_fp = false;
 bool Object::m_free_terminals = false;
+bool Object::m_strip_terminals = false;
 size_t Object::m_timeout = 0;
 size_t Object::m_bitwidth_orientation;
 size_t Object::m_solutions = 1;
@@ -57,6 +58,7 @@ size_t Object::m_key_counter = 0;
 eLogic Object::m_logic = eInt;
 z3::context Object::m_z3_ctx;
 z3::expr_vector Object::m_stored_constraints(m_z3_ctx);
+
 
 Object::Object()
 {
@@ -458,6 +460,16 @@ bool Object::get_free_terminals() const
 void Object::set_free_terminals(bool const value)
 {
     m_free_terminals = value;
+}
+
+void Object::set_strip_terminals(bool const val)
+{
+    m_strip_terminals = val;
+}
+
+bool Object::get_strip_terminals() const
+{
+    return m_strip_terminals;
 }
 
 std::string Object::get_database_file()

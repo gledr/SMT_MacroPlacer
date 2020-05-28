@@ -122,14 +122,20 @@ public:
                       std::string const & commit,
                       std::string const & author,
                       size_t const max_len);
-    
+
+    void bookshelf_read_aux(std::string const & filename);
     void bookshelf_read_nets(std::string const & filename);
     void bookshelf_read_blocks(std::string const & filename);
     void bookshelf_read_place(std::string const & filename);
-    
+
+    void bookshelf_write_aux(std::string const & filename);
+    void bookshelf_write_nets(std::string const & filename);
+    void bookshelf_write_blocks(std::string const & filename);
+    void bookshelf_write_place(std::string const & filename);
+
     void start_kahypar();
     void kahypar_finished();
-    
+
 private:
     Logger();
     virtual ~Logger();

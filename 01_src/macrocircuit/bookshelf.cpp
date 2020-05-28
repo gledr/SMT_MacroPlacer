@@ -54,6 +54,8 @@ void Bookshelf::read_aux()
 {
     std::string aux_file = this->get_bookshelf_file();
 
+    m_logger->bookshelf_read_aux(aux_file);
+
     if(!boost::filesystem::exists(aux_file)){
         throw PlacerException("Bookshelf Aux File does not exits!");
     }
@@ -661,12 +663,13 @@ void Bookshelf::write_placement()
  */
 void Bookshelf::write_aux()
 {
-    std::string filename = "export_" + this->get_design_name() + ".aux";
+    std::string filename = this->get_bookshelf_export() + ".aux";
+    m_logger->bookshelf_write_aux(filename);
 
     std::ofstream auxFile(filename);
-    auxFile << "export_" << this->get_design_name() << ".pl ";
-    auxFile << "export_" << this->get_design_name() << ".blk ";
-    auxFile << "export_" << this->get_design_name() << ".nets ";
+    auxFile << this->get_bookshelf_export() << ".pl ";
+    auxFile << this->get_bookshelf_export() << ".blk ";
+    auxFile << this->get_bookshelf_export() << ".nets ";
     auxFile.close();
 }
 
@@ -675,7 +678,8 @@ void Bookshelf::write_aux()
  */
 void Bookshelf::write_blocks()
 {
-    std::string filename = "export_" + this->get_design_name() + ".blk";
+    std::string filename = this->get_bookshelf_export() + ".blk";
+    m_logger->bookshelf_write_blocks(filename);
 
     std::ofstream blkFile(filename);
 
@@ -683,8 +687,9 @@ void Bookshelf::write_blocks()
     feed << "UCSC blocks 1.0" << std::endl;
     feed << "# Created " << Utils::Utils::get_current_time();
     feed << "# User " <<  Utils::Utils::get_current_user() << std::endl;
-    feed << "# Platform " << Utils::Utils::get_plattform() << std::endl << std::endl;
-
+    feed << "# Platform " << Utils::Utils::get_plattform() << std::endl;
+    feed << "# Exported by SMT_MacroPlacer" << std::endl << std::endl;
+    
     feed << "NumSoftRectangularBlocks : 0" << std::endl;
     feed << "NumHardRectilinearBlocks : " << m_macros.size() << std::endl;
     feed << "NumTerminals : " << m_terminals.size() << std::endl << std::endl;
@@ -696,7 +701,6 @@ void Bookshelf::write_blocks()
         feed << "(" << curMacro->get_height().get_numeral_uint() << ", " << curMacro->get_width().get_numeral_uint() << ") ";
         feed << "(" << curMacro->get_height().get_numeral_uint() << ",0) " << std::endl;
     }
-
     feed << std::endl;
 
     for(auto terminal: m_terminals){
@@ -713,24 +717,69 @@ void Bookshelf::write_blocks()
  */
 void Bookshelf::write_nets()
 {
-    std::string filename = "export_" + this->get_design_name() + ".nets";
+    std::string filename = this->get_bookshelf_export() + ".nets";
 
+    m_logger->bookshelf_write_nets(filename);
     std::ofstream netsFile(filename);
 
+    auto steiner_tree = m_tree->get_steiner_tree();
+
+    size_t pin_cnt = 0;
+    for (auto itor: steiner_tree){
+        pin_cnt += itor.second.size();
+        pin_cnt++;
+    }
+
     std::stringstream feed;
-    feed << "UCSC nets 1.0" << std::endl;
-    feed << "# Created " << Utils::Utils::get_current_time() << std::endl;
+    feed << "UCLA nets 1.0" << std::endl;
+    feed << "# Created " << Utils::Utils::get_current_time();
     feed << "# User " << Utils::Utils::get_current_user() << std::endl;
     feed << "# Platform " << Utils::Utils::get_plattform() << std::endl;
+    feed << "# Exported by SMT_MacroPlacer" << std::endl;
     feed << std::endl;
-    feed << "NumNets : " << m_tree->get_edges().size() << std::endl;
-    feed << "NumPins: "  << (m_tree->get_edges().size() * 2) << std::endl;
+    feed << "NumNets : " << steiner_tree.size() << std::endl;
+    feed << "NumPins : "  << pin_cnt << std::endl;
     feed << std::endl;
 
-    for(auto edge: m_tree->get_edges()){
-        feed << "NetDegree : 2" << std::endl;
-        feed << edge->get_name() << " B\t : %-50.0 %-50.0" << std::endl; 
+    for(auto itor: steiner_tree){
+        size_t netdegree = itor.second.size() + 1;
+        feed << "NetDegree : " << netdegree << std::endl;
+
+        std::vector<std::string> token = Utils::Utils::tokenize(itor.first, ":");
+        assert (token.size() == 2);
+        // Terminal
+        if (token[0] == token[1]){
+            feed << token[0] << " B : 0 0 " << std::endl;
+        } else {
+            std::vector<std::string> token2 = Utils::Utils::tokenize(token[1], "_");
+            Macro* m = this->find_macro(token[0]);
+            nullpointer_check(m);
+            size_t width = m->get_width().get_numeral_uint();
+            size_t height = m->get_height().get_numeral_uint();
+            double factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
+            double factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+            feed << token[0] << " B : " << width * factor_width << " " << height * factor_height << std::endl;
+        }
+
+        for(auto itor2: itor.second){
+            std::vector<std::string> token = Utils::Utils::tokenize(itor2, ":");
+            assert (token.size() == 2);
+            // Terminal
+            if (token[0] == token[1]){
+                feed << token[0] << " B : 0 0" << std::endl;
+            } else {
+                std::vector<std::string> token2 = Utils::Utils::tokenize(token[1], "_");
+                Macro* m = this->find_macro(token[0]);
+                nullpointer_check(m);
+                size_t width = m->get_width().get_numeral_uint();
+                size_t height = m->get_height().get_numeral_uint();
+                double factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
+                double factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+                feed << token[0] << " B : " << width * factor_width << " " << height * factor_height << std::endl;
+            }
+        }
     }
+
     netsFile << feed.str();
     netsFile.close();
 }
@@ -740,24 +789,51 @@ void Bookshelf::write_nets()
  */
 void Bookshelf::write_pl()
 {
-     std::string filename = "export_" + this->get_design_name() + ".pl";
+    std::string filename = this->get_bookshelf_export() + ".pl";
+    m_logger->bookshelf_write_place(filename);
 
-     std::ofstream plFile(filename);
+    std::ofstream plFile(filename);
 
     std::stringstream feed;
     feed << "UCSC pl 1.0" << std::endl;
     feed << "# Created " << Utils::Utils::get_current_time();
     feed << "# User " << Utils::Utils::get_current_user() << std::endl;
     feed << "# Platform " << Utils::Utils::get_plattform() << std::endl;
+    feed << "# Exported by SMT_MacroPlacer" << std::endl;
     feed << std::endl;
 
     for(auto macro: m_macros){
-        feed << macro->get_id() << "\t" << "0" << "\t" << "0" << std::endl; 
+        if (macro->is_free()){
+            feed << macro->get_id() << " " << "0" << " " << "0" << std::endl;
+        } else {
+            size_t lx = macro->get_solution_lx(0);
+            size_t ly = macro->get_solution_ly(0);
+            eOrientation o = macro->get_solution_orientation(0);
+            size_t h = macro->get_height_numeral();
+            size_t w = macro->get_width_numeral();
+            
+            if (o == eNorth){
+                feed << macro->get_id() << " " << lx << " " << ly << std::endl;
+            } else if (o == eWest){
+                feed << macro->get_id() << " " << lx -h << " " << ly << std::endl;
+            } else if (o == eSouth){
+                feed << macro->get_id() << " " << lx - w << " " << ly - h << std::endl;
+            } else if (o == eEast){
+                feed << macro->get_id() << " " << lx << " " <<  ly - h << std::endl;
+            } else {
+                notimplemented_check();
+            }
+        }
     }
     feed << std::endl;
 
     for(auto terminal: m_terminals){
-        feed << terminal->get_name() << "\t 0 \t 0" << std::endl;
+        if (terminal->is_free()){
+            feed << terminal->get_name() << " 0 0" << std::endl;
+        } else {
+            // TODO
+            feed << terminal->get_name() << " 0 0" << std::endl;
+        }
     }
 
     plFile << feed.str();

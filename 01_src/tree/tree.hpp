@@ -58,12 +58,15 @@ public:
 
     void export_hypergraph();
 
+    std::map<std::string, std::set<std::string>> get_steiner_tree();
+
 private:
     Utils::Logger* m_logger;
 
     std::vector<Node*> m_terminals;
     std::vector<Edge*> m_edges;
     std::vector<Node*> m_nodes;
+    std::map<std::string, std::set<std::string>> m_steiner_tree;
 
     Node* find_node(std::string const & name,
                     std::string const & id);

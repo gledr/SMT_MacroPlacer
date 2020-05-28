@@ -90,6 +90,9 @@ protected:
     void set_bookshelf_file(std::string const & file);
     std::string get_bookshelf_file() const;
 
+    void set_bookshelf_export(std::string const & name);
+    std::string get_bookshelf_export() const;
+
     void set_timeout(size_t const val);
     size_t get_timeout() const;
 
@@ -192,6 +195,7 @@ private:
     static std::string m_parquet_directory;
     static std::string m_log_name;
     static std::string m_bookshelf_file;
+    static std::string m_bookshelf_export;
     static std::string m_design_name;
     static std::string m_binary_name;
     static std::string m_database_file;

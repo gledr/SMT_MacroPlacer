@@ -626,6 +626,7 @@ void Partitioning::hypergraph_partitioning()
 
     std::map<size_t, Node*> key_to_node;
     std::map<size_t, std::set<size_t>> steiner_tree;
+    std::map<std::string, std::set<std::string>> string_tree;
 
     for (Edge* edge: m_tree->get_edges()){
         if (edge->get_from()->is_terminal() || edge->get_to()->is_terminal()){
@@ -639,9 +640,20 @@ void Partitioning::hypergraph_partitioning()
             key_to_node[from_key] = from;
             key_to_node[to_key] = to;
             steiner_tree[from_key].insert(to_key);
+            string_tree[from->get_id()].insert(to->get_id());
         }
     }
 
+    std::ofstream test("test.hpr");
+    for (auto itor: string_tree){
+        test << itor.first;
+        for(auto itor2: itor.second){
+            test << itor2;
+        }
+        test << std::endl;
+    }
+    test.close();
+    
     kahypar_hypernode_id_t num_vertices = m_macros.size();
     kahypar_hyperedge_id_t num_hyperedges = steiner_tree.size();
 

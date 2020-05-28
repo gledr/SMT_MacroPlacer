@@ -34,11 +34,17 @@ public:
     
     virtual ~Converter()
     {
-    
     }
     
     void init(){
         try {
+            std::cout << "SMT_MacroPlacer: Bookshelf Converter" << std::endl
+                      << "Johannes Kepler University 2020 " << std::endl
+                      << std::endl
+                      << "This tool is used in order to convert existing " << std::endl
+                      << "Benchmark Circuits into the extended Bookshelf DAC2020 format" 
+                      << std::endl;
+
             po::variables_map vm;
             po::options_description* options_functions =
                 new po::options_description("Usage: " + std::string(m_argv[0]) + " [options]");
@@ -46,7 +52,7 @@ public:
             options_functions->add_options()
                 ("help", "Displays information about usage")
                 ("in",   po::value<std::string>(), "Input Bookshelf Aux file")
-                ("out",  po::value<std::string>(), "Output basename");
+                ("out",  po::value<std::string>(), "Output Basefilename");
 
             po::command_line_parser parser(m_argc, m_argv);
             parser.options(*options_functions).allow_unregistered().style(
@@ -63,9 +69,14 @@ public:
             if (vm.count("in")){
                 this->set_bookshelf_file(vm["in"].as<std::string>());
             }
-            
+            if (vm.count("out")){
+                this->set_bookshelf_export(vm["out"].as<std::string>());
+            }
             if (this->get_bookshelf_file() == ""){
                 throw Utils::PlacerException("No Bookshelf Input Files Defined!");
+            }
+            if (this->get_bookshelf_export() == ""){
+                throw Utils::PlacerException("No Output Basefilename has been Defined!");
             }
         } catch (Utils::PlacerException const & exp){
             std::cerr << exp.what() << std::endl;
@@ -77,10 +88,10 @@ public:
         Bookshelf* bookshelf = new Bookshelf();
         bookshelf->read_files();
         bookshelf->write_placement();
-        
+
         delete bookshelf; bookshelf = nullptr;
     }
-    
+
 private:
     int m_argc;
     char** m_argv;

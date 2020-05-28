@@ -377,6 +377,14 @@ void Logger::deduce_layout(size_t const x, size_t const y)
     LOG(eInfo) << msg.str();
 }
 
+void Logger::bookshelf_read_aux(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Parsing Bookshelf Aux (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
 void Logger::bookshelf_read_nets(std::string const & filename)
 {
     std::stringstream msg;
@@ -397,6 +405,38 @@ void Logger::bookshelf_read_place(std::string const & filename)
 {
     std::stringstream msg;
     msg << "Parsing Bookshelf Place (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::bookshelf_write_aux(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Exporting Bookshelf Aux (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::bookshelf_write_nets(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Exporting Bookshelf Nets (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::bookshelf_write_blocks(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Exporting Bookshelf Blocks (" << filename << ")";
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::bookshelf_write_place(std::string const & filename)
+{
+    std::stringstream msg;
+    msg << "Exporting Bookshelf Place (" << filename << ")";
 
     LOG(eInfo) << msg.str();
 }

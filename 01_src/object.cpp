@@ -23,6 +23,7 @@ std::string Object::m_smt_directory;
 std::string Object::m_log_name;
 std::string Object::m_parquet_directory;
 std::string Object::m_bookshelf_file;
+std::string Object::m_bookshelf_export;
 std::string Object::m_design_name;
 std::string Object::m_binary_name;
 std::string Object::m_database_file;
@@ -198,6 +199,16 @@ void Object::set_bookshelf_file(std::string const & file)
 std::string Object::get_bookshelf_file() const
 {
     return m_bookshelf_file;
+}
+
+std::string Object::get_bookshelf_export() const
+{
+    return m_bookshelf_export;
+}
+
+void Object::set_bookshelf_export(std::string const & name)
+{
+    m_bookshelf_export = name;
 }
 
 size_t Object::get_timeout() const

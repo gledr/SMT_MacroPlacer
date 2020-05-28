@@ -298,6 +298,34 @@ void Tree::show_png()
 }
 
 /**
+ * @brief Reconstruct Steiner Tree
+ * 
+ * @return std::map< std::string, std::set< std::string > >
+ */
+std::map<std::string, std::set<std::string> > Tree::get_steiner_tree()
+{
+    if (!m_steiner_tree.empty()){
+        return m_steiner_tree;
+    } else {
+        for (Edge* edge: m_edges){
+            Node* from = edge->get_from();
+            std::string from_id = from->get_id();
+            std::string from_pin = edge->get_from_pin();
+            
+            Node* to = edge->get_to();
+            std::string to_id = to->get_id();
+            std::string to_pin = edge->get_to_pin();
+            
+            std::string id1 = from_id + ":" + from_pin;
+            std::string id2 = to_id + ":" + to_pin;
+            m_steiner_tree[id1].insert(id2);
+        }
+        
+        return m_steiner_tree;
+    }
+}
+
+/**
  * @brief Export Tree as Hypergraph using *.hgr format
  */
 void Tree::export_hypergraph()

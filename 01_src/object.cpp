@@ -54,6 +54,7 @@ size_t Object::m_solutions = 1;
 size_t Object::m_results_id = 0;
 size_t Object::m_partition_id = 0;
 size_t Object::m_partition_size = 1;
+size_t Object::m_num_partitions = 1;
 size_t Object::m_key_counter = 0;
 eLogic Object::m_logic = eInt;
 z3::context Object::m_z3_ctx;
@@ -412,6 +413,16 @@ bool Object::get_partitioning() const
 void Object::set_partitioning(bool const val)
 {
     m_partitioning = val;
+}
+
+size_t Object::get_num_partitions() const 
+{
+    return m_num_partitions;
+}
+
+void Object::set_num_partition(size_t const num)
+{
+    m_num_partitions = num;
 }
 
 size_t Object::get_partition_id()

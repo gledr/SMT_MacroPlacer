@@ -69,6 +69,7 @@ private:
     std::vector<Edge*> m_edges;
     std::vector<Node*> m_nodes;
     std::map<std::string, std::set<std::string>> m_steiner_tree;
+    std::map<size_t, std::set<size_t>> m_key_tree;
 
     Node* find_node(std::string const & name,
                     std::string const & id);

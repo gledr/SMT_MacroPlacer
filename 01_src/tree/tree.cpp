@@ -304,25 +304,24 @@ void Tree::show_png()
  */
 std::map<std::string, std::set<std::string> > Tree::get_steiner_tree()
 {
-    if (!m_steiner_tree.empty()){
-        return m_steiner_tree;
-    } else {
-        for (Edge* edge: m_edges){
-            Node* from = edge->get_from();
-            std::string from_id = from->get_id();
-            std::string from_pin = edge->get_from_pin();
-            
-            Node* to = edge->get_to();
-            std::string to_id = to->get_id();
-            std::string to_pin = edge->get_to_pin();
-            
-            std::string id1 = from_id + ":" + from_pin;
-            std::string id2 = to_id + ":" + to_pin;
-            m_steiner_tree[id1].insert(id2);
-        }
-        
-        return m_steiner_tree;
+    m_steiner_tree.clear();
+    
+    for (Edge* edge: m_edges){
+        Node* from = edge->get_from();
+        std::string from_id = from->get_id();
+        std::string from_pin = edge->get_from_pin();
+
+        Node* to = edge->get_to();
+        std::string to_id = to->get_id();
+        std::string to_pin = edge->get_to_pin();
+    
+        std::string id1 = from_id + ":" + from_pin;
+        std::string id2 = to_id + ":" + to_pin;
+        m_steiner_tree[id1].insert(id2);
     }
+
+    return m_steiner_tree;
+
 }
 
 /**
@@ -332,32 +331,58 @@ void Tree::export_hypergraph()
 {
     std::string filename = this->get_design_name() + ".hgr";
     m_logger->export_hypergraph(filename);
+    this->strip_terminals();
 
     std::ofstream hgr_file (this->get_active_results_directory() +
                             "/" +
                             filename);
 
-    std::map<size_t, std::set<size_t>> steiner_tree;
-
-    for (Edge* edge: m_edges){
-        //if (edge->get_from()->is_terminal() || edge->get_to()->is_terminal()){
-            //continue;
-        //} else {
-            steiner_tree[edge->get_from()->get_key()].insert(edge->get_to()->get_key());
-        //}
-    }
+    std::map<std::string, std::set<std::string>> steiner_tree = this->get_steiner_tree();
 
     // Header: Edges Nodes Settings
     // Settings 0  Unweigthed Hypergraph
     //          1  Hypergraph with edge weights
     //          10 Hypergraph with node weights
     //          11 Hypergraph with node and edge weights
-    hgr_file << m_nodes.size() << " " << steiner_tree.size() << std::endl;
+    hgr_file << m_steiner_tree.size() << " " << m_nodes.size() + m_terminals.size() << std::endl;
     for (auto edge: steiner_tree){
-        hgr_file << edge.first << " ";
+        std::vector<std::string> root_token = Utils::Utils::tokenize(edge.first, ":");
+        Node* root = this->find_node(root_token[0], root_token[0]);
+        nullpointer_check(root);
+        size_t root_key = 0;
+        if (root->is_node()){
+            Macro* m = root->get_macro();
+            root_key = m->get_key();
+        } else {
+            Terminal* t = root->get_terminal();
+            root_key = t->get_key();
+        }
 
-        for (auto itor: edge.second){
-            hgr_file << itor << " ";
+        hgr_file << root_key << " ";
+
+        std::set<size_t> sub_keys;
+        for (auto itor2: edge.second){
+            std::vector<std::string> token = Utils::Utils::tokenize(itor2, ":");
+            Node* node = this->find_node(token[0], token[0]);
+            nullpointer_check(node);
+
+            size_t sub_key = 0;
+            if (node->is_node()){
+                Macro* sub_m = node->get_macro();
+                sub_key = sub_m->get_key();
+            } else {
+                Terminal* t = node->get_terminal();
+                sub_key = t->get_key();
+            }
+            // No Edge can point at itself
+            // Use a set to get unique subkeys
+            sub_keys.insert(sub_key);
+        }
+
+        for (auto itor2: sub_keys){
+            if (itor2 != root_key){
+                hgr_file << itor2 << " ";
+            }
         }
         hgr_file << std::endl;
     }
@@ -398,6 +423,14 @@ void Tree::strip_terminals()
             next_edges.push_back(edge);
         }
     }
+    
+    for (Edge* edge: delete_me){
+        delete edge; edge = nullptr;
+    }
+    for(auto itor: m_terminals){
+        delete itor; itor = nullptr;
+    }
+    m_terminals.clear();
     
     m_edges.clear();
     std::copy(next_edges.begin(), next_edges.end(), std::back_inserter(m_edges));

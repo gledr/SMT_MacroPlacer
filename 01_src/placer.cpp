@@ -69,6 +69,7 @@ void MacroPlacer::read_configuration()
             ("minimize-hpwl",       "Add HPWL as Minimization Target")
             ("free-terminals",      "Ignore Any Existing Terminal Placement")
             ("partition-size",      boost::program_options::value<size_t>(),        "Parition Size")
+            ("partition-count",     boost::program_options::value<size_t>(),        "Number of Partitions")
             ("def",                 boost::program_options::value<std::string>(),   "Circuit as DEF File")
             ("lef",                 boost::program_options::value<std::string>(),   "Library as LEF File")
             ("bookshelf",           boost::program_options::value<std::string>(),   "Circuits as Bookshelf Format")
@@ -115,6 +116,9 @@ void MacroPlacer::read_configuration()
         }
         if(m_vm.count("partition-size")){
             this->set_partition_size(m_vm["partition-size"].as<size_t>());
+        }
+        if(m_vm.count("partition-count")){
+            this->set_num_partition(m_vm["partition-count"].as<size_t>());
         }
         if(m_vm.count("allsat")){
             this->set_allsat(true);

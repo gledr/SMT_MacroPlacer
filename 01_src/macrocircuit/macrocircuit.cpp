@@ -145,11 +145,10 @@ void MacroCircuit::build_circuit_lefdef()
             m_logger->min_die_area(m_estimated_area);
 
             std::thread macro_worker(&MacroCircuit::add_macros, this);
-            std::thread cell_worker(&MacroCircuit::add_cells, this);
-            std::thread terminal_worker(&MacroCircuit::add_terminals, this);
-
             macro_worker.join();
+            std::thread cell_worker(&MacroCircuit::add_cells, this);
             cell_worker.join();
+            std::thread terminal_worker(&MacroCircuit::add_terminals, this);
             terminal_worker.join();
 
             m_layout->set_units(m_circuit->defUnit);
@@ -257,7 +256,7 @@ void MacroCircuit::partitioning()
 {
     if(this->get_partitioning()){
         m_logger->run_partitioning();
-        m_partitioning->set_problem(m_macros, this->get_partition_size(), m_tree);
+        m_partitioning->set_problem(m_macros, m_terminals, m_tree);
         m_partitioning->run();
         std::vector<Component*> partitions = m_partitioning->get_partitions();
 

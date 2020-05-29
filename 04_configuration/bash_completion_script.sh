@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 # Generted File! Do not modify!
-# Mon May 18 12:14:44 2020
+# Fri May 29 14:57:49 2020
 #
 
 #
@@ -41,6 +41,7 @@ local cur
 			--minimize-hpwl \
 			--free-terminals \
 			--partition-size \
+			--partition-count \
 			--def \
 			--lef \
 			--bookshelf \

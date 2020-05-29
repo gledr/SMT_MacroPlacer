@@ -251,7 +251,6 @@ void Bookshelf::read_nets()
                 }
 
                 std::string id = sub_token[0];
-                Terminal* t = nullptr;
                 if (this->has_macro(id)){
                     std::string direction = sub_token[1];
                     // Pin has relative position
@@ -264,12 +263,14 @@ void Bookshelf::read_nets()
                         pins.push_back(pin);
                     // Pin is center
                     } else {
+                        std::cout << "Pin is center" << std::endl;
                         this->add_pin_to_macro(id, "center", direction, "", "");
+                        pins.push_back("%0.0_%0.0");
                     }
                     Node* n = new Node(this->find_macro(id));
                     nodes.push_back(n);
                     num_pins++;
-                } else if ((t = this->find_terminal(id))){
+                } else if (this->has_terminal(id)){
                     Node* n = new Node(this->find_terminal(id));
                     nodes.push_back(n);
                     pins.push_back(id);
@@ -972,9 +973,4 @@ void Bookshelf::strip_terminals()
     m_logger->strip_terminals();
 
     m_tree->strip_terminals();
-
-    for(auto itor: m_terminals){
-        delete itor; itor = nullptr;
-    }
-    m_terminals.clear();
 }

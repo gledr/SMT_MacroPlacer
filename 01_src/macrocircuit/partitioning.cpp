@@ -83,10 +83,10 @@ void Partitioning::create_initial_partitions()
     std::cout << "Sorted: " << sorted.size() << std::endl;
     
     for (auto itor: sorted){
-        for (size_t j = 0; j < itor.second.size(); j+= m_partition_size){
+        for (size_t j = 0; j < itor.second.size(); j+= this->get_partition_size()){
             Partition* next_partition = new Partition();
     
-            for (size_t k = j; (k < (m_partition_size+j)) && (k < itor.second.size()); ++k){
+            for (size_t k = j; (k < (this->get_partition_size()+j)) && (k < itor.second.size()); ++k){
                 next_partition->add_macro(itor.second[k]);
             }
             m_components.push_back(next_partition);
@@ -123,13 +123,12 @@ std::vector<Component*> Partitioning::get_partitions()
  * @param partition_size Number of Partitions
  */
 void Partitioning::set_problem(std::vector<Macro *> & macros,
-                               size_t partition_size,
+                                std::vector<Terminal*> & terminals,
                                Tree* tree)
 {
     nullpointer_check(tree);
     
     m_macros = macros;
-    m_partition_size = partition_size;
     m_tree = tree;
 }
 
@@ -479,8 +478,9 @@ void Partitioning::solve(Partition* next_partition)
 {
     nullpointer_check (next_partition);
 
-    std::cout << "Solve Paritition" << std::endl;
+    std::cout << "Solve Partition" << std::endl;
     
+    assert(m_z3_ctx != nullptr);
     z3::check_result sat = m_z3_opt->check();
 
     if(sat == z3::check_result::sat){
@@ -608,105 +608,139 @@ void Partitioning::kmeans_clustering()
     }
 }
 
+Macro* Partitioning::find_macro(std::string const & id)
+{
+    Macro* m = nullptr;
+    assert (id.size() > 0);
+    //std::cout << id << std::endl;
+    
+    for (Macro* itor: m_macros){
+        if (id == itor->get_id()){
+            m = itor;
+            break;
+        }
+    }
+    assert (m != nullptr);
+    assert (id == m->get_id());
+
+    return m;
+}
+
 /**
  * @brief Invoke Kahypar for Partitioning
  */
 void Partitioning::hypergraph_partitioning()
 {
+    //this->file_based_partitioning();
+    this->api_based_partitioning();
+}
+
+void Partitioning::api_based_partitioning()
+{
     m_logger->start_kahypar();
-    std::cout << "Partition Size: " << this->get_partition_size() << std::endl;
+    m_tree->strip_terminals();
+
     // Redirect Kahypar Output to File
     std::ofstream out(this->get_active_results_directory() + "/kahypar.txt");
     std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
     std::cout.rdbuf(out.rdbuf()); //redirect std::cout to kahypar.txt!
 
+    // Create Kahypar Instance 
     kahypar_context_t* context = kahypar_context_new();
     std::string config_file = this->get_base_path() + "/04_configuration/kahypar.ini";
     kahypar_configure_context_from_file(context, config_file.c_str());
 
-    std::map<size_t, Node*> key_to_node;
-    std::map<size_t, std::set<size_t>> steiner_tree;
-    std::map<std::string, std::set<std::string>> string_tree;
-
-    for (Edge* edge: m_tree->get_edges()){
-        if (edge->get_from()->is_terminal() || edge->get_to()->is_terminal()){
-            continue;
-        } else {
-            Node* from = edge->get_from();
-            Node* to   = edge->get_to();
-            size_t from_key = from->get_key();
-            size_t to_key = to->get_key();
-
-            key_to_node[from_key] = from;
-            key_to_node[to_key] = to;
-            steiner_tree[from_key].insert(to_key);
-            string_tree[from->get_id()].insert(to->get_id());
-        }
+    // Translation Map Key <-> Macro
+    std::map<size_t, Macro*> key_to_macro;
+    for(Macro* m: m_macros){
+        key_to_macro[m->get_key()] = m;
     }
 
-    std::ofstream test("test.hpr");
-    for (auto itor: string_tree){
-        test << itor.first;
-        for(auto itor2: itor.second){
-            test << itor2;
+    size_t hyperedge_idx = 0;
+    size_t hyperedge_idx_idx = 0;
+
+    std::map<std::string, std::set<std::string>> steiner_tree = m_tree->get_steiner_tree();
+
+    // Resolve Number of Total Needed Array Spaces for Hyperedge Container
+    std::vector<std::set<std::string>> key_tree;
+    for (auto itor: steiner_tree){
+        std::set<std::string> tmp;
+        std::vector<std::string> token = Utils::Utils::tokenize(itor.first, ":");
+        tmp.insert(token[0]);
+        for (auto itor2: itor.second){
+            std::vector<std::string> token2 = Utils::Utils::tokenize(itor2, ":");
+            tmp.insert(token2[0]);
         }
-        test << std::endl;
+        key_tree.push_back(tmp);
     }
-    test.close();
-    
-    kahypar_hypernode_id_t num_vertices = m_macros.size();
+    size_t hyperedge_cnt =0;
+    for (auto itor: key_tree){
+        hyperedge_cnt += itor.size();
+    }
+
+    kahypar_hypernode_id_t num_vertices =  m_macros.size() + m_terminals.size();
     kahypar_hyperedge_id_t num_hyperedges = steiner_tree.size();
 
-    size_t edge_cnt = 0;
-    for (auto itor: steiner_tree){
-        edge_cnt++;
-        for (auto itor2: itor.second){
-            edge_cnt++;
-        }
-    }
-
-    std::unique_ptr<kahypar_hyperedge_id_t[]> hyperedges =
-           std::make_unique<kahypar_hyperedge_id_t[]>(edge_cnt);
-
-    size_t pos = 0;
-    for(auto itor: steiner_tree){
-        hyperedges[pos] = itor.first;
-        pos++;
-        for (auto itor2: itor.second){
-            hyperedges[pos] = itor2;
-            pos++;
-        }
-    }
-
+    std::unique_ptr<kahypar_hyperedge_id_t[]> hyperedges = std::make_unique<kahypar_hyperedge_id_t[]>(hyperedge_cnt);
     std::unique_ptr<size_t[]> hyperedge_indices = std::make_unique<size_t[]>(num_hyperedges+1);
-    size_t val = 0;
-    pos = 0;
-    for(auto itor: steiner_tree){
-        hyperedge_indices[pos] = val;
-        pos++;
-        val++;
-        for (auto itor2: itor.second){
-            val++;
+
+     for (auto edge: steiner_tree){
+        std::vector<std::string> root_token = Utils::Utils::tokenize(edge.first, ":");
+        Macro* root = this->find_macro(root_token[0]);
+        nullpointer_check(root);
+        size_t root_key = root->get_key();
+        hyperedges[hyperedge_idx] = root_key;
+        hyperedge_indices[hyperedge_idx_idx] = hyperedge_idx;
+
+        hyperedge_idx++;
+        hyperedge_idx_idx++;
+
+        std::set<size_t> sub_keys;
+        for (auto itor2: edge.second){
+            std::vector<std::string> token = Utils::Utils::tokenize(itor2, ":");
+            Macro* m = this->find_macro(token[0]);
+            nullpointer_check(m);
+            size_t sub_key = m->get_key();
+
+            // No Edge can point at itself
+            // Use a set to get unique subkeys
+            sub_keys.insert(sub_key);
+        }
+        for (auto itor2: sub_keys){
+            if (itor2 != root_key){
+                hyperedges[hyperedge_idx] = itor2;
+                hyperedge_idx++;
+            }
         }
     }
-    hyperedge_indices[pos] = edge_cnt;
+    hyperedge_indices[hyperedge_idx_idx] = hyperedge_idx;
 
     double imbalance = 0.03;
-    kahypar_partition_id_t k = 5;
-    std::vector<kahypar_partition_id_t> partition(num_vertices, -1);
+    kahypar_partition_id_t k = this->get_num_partitions();
+
     kahypar_hyperedge_weight_t objective = 1;
+
+    kahypar_hyperedge_weight_t* w1 = nullptr;
+    kahypar_hypernode_weight_t* w2 = nullptr;
+
+    std::vector<kahypar_partition_id_t> partition(num_vertices);
 
     kahypar_partition(num_vertices,
                       num_hyperedges,
                       imbalance,
                       k,
-                     /*vertex_weights */ nullptr,
-                     nullptr,
-                     hyperedge_indices.get(),
+                      w1,
+                      w2,
+                      hyperedge_indices.get(),
                       hyperedges.get(),
                       &objective,
                       context,
                       partition.data());
+
+    kahypar_context_free(context);
+    std::cout.rdbuf(coutbuf); //reset to standard output again
+
+    m_logger->kahypar_finished();
 
     // Partition ID as key, Values as Set of Macro IDs
     std::map<size_t, std::set<size_t>> partition_map;
@@ -718,8 +752,94 @@ void Partitioning::hypergraph_partitioning()
     for (auto itor: partition_map){
         Partition* next_partition = new Partition();
         m_z3_opt = new z3::optimize(m_z3_ctx);
-        for (auto itor2: itor.second){
-            Macro* m = key_to_node[itor2]->get_macro();
+        for(auto itor2: itor.second){
+            Macro* m = key_to_macro[itor2];
+            assert (m != nullptr);
+            next_partition->add_macro(m);
+        }
+        this->encode(next_partition);
+        this->solve(next_partition);
+        size_t w = next_partition->get_ux().get_numeral_uint();
+        size_t h = next_partition->get_uy().get_numeral_uint();
+        delete m_z3_opt; m_z3_opt = nullptr;
+        next_partition->set_height(h);
+        next_partition->set_witdh(w);
+        next_partition->free_lx();
+        next_partition->free_ly();
+        m_components.push_back(next_partition);
+    }
+}
+
+void Partitioning::file_based_partitioning()
+{
+    m_logger->start_kahypar();
+    m_tree->strip_terminals();
+
+    std::cout << "Partition Size: " << this->get_partition_size() << std::endl;
+    // Redirect Kahypar Output to File
+    std::ofstream out(this->get_active_results_directory() + "/kahypar.txt");
+    std::streambuf *coutbuf = std::cout.rdbuf(); //save old buf
+    std::cout.rdbuf(out.rdbuf()); //redirect std::cout to kahypar.txt!
+
+    kahypar_context_t* context = kahypar_context_new();
+    std::string config_file = this->get_base_path() + "/04_configuration/kahypar.ini";
+    kahypar_configure_context_from_file(context, config_file.c_str());
+
+    std::map<size_t, Macro*> key_to_macro;
+    for(Macro* m: m_macros){
+        key_to_macro[m->get_key()] = m;
+    }
+    
+    kahypar_hypernode_id_t num_vertices = 0;
+    kahypar_hyperedge_id_t num_hyperedges = 0;
+    
+
+    kahypar_hyperedge_id_t* hyperedges;
+    size_t* hyperedge_indices;
+ 
+    double imbalance = 0.03;
+    kahypar_partition_id_t k = this->get_num_partitions();
+
+    kahypar_hyperedge_weight_t objective = 1;
+
+    kahypar_hyperedge_weight_t* w1;
+    kahypar_hypernode_weight_t* w2;
+
+    kahypar_read_hypergraph_from_file(std::string(this->get_working_directory() + "/hp.hgr").c_str(),
+                                      &num_vertices,
+                                      &num_hyperedges,
+                                      &hyperedge_indices,
+                                      &hyperedges,
+                                      &w1,
+                                      &w2);
+
+    std::vector<kahypar_partition_id_t> partition(num_vertices, -1);
+
+    kahypar_partition(num_vertices,
+                      num_hyperedges,
+                      imbalance,
+                      k,
+                      w1,
+                      w2,
+                      hyperedge_indices,
+                      hyperedges,
+                      &objective,
+                      context,
+                      partition.data());
+
+    
+    // Partition ID as key, Values as Set of Macro IDs
+    std::map<size_t, std::set<size_t>> partition_map;
+
+    for(int i = 0; i != num_vertices; ++i) {
+        partition_map[partition[i]].insert(i);
+    }
+    
+    for (auto itor: partition_map){
+        Partition* next_partition = new Partition();
+        m_z3_opt = new z3::optimize(m_z3_ctx);
+        for(auto itor2: itor.second){
+            Macro* m = key_to_macro[itor2];
             next_partition->add_macro(m);
         }
         this->encode(next_partition);

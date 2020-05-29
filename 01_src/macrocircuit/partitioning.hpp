@@ -20,6 +20,7 @@
 #include <object.hpp>
 #include <partition.hpp>
 #include <macro.hpp>
+#include <terminal.hpp>
 #include <encoding_utils.hpp>
 #include <cluster.hpp>
 #include <kmeans.hpp>
@@ -40,7 +41,7 @@ public:
     virtual ~Partitioning();
 
     void set_problem(std::vector<Macro*> & macros,
-                     size_t partion_size,
+                     std::vector<Terminal*> & terminals,
                      Tree* tree);
 
     void run();
@@ -60,9 +61,10 @@ private:
 
     std::vector<Component*> m_components;
     std::vector<Macro*> m_macros;
-    size_t m_partition_size;
+    std::vector<Terminal*> m_terminals;
 
     void create_initial_partitions();
+    Macro* find_macro(std::string const & id);
 
     /**
      * SMT Encoding
@@ -84,6 +86,12 @@ private:
      * SMT Solver
      */
     void solve(Partition* next_partition);
+    
+    /**
+     * Hypergraph Partitioning
+     */
+    void file_based_partitioning();
+    void api_based_partitioning();
 };
 
 } /* namespace Placer */

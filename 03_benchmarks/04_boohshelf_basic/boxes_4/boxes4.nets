@@ -9,9 +9,10 @@ NumPins : 10
 NetDegree : 2
 in B
 a  B : %50.0 %0.0
-NetDegree : 2
+NetDegree : 3
 a B : %0.0 %50.0
 b B : %50.0 %0.0
+c B : %0.00 %0.00
 NetDegree : 2
 b B : %0.0 %50.0
 c B : %50.0 %0.0

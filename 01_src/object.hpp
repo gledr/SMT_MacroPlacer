@@ -156,6 +156,9 @@ protected:
     void set_partition_size(size_t const val);
     size_t get_partition_size() const;
 
+    void set_num_partition(size_t const val);
+    size_t get_num_partitions() const;
+
     size_t get_partition_id();
 
     void set_logic(eLogic const logic);
@@ -225,6 +228,7 @@ private:
     static bool m_free_terminals;
     static bool m_strip_terminals;
     static size_t m_partition_size;
+    static size_t m_num_partitions;
     static size_t m_solutions;
     static size_t m_results_id;
     static eLogic m_logic;

@@ -4,29 +4,27 @@
 // Name         : SMT Macro Placer
 // Workfile     : object.hpp
 //
-// Date         : 07.January 2019
-// Compiler     : gcc version 9.2.0 (GCC) 
+// Date         : 07.January 2020
+// Compiler     : gcc version 10.1.0 (GCC)
 // Copyright    : Johannes Kepler University
 // Description  : Virtual Base Class
 //==================================================================
 #ifndef OBJECT_HPP
 #define OBJECT_HPP
 
+#include <exception.hpp>
+
 #include <vector>
 #include <string>
-#include <cassert>
 #include <functional>
 
 #include <z3++.h>
 
 namespace Placer {
 
-enum eEncodingProblem { eMacroCircuit, ePartition, eInit };
 enum eRotation { eFixed, e2D, e4D };
 enum eLogic { eInt, eBitVector };
 enum eInputFormat {eLEFDEF, eBookshelf};
-
-double const layout_factor = 1.2;
 
 enum eOrientation {
      eNorth     = 0,

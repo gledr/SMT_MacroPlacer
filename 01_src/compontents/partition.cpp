@@ -12,6 +12,7 @@
 #include "partition.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 std::string Partition::m_partition_keyword = "partition";
 
@@ -59,7 +60,7 @@ Partition::~Partition()
  */
 void Partition::add_macro(Macro* macro)
 {
-    assert (macro != nullptr);
+//     nullpointer_check (macro);
     m_components.push_back(macro);
 }
 
@@ -82,7 +83,7 @@ void Partition::add_macros(std::vector<Macro *> macros)
  */
 void Partition::add_subpartition(Partition* subpartition)
 {
-    assert (subpartition != nullptr);
+    nullpointer_check (subpartition);
 
     m_components.push_back(subpartition);
 }

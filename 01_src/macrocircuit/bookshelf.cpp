@@ -567,7 +567,7 @@ Macro* Bookshelf::find_macro(std::string const & name)
             break;
         }
     }
-    assert (name == ret_val->get_id());
+    assertion_check (name == ret_val->get_id());
     
     return ret_val;
 }
@@ -800,7 +800,7 @@ void Bookshelf::write_nets()
         feed << "NetDegree : " << netdegree << std::endl;
 
         std::vector<std::string> token = Utils::Utils::tokenize(itor.first, ":");
-        assert (token.size() == 2);
+        assertion_check (token.size() == 2);
         // Terminal
         if (token[0] == token[1]){
             Terminal* t = this->find_terminal(token[0]);
@@ -829,7 +829,7 @@ void Bookshelf::write_nets()
 
         for(auto itor2: itor.second){
             std::vector<std::string> token = Utils::Utils::tokenize(itor2, ":");
-            assert (token.size() == 2);
+            assertion_check (token.size() == 2);
             // Terminal
             if (token[0] == token[1]){
                 Terminal* t = this->find_terminal(token[0]);

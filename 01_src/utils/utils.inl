@@ -27,7 +27,7 @@
 template<typename T>
 T Placer::Utils::Utils::gcd(std::vector<T> const & input)
 {
-    assert (input.size());
+    assertion_check (input.size());
     
     size_t ret_val= input[0];
     

@@ -173,7 +173,7 @@ void Partitioning::encode_components_in_partition(Partition* next_partition,
                                                   eRotation const type)
 {
     try {
-        assert (next_partition != nullptr);
+        nullpointer_check (next_partition);
         
         z3::expr_vector clauses(m_z3_ctx);
 
@@ -224,7 +224,7 @@ void Partitioning::encode_components_in_partition(Partition* next_partition,
                                z3::ite(is_W, z3::mk_and(case_W), m_encode->get_flag(false)))));
                 clauses.push_back(ite);
             } else {
-                assert (0);
+                notsupported_check("Only 2D and 4D Rotation is supported!")
             }
 
             if(type == eRotation::e2D){
@@ -234,15 +234,14 @@ void Partitioning::encode_components_in_partition(Partition* next_partition,
                 clauses.push_back(itor->get_orientation() >= m_encode->get_value(eNorth));
                 clauses.push_back(itor->get_orientation() <= m_encode->get_value(eEast));
             } else {
-                assert (0);
+                notsupported_check("Only 2D and 4D Rotation is supported!")
             }
         }
 
         m_components_in_partition = z3::mk_and(clauses);
 
     } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        exit(0);
+        throw PlacerException(exp.msg());
     }
 }
 
@@ -389,22 +388,23 @@ void Partitioning::encode_components_non_overlapping(Partition* next_partition,
                 case_ee.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{
-                assert (case_nn.size() == 4);
-                assert (case_nw.size() == 4);
-                assert (case_ns.size() == 4);
-                assert (case_ne.size() == 4);
-                assert (case_wn.size() == 4);
-                assert (case_ww.size() == 4);
-                assert (case_ws.size() == 4);
-                assert (case_we.size() == 4);
-                assert (case_sn.size() == 4);
-                assert (case_sw.size() == 4);
-                assert (case_ss.size() == 4);
-                assert (case_se.size() == 4);
-                assert (case_en.size() == 4);
-                assert (case_ew.size() == 4);
-                assert (case_es.size() == 4);
-                assert (case_ee.size() == 4);
+                // Ensure No Nasty Copy Paste Error 
+                assertion_check (case_nn.size() == 4);
+                assertion_check (case_nw.size() == 4);
+                assertion_check (case_ns.size() == 4);
+                assertion_check (case_ne.size() == 4);
+                assertion_check (case_wn.size() == 4);
+                assertion_check (case_ww.size() == 4);
+                assertion_check (case_ws.size() == 4);
+                assertion_check (case_we.size() == 4);
+                assertion_check (case_sn.size() == 4);
+                assertion_check (case_sw.size() == 4);
+                assertion_check (case_ss.size() == 4);
+                assertion_check (case_se.size() == 4);
+                assertion_check (case_en.size() == 4);
+                assertion_check (case_ew.size() == 4);
+                assertion_check (case_es.size() == 4);
+                assertion_check (case_ee.size() == 4);
 //}}}
 //{{{           Orientation
                 z3::expr is_NN((free->get_orientation() == N) && (fixed->get_orientation() == N));
@@ -454,7 +454,7 @@ void Partitioning::encode_components_non_overlapping(Partition* next_partition,
                              z3::ite(is_EE, z3::mk_or(case_ee), m_encode->get_flag(false)
                              ))))))))))))))));
                 } else {
-                    assert (0);
+                    notsupported_check("Only 2D and 4D Rotation is supported!");
                 }
                 clauses.push_back(clause);
 //}}}
@@ -464,8 +464,7 @@ void Partitioning::encode_components_non_overlapping(Partition* next_partition,
         m_components_non_overlapping = z3::mk_and(clauses);
         
     } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        assert (0);
+        throw PlacerException(exp.msg());
     }
 }
 
@@ -479,13 +478,12 @@ void Partitioning::solve(Partition* next_partition)
     nullpointer_check (next_partition);
 
     std::cout << "Solve Partition" << std::endl;
-    
-    assert(m_z3_ctx != nullptr);
+
     z3::check_result sat = m_z3_opt->check();
 
     if(sat == z3::check_result::sat){
         z3::model m = m_z3_opt->get_model();
-            
+
         size_t ux = m.eval(next_partition->get_ux()).get_numeral_uint();
         size_t uy = m.eval(next_partition->get_uy()).get_numeral_uint();
         next_partition->set_ux(ux);
@@ -608,20 +606,24 @@ void Partitioning::kmeans_clustering()
     }
 }
 
+/**
+ * @brief Find a macro based on its identifier
+ * 
+ * @param id Macro identifier
+ * @return Placer::Macro*
+ */
 Macro* Partitioning::find_macro(std::string const & id)
 {
     Macro* m = nullptr;
-    assert (id.size() > 0);
-    //std::cout << id << std::endl;
-    
+
     for (Macro* itor: m_macros){
         if (id == itor->get_id()){
             m = itor;
             break;
         }
     }
-    assert (m != nullptr);
-    assert (id == m->get_id());
+    nullpointer_check(m);
+    assertion_check (id == m->get_id());
 
     return m;
 }
@@ -635,6 +637,9 @@ void Partitioning::hypergraph_partitioning()
     this->api_based_partitioning();
 }
 
+/**
+ * @brief Perform Kahypar Partitioning using the Library API
+ */
 void Partitioning::api_based_partitioning()
 {
     m_logger->start_kahypar();
@@ -754,7 +759,7 @@ void Partitioning::api_based_partitioning()
         m_z3_opt = new z3::optimize(m_z3_ctx);
         for(auto itor2: itor.second){
             Macro* m = key_to_macro[itor2];
-            assert (m != nullptr);
+            nullpointer_check (m);
             next_partition->add_macro(m);
         }
         this->encode(next_partition);
@@ -770,6 +775,9 @@ void Partitioning::api_based_partitioning()
     }
 }
 
+/**
+ * @brief Perform Kahypar Partitioning based on an external Hypergraph File
+ */
 void Partitioning::file_based_partitioning()
 {
     m_logger->start_kahypar();
@@ -805,13 +813,14 @@ void Partitioning::file_based_partitioning()
     kahypar_hyperedge_weight_t* w1;
     kahypar_hypernode_weight_t* w2;
 
-    kahypar_read_hypergraph_from_file(std::string(this->get_working_directory() + "/hp.hgr").c_str(),
-                                      &num_vertices,
-                                      &num_hyperedges,
-                                      &hyperedge_indices,
-                                      &hyperedges,
-                                      &w1,
-                                      &w2);
+    kahypar_read_hypergraph_from_file(
+        std::string(this->get_working_directory() + "/hp.hgr").c_str(),
+        &num_vertices,
+        &num_hyperedges,
+        &hyperedge_indices,
+        &hyperedges,
+        &w1,
+        &w2);
 
     std::vector<kahypar_partition_id_t> partition(num_vertices, -1);
 

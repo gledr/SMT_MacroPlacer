@@ -238,12 +238,12 @@ void Macro::handle_supplement()
     }
 
     SupplementMacro* sm = m_supplement->get_macro(m_name);
-    assert (sm != nullptr);
+    nullpointer_check (sm);
 
     for(auto pin: m_pins){
         if(sm->has_pin(pin.second->get_id())){
             SupplementPin* p = sm->get_pin(pin.second->get_id());
-            assert (p != nullptr);
+            nullpointer_check (p);
             
             if(p->has_bitwidth()){
                 pin.second->set_bitwidth(p->get_bitwidth());
@@ -262,8 +262,8 @@ void Macro::handle_supplement()
  */
 size_t Macro::get_area()
 {
-    assert (m_width.is_numeral());
-    assert (m_height.is_numeral());
+    assertion_check (m_width.is_numeral());
+    assertion_check (m_height.is_numeral());
     
     return m_width.get_numeral_uint() * m_height.get_numeral_uint();
 }
@@ -523,7 +523,7 @@ void Macro::encode_pins_non_overlapping()
 {
     z3::expr_vector clauses(m_z3_ctx);
     
-    assert (0);
+    notimplemented_check();
     
     m_encode_pins_not_overlapping = z3::mk_and(clauses);
 }

@@ -44,7 +44,7 @@ void Supplement::read_supplement_file()
     }
     
     if(!boost::filesystem::exists(this->get_supplement())){
-        assert (0 && "Can not find Supplement File!");
+        throw PlacerException("Can not find Supplement File!");
     }
 
     Json::Value root;
@@ -74,7 +74,7 @@ void Supplement::read_supplement_file()
                             } else if (property == "width"){
                                 pin->set_bitwidth(std::stoi(value));
                             } else {
-                                assert (0 && "Unknown JSON Key!");
+                                throw PlacerException("Unknown JSON Key!");
                             }
                         }
                         macro->add_pin(pin);
@@ -114,7 +114,7 @@ void Supplement::read_supplement_file()
                     throw std::runtime_error("Missing uy entry in Supplement!");
                 }
                 
-                assert (m_layout == nullptr);
+                nullpointer_check (m_layout);
                 m_layout = new SupplementLayout(lx, ly, ux, uy);
             }
         }

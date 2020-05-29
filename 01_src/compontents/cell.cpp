@@ -28,7 +28,7 @@ Cell::~Cell()
 
 void Cell::add_pin(Pin* _pin)
 {
-    assert (_pin != nullptr);
+    nullpointer_check (_pin);
 }
 
 void Cell::dump(std::ostream& stream)
@@ -44,7 +44,7 @@ void Cell::dump(std::ostream& stream)
 
 size_t Cell::get_area()
 {
-    assert (0);
+    notimplemented_check();
 }
 
 size_t Cell::get_key()

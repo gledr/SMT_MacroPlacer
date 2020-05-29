@@ -13,7 +13,6 @@
 #define EDGE_HPP
 
 #include <iostream>
-#include <cassert>
 #include <string>
 #include <exception.hpp>
 

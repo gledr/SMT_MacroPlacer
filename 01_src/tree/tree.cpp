@@ -118,8 +118,6 @@ void Tree::construct_tree()
             Node* from = edge->get_from();
             Node* to   = edge->get_to();
 
-            //assert (from != to);
-
           from->insert_edge(edge);
           to->insert_edge(edge);
         }

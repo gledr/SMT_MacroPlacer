@@ -326,7 +326,6 @@ void Object::set_store_smt(bool const val)
 
 std::string Object::get_design_name() const
 {
-    assert (!m_design_name.empty());
     return m_design_name;
 }
 
@@ -537,6 +536,6 @@ std::string Object::orientation_to_string(eOrientation const orientation)
     } else if (orientation == eFlipEast){
         return "FE";
     } else {
-        assert (0);
+        notsupported_check("Orientation not Supported!");
     }
 }

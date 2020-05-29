@@ -32,8 +32,7 @@ Edge::Edge(Node* from, Node* to,
 {
     nullpointer_check (from);
     nullpointer_check (to);
-    //assert (from != to); FIXME
-    
+
     // Case I: Input 
     if(from->is_terminal() &&
        from->get_terminal()->is_input() &&

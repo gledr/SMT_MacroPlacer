@@ -14,7 +14,6 @@
 
 #include <string>
 #include <iostream>
-#include <cassert>
 #include <vector>
 #include <z3++.h>
 

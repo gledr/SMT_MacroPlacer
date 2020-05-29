@@ -250,7 +250,7 @@ void Terminal::set_direction(e_pin_direction const direction)
  */
 bool Terminal::has_solution(size_t const solution)
 {
-    assert (m_solutions_x.size() == m_solutions_y.size());
+    assertion_check (m_solutions_x.size() == m_solutions_y.size());
 
     return solution < m_solutions_x.size();
 }

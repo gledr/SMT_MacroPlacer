@@ -23,7 +23,7 @@ using namespace Placer::Utils;
 MacroPlacer::MacroPlacer(int const argc, char ** argv):
     Object()
 {
-    assert (argv != nullptr);
+    nullpointer_check (argv);
 
     m_argc = argc;
     m_argv = argv;

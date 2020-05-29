@@ -13,7 +13,6 @@
 #define NODE_HPP
 
 #include <vector>
-#include <cassert>
 #include <iostream>
 #include <set>
 

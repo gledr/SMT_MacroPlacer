@@ -108,7 +108,7 @@ int Database::__callback__(int argc, char **argv, char **azColName)
  */
 void Database::place_macro(size_t const solution, Macro* macro)
 {
-    assert (macro != nullptr);
+    nullpointer_check (macro);
 
     std::string s    = std::to_string(solution);
     std::string name = macro->get_name();
@@ -122,7 +122,7 @@ void Database::place_macro(size_t const solution, Macro* macro)
     std::string o;
 
     if (macro->is_free()){
-        assert (macro->has_solution(solution));
+        assertion_check (macro->has_solution(solution));
         lx  = std::to_string(macro->get_solution_lx(solution));
         ly  = std::to_string(macro->get_solution_ly(solution));
         o   = this->orientation_to_string(macro->get_solution_orientation(solution));
@@ -148,7 +148,7 @@ void Database::place_macro(size_t const solution, Macro* macro)
  */
 void Database::place_terminal(size_t const solution, Terminal* terminal)
 {
-    assert (terminal != nullptr);
+    nullpointer_check (terminal);
 
     std::string sol = std::to_string(solution);
     std::string name = terminal->get_name();
@@ -156,7 +156,7 @@ void Database::place_terminal(size_t const solution, Terminal* terminal)
     std::string y;
 
     if (terminal->is_free()){
-        assert(terminal->has_solution(solution));
+        assertion_check(terminal->has_solution(solution));
         x    = std::to_string(terminal->get_solution_pos_x(solution));
         y    = std::to_string(terminal->get_solution_pos_y(solution));
     } else {

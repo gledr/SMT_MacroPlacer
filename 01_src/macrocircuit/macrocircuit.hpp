@@ -41,7 +41,6 @@
 #include <encoding_utils.hpp>
 #include <utils.hpp>
 #include <database.hpp>
-#include <exception.hpp>
 
 namespace Placer {
 

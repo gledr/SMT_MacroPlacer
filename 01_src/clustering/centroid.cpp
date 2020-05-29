@@ -56,7 +56,7 @@ void Centroid::update_centroid(size_t const x, size_t const y)
  */
 double Centroid::eucledian_distance(Component* c)
 {
-    assert (c != nullptr);
+    nullpointer_check (c);
     
     int mw = c->get_width().get_numeral_uint();
     int mh = c->get_width().get_numeral_uint();

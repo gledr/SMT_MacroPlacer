@@ -349,7 +349,7 @@ void MacroCircuit::add_macros()
             Pin* p = new Pin(pin_definition.name,
                              pin_definition.parent,
                              Pin::string2enum(pin_definition.direction));
-            assert (p != nullptr);
+            nullpointer_check (p);
             m->add_pin(p);
         }
 
@@ -398,7 +398,7 @@ void MacroCircuit::add_terminals()
             tmp = new Terminal(itor.pinName(), direction);
         }
 
-        assert(tmp != nullptr);
+        nullpointer_check(tmp);
 
         m_terminals.push_back(tmp);
         m_id2terminal[itor.pinName()] = tmp;
@@ -536,7 +536,7 @@ void MacroCircuit::create_image(size_t const solution)
 
         // Error
         } else {
-                assert (0);
+            notsupported_check("Orientation not Supported!");
         }
 
         gnu_plot_file  << "set object " << j+1 << 
@@ -612,7 +612,7 @@ void MacroCircuit::build_tree_from_lefdef()
                  _case << "t";
             } else {
                 std::cout << itor.instance(0) << std::endl;
-                assert (0);
+                notimplemented_check();
             }
 
             if(m_id2macro.find(itor.instance(i)) != m_id2macro.end()){
@@ -626,56 +626,56 @@ void MacroCircuit::build_tree_from_lefdef()
                   _case << "t";
             } else {
                 std::cout << itor.instance(i) << std::endl;
-                assert (0);
+                notimplemented_check();
             }
 
             if(_case.str() == "mm"){
-                assert (from_m != nullptr);
-                assert (to_m != nullptr);
+                nullpointer_check (from_m);
+                nullpointer_check (to_m);
                 m_tree->insert_edge<Macro, Macro>(from_m, to_m, itor.pin(0), itor.pin(i), itor.name());
 
             } else if (_case.str() == "mc"){
-                assert (from_m != nullptr);
-                assert (to_c != nullptr);
+                nullpointer_check (from_m);
+                nullpointer_check (to_c);
 
                 m_tree->insert_edge<Macro, Cell>(from_m, to_c, itor.pin(0), itor.pin(i), itor.name());
             } else if (_case.str() == "mt"){
-                  assert (from_m != nullptr);
-                  assert (to_t != nullptr);
+                  nullpointer_check (from_m);
+                  nullpointer_check (to_t );
                 m_tree->insert_edge<Macro, Terminal>(from_m, to_t, itor.pin(0), itor.pin(i), itor.name());
 
             } else if (_case.str() == "cm"){
-                assert (from_c != nullptr);
-                assert (to_m != nullptr);
+                nullpointer_check (from_m);
+                nullpointer_check (to_m);
                 m_tree->insert_edge<Cell, Macro>(from_c, to_m, itor.pin(0), itor.pin(i), itor.name());
 
             } else if (_case.str() == "cc"){
-                assert (from_c != nullptr);
-                assert (to_c != nullptr);
+                nullpointer_check (from_c);
+                nullpointer_check (to_c);
                 m_tree->insert_edge<Cell, Cell>(from_c, to_c, itor.pin(0), itor.pin(i), itor.name());
 
             } else if (_case.str() == "ct"){
-                assert (from_c != nullptr);
-                assert (to_t != nullptr);
+                nullpointer_check (from_c);
+                nullpointer_check (to_t);
                 m_tree->insert_edge<Cell, Terminal>(from_c, to_t, itor.pin(0), itor.pin(i), itor.name());
 
             } else if (_case.str() == "tm"){
-                assert (from_t != nullptr);
-                assert (to_m != nullptr);
+                nullpointer_check (from_t);
+                nullpointer_check (to_m);
                 m_tree->insert_edge<Terminal, Macro>(from_t, to_m, itor.pin(0), itor.pin(i), itor.name());
 
             } else if (_case.str() == "tc"){
-                assert (from_t != nullptr);
-                assert (to_c != nullptr);
+                nullpointer_check (from_t);
+                nullpointer_check (to_c);
                 m_tree->insert_edge<Terminal, Cell>(from_t, to_c, itor.pin(0), itor.pin(i), itor.name());
 
             } else if (_case.str() == "tt"){
-                assert (from_t != nullptr);
-                assert (to_t != nullptr);
+                nullpointer_check (from_t);
+                nullpointer_check (to_t);
                 m_tree->insert_edge<Terminal, Terminal>(from_t, to_t, itor.pin(0), itor.pin(i), itor.name());
 
             } else {
-                assert (0);
+                notimplemented_check();
             }
         }
     }
@@ -967,7 +967,7 @@ void MacroCircuit::encode_components_inside_die(eRotation const type)
                                z3::ite(is_W, z3::mk_and(case_W), m_z3_ctx.bool_val(false)))));
                 clauses.push_back(ite);
             } else {
-                assert (0);
+                notsupported_check("Only 2D and 4D Rotation are Supported!");
             }
 
             if(type == eRotation::e2D){
@@ -977,15 +977,14 @@ void MacroCircuit::encode_components_inside_die(eRotation const type)
                 clauses.push_back(itor->get_orientation() >= m_encode->get_value(eNorth));
                 clauses.push_back(itor->get_orientation() <= m_encode->get_value(eEast));
             } else {
-                assert (0);
+                notsupported_check("Only 2D and 4D Rotation are Supported!");
             }
         }
 
         m_components_inside_die = z3::mk_and(clauses);
 
     } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        exit(0);
+        throw PlacerException(exp.msg());
     }
 }
 
@@ -1128,22 +1127,22 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
                 case_ee.push_back(m_encode->le(free->get_uy(eEast), fixed->get_ly(eEast))); ///< Below
 //}}}
 //{{{
-                assert (case_nn.size() == 4);
-                assert (case_nw.size() == 4);
-                assert (case_ns.size() == 4);
-                assert (case_ne.size() == 4);
-                assert (case_wn.size() == 4);
-                assert (case_ww.size() == 4);
-                assert (case_ws.size() == 4);
-                assert (case_we.size() == 4);
-                assert (case_sn.size() == 4);
-                assert (case_sw.size() == 4);
-                assert (case_ss.size() == 4);
-                assert (case_se.size() == 4);
-                assert (case_en.size() == 4);
-                assert (case_ew.size() == 4);
-                assert (case_es.size() == 4);
-                assert (case_ee.size() == 4);
+                assertion_check (case_nn.size() == 4);
+                assertion_check (case_nw.size() == 4);
+                assertion_check (case_ns.size() == 4);
+                assertion_check (case_ne.size() == 4);
+                assertion_check (case_wn.size() == 4);
+                assertion_check (case_ww.size() == 4);
+                assertion_check (case_ws.size() == 4);
+                assertion_check (case_we.size() == 4);
+                assertion_check (case_sn.size() == 4);
+                assertion_check (case_sw.size() == 4);
+                assertion_check (case_ss.size() == 4);
+                assertion_check (case_se.size() == 4);
+                assertion_check (case_en.size() == 4);
+                assertion_check (case_ew.size() == 4);
+                assertion_check (case_es.size() == 4);
+                assertion_check (case_ee.size() == 4);
 //}}}
 //{{{           Orientation
                 z3::expr is_NN((free->get_orientation() == N) && (fixed->get_orientation() == N));
@@ -1193,7 +1192,7 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
                              z3::ite(is_EE, z3::mk_or(case_ee), m_z3_ctx.bool_val(false)
                              ))))))))))))))));
                 } else {
-                    assert (0);
+                    notsupported_check("Only 2D and 4D Rotation are supported!");
                 }
                 clauses.push_back(clause);
 //}}}
@@ -1202,8 +1201,7 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
 
         m_components_non_overlapping = z3::mk_and(clauses);
     } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        assert (0);
+        throw PlacerException(exp.msg());
     }
 }
 
@@ -1281,8 +1279,8 @@ void MacroCircuit::encode_terminals_non_overlapping()
                 Terminal* a = m_terminals[i];
                 Terminal* b = m_terminals[j];
 
-                assert (a != nullptr);
-                assert (b != nullptr);
+                nullpointer_check (a);
+                nullpointer_check (b);
 
                 // Case 1: x moveable
                 z3::expr_vector case_1(m_z3_ctx);
@@ -1302,8 +1300,7 @@ void MacroCircuit::encode_terminals_non_overlapping()
         m_terminals_non_overlapping = z3::mk_and(clauses);
 
     } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        assert (0);
+        throw PlacerException(exp.msg());
     }
 }
 

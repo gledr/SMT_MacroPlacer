@@ -60,7 +60,7 @@ void ParquetFrontend::set_terminals(std::vector<Terminal*> & terminals)
  */
 void ParquetFrontend::set_tree(Tree* tree)
 {
-    assert (tree != nullptr);
+    nullpointer_check (tree);
 
     m_tree = tree;
 }
@@ -72,7 +72,7 @@ void ParquetFrontend::set_tree(Tree* tree)
  */
 void ParquetFrontend::set_layout(Layout* layout)
 {
-    assert (layout != nullptr);
+    nullpointer_check (layout);
 
     m_layout = layout;
 }
@@ -221,7 +221,7 @@ void ParquetFrontend::data_from_parquet()
        }   else if (orient == parquetfp::ORIENT::FE){
             orient_solution = eOrientation::eFlipEast;
        } else {
-            assert (0);
+            notimplemented_check();
        }
 
        m->add_solution_orientation(orient_solution);

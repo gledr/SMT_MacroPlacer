@@ -42,7 +42,7 @@ public:
             ret_val = a + b;
             
         } else {
-            assert (0);
+            notimplemented_check();
         }
 
         return ret_val;
@@ -99,7 +99,7 @@ public:
     {
         try {
             if(clauses.size() == 0){
-                assert (0);
+                notimplemented_check();
             } else if (clauses.size() == 1){
                 return clauses[0];
             } else {
@@ -111,8 +111,7 @@ public:
                 return sum;
             }
         } catch (z3::exception const & exp){
-            std::cout << exp.msg() << std::endl;
-            assert (0);
+            throw Utils::PlacerException(exp.msg());
         }
     }
     
@@ -125,7 +124,7 @@ public:
         } else if (this->get_logic() == eBitVector){
             ret_val = m_z3_ctx.bv_const(id.c_str(), 16);
         } else {
-            assert (0);
+            notimplemented_check();
         }
         
         return ret_val;
@@ -140,7 +139,7 @@ public:
         } else if (this->get_logic() == eBitVector){
             ret_val = m_z3_ctx.bv_val(value, 16);
         } else {
-            assert (0);
+            notimplemented_check();
         }
 
         return ret_val;

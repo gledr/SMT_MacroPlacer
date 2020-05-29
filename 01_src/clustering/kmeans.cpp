@@ -119,7 +119,7 @@ void KMeans::map_macros_to_cluster()
                 break;
             }
         }
-        assert (done);
+        assertion_check(done);
     }
 }
 

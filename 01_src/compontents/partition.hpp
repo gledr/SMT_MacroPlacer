@@ -14,6 +14,8 @@
 
 #include <component.hpp>
 #include <macro.hpp>
+#include <exception.hpp>
+
 #include <vector>
 
 namespace Placer {

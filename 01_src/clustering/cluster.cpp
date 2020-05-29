@@ -47,7 +47,7 @@ Cluster::~Cluster()
  */
 double Cluster::eucledian_distance(Component* c)
 {
-    assert (c != nullptr);
+    nullpointer_check (c);
     
     return m_centroid->eucledian_distance(c);
 }
@@ -59,7 +59,7 @@ double Cluster::eucledian_distance(Component* c)
  */
 void Cluster::insert_partition(Partition* p)
 {
-    assert (p != nullptr);
+    nullpointer_check (p);
     
     m_partitons.push_back(p);
 }

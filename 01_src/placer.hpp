@@ -12,7 +12,6 @@
 #ifndef MACRO_PLACER_HPP
 #define MACRO_PLACER_HPP
 
-#include <cassert>
 #include <exception>
 #include <string>
 #include <vector>

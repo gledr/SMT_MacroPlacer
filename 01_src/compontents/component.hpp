@@ -15,6 +15,7 @@
 #include <object.hpp>
 #include <encoding_utils.hpp>
 #include <exception.hpp>
+#include <pin.hpp>
 
 #include <z3++.h>
 
@@ -39,12 +40,17 @@ public:
     z3::expr& get_orientation();
     z3::expr& get_width();
     z3::expr& get_height();
-    
+
     size_t get_width_numeral();
     size_t get_height_numeral();
 
     std::string get_name();
     std::string get_id();
+
+    z3::expr is_N();
+    z3::expr is_W();
+    z3::expr is_S();
+    z3::expr is_E();
 
     bool has_solution(size_t const id);
 
@@ -58,6 +64,8 @@ public:
 
     virtual size_t get_area() = 0;
     virtual void dump(std::ostream & stream = std::cout) = 0;
+    
+    virtual std::vector<Pin*> get_pins() = 0;
 
 protected:
     Component ();

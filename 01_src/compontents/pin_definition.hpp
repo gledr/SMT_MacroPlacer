@@ -31,7 +31,6 @@ struct PinDefinition {
         stream << "### Direction: " << direction << std::endl;
         stream << "#####################" << std::endl;
     }
-
 };
 
 } /* namespace Placer */

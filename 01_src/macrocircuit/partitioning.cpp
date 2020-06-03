@@ -509,69 +509,7 @@ void Partitioning::solve(Partition* next_partition)
  */
 void Partitioning::encode_hpwl_cost_function(Partition* next_partition)
 {
-    /*
-    try {
-        z3::expr_vector clauses(*m_z3_ctx);
-        std::vector<Edge*> edges = m_tree->get_edges();
-        
-        for(auto edge: edges){
-            z3::expr from_x(*m_z3_ctx);
-            z3::expr from_y(*m_z3_ctx);
-            z3::expr to_x(*m_z3_ctx);
-            z3::expr to_y(*m_z3_ctx);
-            
-        Node* from = edge->get_from();
-        if(from->is_node()){
-            if(from->has_macro()){
-                from_x = from->get_macro()->get_lx();
-                from_y = from->get_macro()->get_ly();
-            } else if (from->has_cell()){
-                continue;
-                assert (0 && "Not Implemented");
-            } else {
-                assert (0);
-            }
-        } else if (from->is_terminal()){
-            from_x = from->get_terminal()->get_pin_pos_x();
-            from_y = from->get_terminal()->get_pin_pos_y();
-        } else {
-            assert (0);
-        }
-
-        Node* to = edge->get_to();
-        if(to->is_node()){
-            if(to->has_macro()){
-                to_x = to->get_macro()->get_lx();
-                to_y = to->get_macro()->get_ly();
-            } else if (to->has_cell()){
-                continue;
-                    assert (0 && "Not Implemented");
-            } else {
-                assert (0);
-            }
-        } else if (to->is_terminal()){
-            to_x = to->get_terminal()->get_pin_pos_x();
-            to_y = to->get_terminal()->get_pin_pos_y();
-        } else {
-            assert (0);
-        }
-            
-        // Calculate Manhattan Distance
-        //Z3 Sqrt Function Costly?
-         
-        z3::expr distance_x = (to_x - from_x) * (to_x - from_x);
-        z3::expr distance_y = (to_y - from_y) * (to_y - from_y);
-        z3::expr sum = distance_x + distance_y;
-        clauses.push_back(sum);
-        
-        }
-        //return this->mk_sum(clauses);
-    
-    } catch(z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        assert (0);
-    }
-    */
+    notimplemented_check();
 }
 
 void Partitioning::kmeans_clustering()
@@ -756,21 +694,24 @@ void Partitioning::api_based_partitioning()
 
     for (auto itor: partition_map){
         Partition* next_partition = new Partition();
-        m_z3_opt = new z3::optimize(m_z3_ctx);
         for(auto itor2: itor.second){
             Macro* m = key_to_macro[itor2];
             nullpointer_check (m);
             next_partition->add_macro(m);
+            m->set_parent_partition(next_partition);
         }
-        this->encode(next_partition);
-        this->solve(next_partition);
-        size_t w = next_partition->get_ux().get_numeral_uint();
-        size_t h = next_partition->get_uy().get_numeral_uint();
-        delete m_z3_opt; m_z3_opt = nullptr;
-        next_partition->set_height(h);
-        next_partition->set_witdh(w);
+        size_t area = 0;
+        for (Component* c: next_partition->get_components()){
+            area += c->get_area();
+        }
+        std::pair<size_t, size_t> wh = this->find_shape(area);
+
+        next_partition->set_height(wh.first);
+        next_partition->set_witdh(wh.second);
         next_partition->free_lx();
         next_partition->free_ly();
+        next_partition->encode_partition();
+        next_partition->push_up_pins();
         m_components.push_back(next_partition);
     }
 }
@@ -850,6 +791,7 @@ void Partitioning::file_based_partitioning()
         for(auto itor2: itor.second){
             Macro* m = key_to_macro[itor2];
             next_partition->add_macro(m);
+            m->set_parent_partition(next_partition);
         }
         this->encode(next_partition);
         this->solve(next_partition);
@@ -867,4 +809,46 @@ void Partitioning::file_based_partitioning()
     std::cout.rdbuf(coutbuf); //reset to standard output again
 
     m_logger->kahypar_finished();
+}
+
+std::pair<size_t, size_t> Partitioning::find_shape(size_t const _area)
+{
+    try {
+        std::pair<size_t, size_t> ret_val;
+
+        z3::optimize opt(m_z3_ctx);
+        z3::expr a = m_z3_ctx.int_const("a");
+        z3::expr b = m_z3_ctx.int_const("b");
+        z3::check_result sat;
+        int area_corration = -1;
+        z3::model m(m_z3_ctx);
+
+        do {
+            area_corration++;
+            opt.push();
+            opt.add(a > 1);
+            opt.add(b > 1);
+            opt.add (a*b == m_z3_ctx.int_val(_area + area_corration));
+
+            opt.minimize(z3::abs(a-b));
+            opt.minimize(z3::abs(b-a));
+            sat = opt.check();
+            
+            if (sat == z3::check_result::sat){
+                m = opt.get_model();
+            }
+            opt.pop();
+
+        } while (sat != z3::check_result::sat);
+
+        size_t ret_a = m.eval(a).get_numeral_uint();
+        size_t ret_b = m.eval(b).get_numeral_uint();
+        ret_val = std::make_pair(ret_a, ret_b);
+        std::cout << _area << " = " << ret_a << " * " << ret_b << std::endl;
+
+        return ret_val;
+    } catch (z3::exception const & exp){
+        std::cout << exp.msg() << std::endl;
+        assert (0);
+    }
 }

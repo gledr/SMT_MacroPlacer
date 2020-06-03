@@ -32,7 +32,8 @@ Macro::Macro(std::string const & name,
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
     m_encode_pins_relative_to_center(m_encode->get_value(0)),
     m_pin_constraints(m_encode->get_value(0)),
-    m_key(m_key_counter++)
+    m_key(m_key_counter++),
+    m_parent(nullptr)
 {
     m_free = true;
     m_supplement = nullptr;
@@ -42,8 +43,8 @@ Macro::Macro(std::string const & name,
     m_ly = m_encode->get_constant(id + "_ly");
     m_width = m_encode->get_value(width);
     m_height = m_encode->get_value(height);
-    //m_orientation = m_encode->get_value(eNorth);
-    m_orientation = m_encode->get_constant(id + "_orientation");
+    m_orientation = m_encode->get_value(eNorth);
+    //m_orientation = m_encode->get_constant(id + "_orientation");
     m_logger = Logger::getInstance();
 
     m_logger->add_free_macro(id, width, height);
@@ -73,7 +74,8 @@ Macro::Macro(std::string const & name,
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
     m_pin_constraints(m_encode->get_value(0)),
     m_encode_pins_relative_to_center(m_encode->get_value(0)),
-    m_key(m_key_counter++)
+    m_key(m_key_counter++),
+    m_parent(nullptr)
 {
     m_lx = m_encode->get_value(pos_lx);
     m_ly = m_encode->get_value(pos_ly);
@@ -100,46 +102,6 @@ Macro::~Macro()
 
     m_supplement = nullptr;
     m_logger = nullptr;
-}
-
-/**
- * @brief Check Macro Position North Clause
- * 
- * @return z3::expr
- */
-z3::expr Macro::is_N()
-{
-    return m_orientation == m_encode->get_value(eNorth);
-}
-
-/**
- * @brief Check West Position North Clause
- * 
- * @return z3::expr
- */
-z3::expr Macro::is_W()
-{
-    return m_orientation == m_encode->get_value(eWest);
-}
-
-/**
- * @brief Check Macro Position South Clause
- * 
- * @return z3::expr
- */
-z3::expr Macro::is_S()
-{
-    return m_orientation == m_encode->get_value(eSouth);
-}
-
-/**
- * @brief Check Macro Position East Clause
- * 
- * @return z3::expr
- */
-z3::expr Macro::is_E()
-{
-    return m_orientation == m_encode->get_value(eEast);
 }
 
 /**
@@ -291,18 +253,19 @@ void Macro::dump(std::ostream & stream)
 void Macro::encode_pins()
 {
     z3::expr_vector clauses(m_z3_ctx);
-#if 0
+
     // Pins are at the center of the Macro
-    this->encode_pins_center_of_macro();
+    //this->encode_pins_center_of_macro();
     
     // Pins are at the macro edge non overlapping
-    this->encode_pins_on_macro_frontier();
+    this->encode_pins_on_macro_frontier(e2D);
     this->encode_pins_non_overlapping();
-#endif
-    // Pins are positioned relative to the macro center
-    this->encode_pins_relative_to_center();
 
-    clauses.push_back(m_encode_pins_relative_to_center);
+    // Pins are positioned relative to the macro center
+    //this->encode_pins_relative_to_center();
+
+    clauses.push_back(m_encode_pin_macro_frontier);
+    clauses.push_back(m_encode_pins_not_overlapping);
     
     m_pin_constraints =  z3::mk_and(clauses);
 }
@@ -365,7 +328,7 @@ void Macro::encode_pins_relative_to_center()
  * 
  * The Pins may be located on the UPPER, LEFT, LOWER or RIGHT plane
  */
-void Macro::encode_pins_on_macro_frontier()
+void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
 {
     try {
         z3::expr_vector clauses(m_z3_ctx);
@@ -503,14 +466,23 @@ void Macro::encode_pins_on_macro_frontier()
 }
 ///}}}
 ///}}}
-            z3::expr clause = z3::ite(this->is_N(), z3::mk_or(case_n),
-                              z3::ite(this->is_W(), z3::mk_or(case_w),
-                              z3::ite(this->is_S(), z3::mk_or(case_s),
-                              z3::ite(this->is_E(), z3::mk_or(case_e), m_z3_ctx.bool_val(false)))));
-            clauses.push_back(clause);
+            if (rotation == eRotation::e4D){
+                z3::expr clause = z3::ite(this->is_N(), z3::mk_or(case_n),
+                                  z3::ite(this->is_W(), z3::mk_or(case_w),
+                                  z3::ite(this->is_S(), z3::mk_or(case_s),
+                                  z3::ite(this->is_E(), z3::mk_or(case_e), m_z3_ctx.bool_val(false)))));
+                clauses.push_back(clause);
+            } else if (rotation == eRotation::e2D){
+                z3::expr clause = z3::ite(this->is_N(), z3::mk_or(case_n),
+                                  z3::ite(this->is_W(), z3::mk_or(case_w), m_z3_ctx.bool_val(false)));
+                clauses.push_back(clause);
+            } else {
+                notsupported_check("Only 2D and 4D Rotations are supported!");
+            }
+            
         }
-        
         m_encode_pin_macro_frontier = z3::mk_and(clauses);
+        
     } catch (z3::exception const & exp){
         throw PlacerException(exp.msg());
     }
@@ -523,8 +495,34 @@ void Macro::encode_pins_non_overlapping()
 {
     z3::expr_vector clauses(m_z3_ctx);
     
-    notimplemented_check();
+    std::vector<Pin*> pins = this->get_pins();
     
+    for (size_t i = 0; i < m_pins.size(); ++i){
+        for (size_t j = 0; j < m_pins.size(); ++j){
+            if (i == j){
+                continue;
+            } else {
+                Pin* a = pins[i];
+                Pin* b = pins[j];
+                
+                z3::expr_vector clause(m_z3_ctx);
+                //
+                // Use Case North as default since pins are already encoded 
+                // to the frontier
+                //
+                z3::expr left = m_encode->lt(a->get_pin_pos_x(), b->get_pin_pos_x());
+                z3::expr right = m_encode->gt(a->get_pin_pos_x(), b->get_pin_pos_x());
+                z3::expr upper = m_encode->gt(a->get_pin_pos_y(), b->get_pin_pos_y());
+                z3::expr lower = m_encode->lt(a->get_pin_pos_y(), b->get_pin_pos_y());
+                
+                clause.push_back(left);
+                clause.push_back(right);
+                clause.push_back(upper);
+                clause.push_back(lower);
+                clauses.push_back(z3::mk_or(clause));
+            }
+        }
+    }
     m_encode_pins_not_overlapping = z3::mk_and(clauses);
 }
 
@@ -579,4 +577,36 @@ void Macro::encode_pins_center_of_macro()
 z3::expr Macro::get_pin_constraints()
 {
     return m_pin_constraints;
+}
+
+/**
+ * @brief Check if Macro is part of Partition
+ * 
+ * @return bool
+ */
+bool Macro::is_part_of_partition()
+{
+    return m_parent != nullptr;
+}
+
+/**
+ * @brief Assign Parent Partition
+ * 
+ * @param parent Pointer to Parent Partition
+ */
+void Macro::set_parent_partition(Partition* const parent)
+{
+    nullpointer_check(parent);
+
+    m_parent = parent;
+}
+
+/**
+ * @brief Get Pointer to Parent Partition
+ * 
+ * @return Placer::Partition*
+ */
+Partition* Macro::get_parent_partition()
+{
+    return m_parent;
 }

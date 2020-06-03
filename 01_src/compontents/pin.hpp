@@ -64,7 +64,7 @@ public:
 
     bool is_input();
     bool is_output();
-    bool is_placed();
+    bool is_free();
 
     std::string get_name();
     std::string get_id();
@@ -99,7 +99,7 @@ private:
 
     int m_offset_x_percentage;
     int m_offset_y_percentage;
-    bool m_is_placed;
+    bool m_is_free;
 };
 
 } /* namespace Placer */

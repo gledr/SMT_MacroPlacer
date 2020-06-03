@@ -156,7 +156,7 @@ void Layout::free_ly ()
  */
 void Layout::set_lx(size_t const val)
 {
-     m_logger->set_die_lx(val);
+    m_logger->set_die_lx(val);
     m_free_lx = false;
     m_lx = m_encode->get_value(val);
 }

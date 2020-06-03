@@ -31,6 +31,11 @@ void Cell::add_pin(Pin* _pin)
     nullpointer_check (_pin);
 }
 
+std::vector<Pin*> Cell::get_pins()
+{
+    return m_pins;
+}
+
 void Cell::dump(std::ostream& stream)
 {
     stream << std::string(30, '$') << std::endl;

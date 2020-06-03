@@ -128,7 +128,7 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
 {
     Tree* tree = m_mckt->get_tree();
     size_t hpwl = 0;
-    std::cout << "Edges: " << tree->get_edges().size() << std::endl;
+    //std::cout << "Edges: " << tree->get_edges().size() << std::endl;
     for(auto edge: tree->get_edges()){
        
         size_t from_x = 0;
@@ -139,8 +139,25 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
         Node* from = edge->get_from();
         if(from->is_node()){
              if(from->has_macro()){
-                from_x = from->get_macro()->get_solution_lx(solution);
-                from_y = from->get_macro()->get_solution_ly(solution);
+                Macro* m = from->get_macro();
+                nullpointer_check(m);
+                
+                Pin* pin = m->get_pin(edge->get_from_pin());
+                nullpointer_check(pin);
+                
+                if (m->is_part_of_partition()){
+                    Partition* p = m->get_parent_partition();
+                    nullpointer_check(p);
+                    
+                    from_x = p->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
+                    from_y = p->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                    
+                } else {
+                    from_x = m->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
+                    from_y = m->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                }
+                
+            
             } else if (from->has_cell()){
                 continue;
                 notimplemented_check();
@@ -164,8 +181,23 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
         Node* to = edge->get_to();
         if(to->is_node()){
             if(to->has_macro()){
-                to_x = to->get_macro()->get_solution_lx(solution);
-                to_y = to->get_macro()->get_solution_ly(solution);
+                Macro* m = to->get_macro();
+                nullpointer_check(m);
+                
+                Pin* pin = m->get_pin(edge->get_to_pin());
+                nullpointer_check(pin);
+                
+                if (m->is_part_of_partition()){
+                    Partition* p = m->get_parent_partition();
+                    nullpointer_check(p);
+                    
+                    to_x = p->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
+                    to_y = p->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                    
+                } else {
+                    to_x = m->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
+                    to_y = m->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                }
             } else if (to->has_cell()){
                 continue;
                 notimplemented_check();
@@ -186,13 +218,13 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
             notsupported_check("Only Macros and Terminals are Supported!");
         }
 
-        std::cout << "From_x: " << from_x << " From_y: " << from_y << std::endl;
-        std::cout << "To_x: " << to_x << " To_y: " << to_y << std::endl;
+        //std::cout << "From_x: " << from_x << " From_y: " << from_y << std::endl;
+        //std::cout << "To_x: " << to_x << " To_y: " << to_y << std::endl;
         
         hpwl += this->euclidean_distance(std::make_pair(from_x, from_y),
                                               std::make_pair(to_x, to_y));
     }
-    std::cout << "HPWL: " << hpwl << std::endl;
+    //std::cout << "HPWL: " << hpwl << std::endl;
     return hpwl;
 }
 
@@ -238,7 +270,7 @@ size_t Evaluate::calculate_area(size_t const solution)
     size_t ux = 0;
     size_t uy = 0;
 
-    if (layout->is_free_ux() && layout->is_free_ly()){
+    if (layout->is_free_ux() && layout->is_free_uy()){
         ux = layout->get_solution_ux(solution);
         uy = layout->get_solution_uy(solution);
     } else {

@@ -86,6 +86,7 @@ private:
      * SMT Solver
      */
     void solve(Partition* next_partition);
+    std::pair<size_t, size_t> find_shape(size_t const area);
     
     /**
      * Hypergraph Partitioning

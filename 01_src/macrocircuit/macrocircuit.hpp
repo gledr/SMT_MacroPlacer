@@ -72,6 +72,8 @@ public:
 
     void results_to_db();
 
+    void create_statistics();
+
     void dump(std::ostream & stream = std::cout);
 
 private:
@@ -156,11 +158,19 @@ private:
     void encode_components_non_overlapping(eRotation const type);
     void encode_terminals_on_frontier();
     void encode_terminals_non_overlapping();
+    void encode_hpwl_lenght();
 
     z3::expr m_components_non_overlapping;
     z3::expr m_components_inside_die;
     z3::expr m_terminals_on_frontier;
     z3::expr m_terminals_non_overlapping;
+    z3::expr m_hpwl_cost_function;
+    z3::expr_vector m_hpwl_edges;
+
+    z3::expr euclidean_distance(z3::expr const & from_x,
+                                z3::expr const & from_y,
+                                z3::expr const & to_x,
+                                z3::expr const & to_y);
 
     /**
      * SMT Solving

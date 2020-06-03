@@ -132,6 +132,8 @@ z3::expr& Terminal::get_pos_y()
  */
 void Terminal::add_solution_pos_x(size_t const val)
 {
+    std::cout << "Place Terminal " << m_name << " x to " << val << std::endl;
+    
     m_solutions_x.push_back(val);
 }
 
@@ -142,6 +144,8 @@ void Terminal::add_solution_pos_x(size_t const val)
  */
 void Terminal::add_solution_pos_y(size_t const val)
 {
+    std::cout << "Place Terminal " << m_name << " y to " << val << std::endl;
+    
     m_solutions_y.push_back(val);
 }
 

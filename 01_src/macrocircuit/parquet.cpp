@@ -203,7 +203,7 @@ void ParquetFrontend::data_from_parquet()
        char const * const _name = name.c_str();
        Macro* m = this->find_macro(_name);
        parquetfp::ORIENT orient = itor_begin->getOrient();
-       eOrientation orient_solution;
+       eOrientation orient_solution = eNorth;
        if (orient == parquetfp::ORIENT::N){
            orient_solution = eOrientation::eNorth;
        } else if (orient == parquetfp::ORIENT::W){
@@ -218,7 +218,7 @@ void ParquetFrontend::data_from_parquet()
             orient_solution = eOrientation::eFlipWest;
        } else if (orient == parquetfp::ORIENT::FS){
             orient_solution = eOrientation::eFlipSouth;
-       }   else if (orient == parquetfp::ORIENT::FE){
+       } else if (orient == parquetfp::ORIENT::FE){
             orient_solution = eOrientation::eFlipEast;
        } else {
             notimplemented_check();

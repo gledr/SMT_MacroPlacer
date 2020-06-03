@@ -12,7 +12,7 @@
 #include "exception.hpp"
 
 using namespace Placer::Utils;
-
+#include <cassert>
 
 /**
  * @brief Type Safe Function called by Macro to check Assertion
@@ -22,6 +22,8 @@ using namespace Placer::Utils;
  */
 void RunTimeCheck::__assertion_check__(std::string const & file, size_t const line)
 {
+
+    assert (0);
     throw PlacerException("Assertion Violated (" + file + ":" + std::to_string(line) + ")");
 }
 

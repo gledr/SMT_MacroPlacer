@@ -23,7 +23,9 @@ MacroCircuit::MacroCircuit():
     m_components_non_overlapping(m_encode->get_value(0)),
     m_components_inside_die(m_encode->get_value(0)),
     m_terminals_on_frontier(m_encode->get_value(0)),
-    m_terminals_non_overlapping(m_encode->get_value(0))
+    m_terminals_non_overlapping(m_encode->get_value(0)),
+    m_hpwl_cost_function(m_encode->get_value(0)),
+    m_hpwl_edges(m_z3_ctx)
 {
     m_z3_opt = new z3::optimize(m_z3_ctx);
     m_layout = new Layout();
@@ -238,7 +240,7 @@ void MacroCircuit::create_macro_definitions()
 
             for(auto pin: lef_pins){
                 PinDefinition pin_def;
-                pin_def.parent = itor.name();
+                pin_def.parent = itor.id();
                 pin_def.name = pin.name();
                 pin_def.direction = pin.direction();
 
@@ -899,6 +901,23 @@ void MacroCircuit::run_encoding()
     m_z3_opt->add(m_components_non_overlapping);
     m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
 
+
+    if (this->get_partitioning()){
+        z3::expr_vector clauses(m_z3_ctx);
+        for (Partition* p: m_partitons){
+            p->encode_partition();
+            clauses.push_back(p->get_partition_constraints());
+        }
+        m_z3_opt->add(z3::mk_and(clauses));
+    } else {
+        z3::expr_vector clauses(m_z3_ctx);
+        for (Macro* m: m_macros){
+            m->encode_pins();
+            clauses.push_back(m->get_pin_constraints());
+        }
+        m_z3_opt->add(z3::mk_and(clauses));
+    }
+    
     if (this->get_minimize_die_mode()){
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
@@ -906,6 +925,14 @@ void MacroCircuit::run_encoding()
         if(this->get_box_optimizer()){
             m_z3_opt->minimize(m_layout->get_uy() + m_layout->get_ux());
             m_z3_opt->check();
+        }
+    }
+
+    if (this->get_minimize_hpwl_mode()){
+        this->encode_hpwl_lenght();
+        
+        for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
+            m_z3_opt->minimize(m_hpwl_edges[i]);
         }
     }
 }
@@ -1359,22 +1386,42 @@ void MacroCircuit::solve()
                         component->add_solution_orientation(o);
 
                         m_logger->place_macro(component->get_id(), x ,y, o);
-                }
+                        
+                        if (this->get_minimize_hpwl_mode()){
+                            std::vector<Pin*> pins = component->get_pins();
+                            
+                            for (Pin* p: pins){
+                                if (p->is_free()){
+                                    z3::expr x = p->get_pin_pos_x();
+                                    z3::expr y = p->get_pin_pos_y();
+                                    
+                                    z3::expr x_val = m.eval(x);
+                                    z3::expr y_val = m.eval(y);
+
+                                    size_t x_pos = x_val.get_numeral_uint();
+                                    size_t y_pos = y_val.get_numeral_uint();
+                                    
+                                    p->add_solution_pin_pos_x(x_pos);
+                                    p->add_solution_pin_pos_y(y_pos);
+                                }
+                            }
+                        }
+                    }
 
                 for (Terminal* terminal: m_terminals){
-                    z3::expr clause_x = m.eval(terminal->get_pos_x());
-                    z3::expr clause_y = m.eval(terminal->get_pos_y());
+                    z3::expr clause_x = terminal->get_pos_x();
+                    z3::expr clause_y = terminal->get_pos_y();
 
-                    if (clause_x.is_numeral() && clause_y.is_numeral()){
-                        size_t pos_x = clause_x.get_numeral_uint();
-                        size_t pos_y = clause_y.get_numeral_uint();
+                    if (this->get_free_terminals()){
+                    size_t val_x = m.eval(clause_x).get_numeral_uint();
+                    size_t val_y = m.eval(clause_y).get_numeral_uint();
 
-                        terminal->add_solution_pos_x(pos_x);
-                        terminal->add_solution_pos_y(pos_y);
+                        terminal->add_solution_pos_x(val_x);
+                        terminal->add_solution_pos_y(val_y);
 
                         m_logger->place_terminal(terminal->get_name(),
-                                                 pos_x,
-                                                 pos_y);
+                                                 val_x,
+                                                 val_y);
                     }
                 }
 
@@ -1391,7 +1438,7 @@ void MacroCircuit::solve()
             throw std::runtime_error("Must not happen!");
         }
     } catch (z3::exception const & exp){
-        throw std::runtime_error(exp.msg());
+        throw PlacerException(exp.msg());
     }
 }
 
@@ -1429,4 +1476,103 @@ void MacroCircuit::results_to_db()
         }
     }
     m_db->export_as_csv("results.csv");
+}
+
+void MacroCircuit::encode_hpwl_lenght()
+{
+    z3::expr_vector clauses(m_z3_ctx);
+    
+    for (Edge* edge: m_tree->get_edges()){
+        Node* from = edge->get_from();
+        Node* to   = edge->get_to();
+        
+        z3::expr from_x = m_encode->get_value(0);
+        z3::expr from_y = m_encode->get_value(0);
+        
+        z3::expr to_x = m_encode->get_value(0);
+        z3::expr to_y = m_encode->get_value(0);
+        
+        if (from->is_terminal()){
+            Terminal* t = from->get_terminal();
+            nullpointer_check(t);
+            from_x = t->get_pos_x();
+            from_y = t->get_pos_y();
+        } else if (from->has_macro()){
+            Macro* m = from->get_macro();
+            nullpointer_check(m);
+            
+            Pin* p = m->get_pin(edge->get_from_pin());
+            nullpointer_check(p);
+            
+            from_x = p->get_pin_pos_x();
+            from_y = p->get_pin_pos_y();
+        } else {
+            notimplemented_check();
+        }
+
+        if (to->is_terminal()){
+            Terminal* t = to->get_terminal();
+            nullpointer_check(t);
+            
+            to_x = t->get_pos_x();
+            to_y = t->get_pos_y();
+        } else if (to->has_macro()){
+            Macro* m = to->get_macro();
+            nullpointer_check(m);
+            
+            Pin* p = m->get_pin(edge->get_to_pin());
+            nullpointer_check(p);
+            
+            to_x = p->get_pin_pos_x();
+            to_y = p->get_pin_pos_y();
+        } else {
+            notimplemented_check();
+        }
+        
+        z3::expr hpwl = this->euclidean_distance(from_x, from_y, to_x, to_y);
+        clauses.push_back(hpwl);
+    }
+    
+    for (size_t i = 0; i < clauses.size(); ++i){
+        m_hpwl_edges.push_back(clauses[i]);
+    }
+    
+    m_hpwl_cost_function = m_encode->mk_sum(clauses);
+}
+
+z3::expr MacroCircuit::euclidean_distance(z3::expr const & from_x,
+                                z3::expr const & from_y,
+                                z3::expr const & to_x,
+                                z3::expr const & to_y)
+{
+    try {
+        // TODO Sqrt Function of Z3 seems to be over complicated for this job
+        z3::expr a = z3::abs(from_x - to_x);
+        z3::expr b = z3::abs(from_y - to_y);
+        
+        return a+b;
+    } catch (z3::exception const & exp){
+        std::cout << exp.msg() << std::endl;
+        assert (0);
+    }
+}
+
+void MacroCircuit::create_statistics()
+{
+    if (this->get_minimize_die_mode()){
+        auto all_area = m_eval->all_area();
+        
+        for (auto itor: all_area){
+            std::cout << "Statistics Area: " << std::endl;
+            std::cout << itor.first << ": " << itor.second << std::endl;
+        }
+    }
+    if (this->get_minimize_hpwl_mode()){
+        auto all_hpwl = m_eval->all_hpwl();
+        
+        for (auto itor: all_hpwl){
+            std::cout << "Statistics HPWL: " << std::endl;
+            std::cout << itor.first << ": " << itor.second << std::endl;
+        }
+    }
 }

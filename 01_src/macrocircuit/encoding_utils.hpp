@@ -15,6 +15,7 @@
 #include <object.hpp>
 
 #include <z3++.h>
+#include <z3.h>
 
 namespace Placer {
 

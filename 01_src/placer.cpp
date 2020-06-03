@@ -171,6 +171,12 @@ void MacroPlacer::read_configuration()
         if(m_vm.count("minimize-area")){
             this->set_minimize_die_mode(true);
         }
+        if (m_vm.count("minimize-hpwl")){
+            this->set_minimize_hpwl_mode(true);
+        }
+        if(m_vm.count("free-terminals")){
+            this->set_free_terminals(true);
+        }
 
         if((this->get_def().empty() || this->get_lef().empty()) && this->get_bookshelf_file().empty()){
             delete m_options_functions; m_options_functions = nullptr;
@@ -343,7 +349,7 @@ void MacroPlacer::post_process()
     if (this->get_dump_best()){
         m_mckt->dump_best();
     }
-
+    m_mckt->create_statistics();
     //m_mckt->results_to_db();
 }
 

@@ -21,6 +21,8 @@
 
 namespace Placer {
 
+class Partition;
+
 /**
  * @class Macro
  * @brief Symbolic Representation of a Macro for Encoding
@@ -51,9 +53,13 @@ public:
 
     virtual size_t get_area();
     virtual void dump(std::ostream & stream = std::cout);
+    
+    void set_parent_partition(Partition* const parent);
+    Partition* get_parent_partition();
 
-    std::vector<Pin*> get_pins();
+    virtual std::vector<Pin*> get_pins();
     bool is_free();
+    bool is_part_of_partition();
     size_t get_key();
 
     void add_solution_root(size_t const x, size_t const y);
@@ -64,16 +70,12 @@ public:
     void encode_pins();
     z3::expr get_pin_constraints();
 
-    z3::expr is_N();
-    z3::expr is_W();
-    z3::expr is_S();
-    z3::expr is_E();
-
 private:
     std::map<std::string, Pin*> m_pins;
     Pin* m_active_pin;
     Supplement* m_supplement;
     Utils::Logger* m_logger;
+    Partition* m_parent;
 
     size_t m_key;
     bool m_free;
@@ -87,7 +89,7 @@ private:
     /**
      * SMT Encoding
      */
-    void encode_pins_on_macro_frontier();
+    void encode_pins_on_macro_frontier(eRotation const rotation);
     void encode_pins_non_overlapping();
     void encode_pins_center_of_macro();
     void encode_pins_relative_to_center();

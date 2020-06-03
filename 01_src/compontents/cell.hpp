@@ -35,7 +35,9 @@ public:
 
     virtual size_t get_area();
     size_t get_key();
-    
+
+    virtual std::vector<Pin*> get_pins();
+
 private:
 
     std::vector<Pin*> m_pins;

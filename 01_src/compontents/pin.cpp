@@ -31,7 +31,7 @@ Pin::Pin(std::string const & name,
     m_direction(direction),
     m_pin_pos_x(m_encode->get_value(x)),
     m_pin_pos_y(m_encode->get_value(y)),
-    m_is_placed(true)
+    m_is_free(false)
 {
     m_bitwidht = 0;
     m_frequency = 0;
@@ -58,7 +58,7 @@ Pin::Pin(std::string const & pin_name,
     m_pin_pos_y(m_encode->get_constant(macro_name + pin_name + "_pos_y")),
     m_offset_x_percentage(0),
     m_offset_y_percentage(0),
-    m_is_placed(false)
+    m_is_free(true)
 {
     m_bitwidht = 0;
     m_frequency = 0;
@@ -265,7 +265,7 @@ z3::expr& Pin::get_pin_pos_y()
  */
 void Pin::add_solution_pin_pos_x(size_t const val)
 {
-    this->get_verbose() && std::cout << "[Debug]: Set Solution for x: " << val << std::endl;
+   std::cout << "[Debug]: Set Solution for " << m_macro_name << ":" << m_pin_name << " x: " << val << std::endl;
 
     m_solutions_x.push_back(val);
 }
@@ -277,7 +277,7 @@ void Pin::add_solution_pin_pos_x(size_t const val)
  */
 void Pin::add_solution_pin_pos_y(size_t const val)
 {
-    this->get_verbose() && std::cout << "[Debug]: Set Solution for y: " << val << std::endl;
+    std::cout << "[Debug]: Set Solution for " << m_macro_name << ":" << m_pin_name << " y: " << val << std::endl;
 
     m_solutions_y.push_back(val);
 }
@@ -362,4 +362,14 @@ bool Pin::has_offset_x()
 bool Pin::has_offset_y()
 {
     return m_offset_y_percentage != 0;
+}
+
+/**
+ * @brief Check if Pin if Placed or Free
+ * 
+ * @return bool
+ */
+bool Pin::is_free()
+{
+    return m_is_free;
 }

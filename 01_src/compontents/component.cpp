@@ -293,3 +293,43 @@ bool Component::has_solution(size_t const id)
 
     return (m_sol_lx.size()) > id;
 }
+
+/**
+ * @brief Check Macro Position North Clause
+ * 
+ * @return z3::expr
+ */
+z3::expr Component::is_N()
+{
+    return m_orientation == m_encode->get_value(eNorth);
+}
+
+/**
+ * @brief Check West Position North Clause
+ * 
+ * @return z3::expr
+ */
+z3::expr Component::is_W()
+{
+    return m_orientation == m_encode->get_value(eWest);
+}
+
+/**
+ * @brief Check Macro Position South Clause
+ * 
+ * @return z3::expr
+ */
+z3::expr Component::is_S()
+{
+    return m_orientation == m_encode->get_value(eSouth);
+}
+
+/**
+ * @brief Check Macro Position East Clause
+ * 
+ * @return z3::expr
+ */
+z3::expr Component::is_E()
+{
+    return m_orientation == m_encode->get_value(eEast);
+}

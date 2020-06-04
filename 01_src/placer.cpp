@@ -5,7 +5,7 @@
 // Workfile     : placer.cpp
 //
 // Date         : 27. December 2019
-// Compiler     : gcc version 9.2.0 (GCC) 
+// Compiler     : gcc version 10.1.0 (GCC) 
 // Copyright    : Johannes Kepler University
 // Description  : Macro Placer Main Class
 //==================================================================
@@ -47,157 +47,165 @@ MacroPlacer::~MacroPlacer()
 void MacroPlacer::read_configuration()
 {
     try {
-        m_options_functions  = new boost::program_options::options_description("Usage: " + this->get_binary_name() + " [options]");
+        namespace po = boost::program_options;
+        namespace fs = boost::filesystem;
+        
+        std::string desc = "Usage: " + this->get_binary_name() + " [options]";
+        m_options_functions  = new po::options_description(desc);
 
         m_options_functions->add_options()
-            ("help",                "Displays information about usage")
-            ("bash_completion",     "Generate a Bash Autocompletion Script")
-            ("save-best",           "Save Best Solution Generated")
-            ("dump-best",           "Shows the best result using Gnuplot")
-            ("dump-all",            "Shows all the results using Gnuplot")
-            ("allsat",              "Search for all possible solutions")
-            ("save-all",            "Save All Generated Solutions")
-            ("verbose",             "Show Debug Information")
-            ("store-log",           "Store Debug Information to Logfile")
-            ("store-smt",           "Specifies if the generated SMT Instance should be stored to the Filesystem")
-            ("pareto",              "Utilize Z3s Pareto Optimizer")
-            ("lex",                 "Utilize Z3s Lex Optimizer")
-            ("box",                 "Utilize Z3s Box Optimizer")
-            ("parquet",             "Utilize Parquet Floorplanning")
-            ("partition",           "Enable Partitioning Mode")
-            ("minimize-area",       "Add Die Area as Minimization Target")
-            ("minimize-hpwl",       "Add HPWL as Minimization Target")
-            ("free-terminals",      "Ignore Any Existing Terminal Placement")
-            ("partition-size",      boost::program_options::value<size_t>(),        "Parition Size")
-            ("partition-count",     boost::program_options::value<size_t>(),        "Number of Partitions")
-            ("def",                 boost::program_options::value<std::string>(),   "Circuit as DEF File")
-            ("lef",                 boost::program_options::value<std::string>(),   "Library as LEF File")
-            ("bookshelf",           boost::program_options::value<std::string>(),   "Circuits as Bookshelf Format")
-            ("supplement",          boost::program_options::value<std::string>(),   "JSON File holding additional information")
-            ("site",                boost::program_options::value<std::string>(),   "Specifies the used site for the Standard/Macro Cells")
-            ("timeout",             boost::program_options::value<size_t>(),        "Timeout for Solving a SAT Instance")
-            ("solutions",           boost::program_options::value<size_t>(),        "Maximum Number of AllSAT results to generate");
+            (CMD_HELP,                                      CMD_HELP_TEXT)
+            (CMD_BASH_COMPLETION,                           CMD_BASH_COMPLETION)
+            (CMD_SAVE_BEST,                                 CMD_SAVE_BEST_TEXT)
+            (CMD_DUMP_BEST,                                 CMD_DUMP_BEST_TEXT)
+            (CMD_DUMP_ALL,                                  CMD_DUMP_ALL_TEXT)
+            (CMD_SAVE_ALL,                                  CMD_SAVE_ALL_TEXT)
+            (CMD_VERBOSE,                                   CMD_VERBOSE_TEXT)
+            (CMD_STORE_LOG,                                 CMD_STORE_LOG_TEXT)
+            (CMD_STORE_SMT,                                 CMD_STORE_SMT_TEXT)
+            (CMD_PARETO,                                    CMD_PARETO_TEXT)
+            (CMD_LEX,                                       CMD_LEX_TEXT)
+            (CMD_BOX,                                       CMD_BOX_TEXT)
+            (CMD_PARQUET,                                   CMD_PARQUET_TEXT)
+            (CMD_PARTITION,                                 CMD_PARTITION_TEXT)
+            (CMD_MIN_AREA,                                  CMD_MIN_AREA_TEXT)
+            (CMD_MIN_HPWL,                                  CMD_MIN_HPWL_TEXT)
+            (CMD_FREE_TERMINALS,                            CMD_FREE_TERMINALS_TEXT)
+            (CMD_SKIP_PWR_SUPPLY,                           CMD_SKIP_PWR_SUPPLY_TEXT)
+            (CMD_PARTITION_SIZE,  po::value<size_t>(),      CMD_PARTITION_SIZE_TEXT)
+            (CMD_PARTITION_COUNT, po::value<size_t>(),      CMD_PARTITION_COUNT_TEXT)
+            (CMD_DEF,             po::value<std::string>(), CMD_DEF_TEXT)
+            (CMD_LEF,             po::value<std::string>(), CMD_LEF_TEXT)
+            (CMD_BOOKSHELF,       po::value<std::string>(), CMD_BOOKSHELF_TEXT)
+            (CMD_SUPPLEMENT,      po::value<std::string>(), CMD_SUPPLEMENT_TEXT)
+            (CMD_SITE,            po::value<std::string>(), CMD_SITE_TEXT)
+            (CMD_TIMEOUT,         po::value<size_t>(),      CMD_TIMEOUT_TEXT)
+            (CMD_SOLUTIONS,       po::value<size_t>(),      CMD_SOLUTIONS_TEXT);
 
         // Top Level Priority: Command Line:
-        boost::program_options::command_line_parser parser(m_argc, m_argv);
+        po::command_line_parser parser(m_argc, m_argv);
         parser.options(*m_options_functions).allow_unregistered().style(
-                boost::program_options::command_line_style::default_style | 
-                boost::program_options::command_line_style::allow_slash_for_short);
+                po::command_line_style::default_style | 
+                po::command_line_style::allow_slash_for_short);
 
         // Second Level Priority: Local Ini File
-        boost::program_options::parsed_options parsed_options1 = parser.run();
-        boost::program_options::store(parsed_options1, m_vm);
+        po::parsed_options parsed_options1 = parser.run();
+        po::store(parsed_options1, m_vm);
 
         std::fstream project_ini = std::fstream("config.ini", std::ios::in);
-        boost::program_options::store(boost::program_options::parse_config_file(project_ini, *m_options_functions), m_vm);
+        po::store(po::parse_config_file(project_ini, *m_options_functions), m_vm);
         project_ini.close();
 
-        boost::program_options::notify(m_vm);
+        po::notify(m_vm);
 
-        if(m_vm.count("help")){
+        if(m_vm.count(CMD_HELP)){
             std::cout << *m_options_functions << std::endl;
             exit(0);
         }
-        if(m_vm.count("bash_completion")){
+        if(m_vm.count(CMD_BASH_COMPLETION)){
             this->bash_completion_script();
             exit(0);
         }
-        if(m_vm.count("lef")){
-            this->add_lef(m_vm["lef"].as<std::string>());
+        if(m_vm.count(CMD_LEF)){
+            this->add_lef(m_vm[CMD_LEF].as<std::string>());
         }
-        if(m_vm.count("def")){
-            this->add_def(m_vm["def"].as<std::string>());
+        if(m_vm.count(CMD_DEF)){
+            this->add_def(m_vm[CMD_DEF].as<std::string>());
         }
-        if(m_vm.count("bookshelf")){
-            this->set_bookshelf_file(m_vm["bookshelf"].as<std::string>());
+        if(m_vm.count(CMD_BOOKSHELF)){
+            this->set_bookshelf_file(m_vm[CMD_BOOKSHELF].as<std::string>());
         }
-        if (m_vm.count("site")){
-            this->set_site(m_vm["site"].as<std::string>());
+        if (m_vm.count(CMD_SITE)){
+            this->set_site(m_vm[CMD_SITE].as<std::string>());
         }
-        if(m_vm.count("partition-size")){
-            this->set_partition_size(m_vm["partition-size"].as<size_t>());
+        if(m_vm.count(CMD_PARTITION_SIZE)){
+            this->set_partition_size(m_vm[CMD_PARTITION_SIZE].as<size_t>());
         }
-        if(m_vm.count("partition-count")){
-            this->set_num_partition(m_vm["partition-count"].as<size_t>());
+        if(m_vm.count(CMD_PARTITION_COUNT)){
+            this->set_num_partition(m_vm[CMD_PARTITION_COUNT].as<size_t>());
         }
-        if(m_vm.count("allsat")){
-            this->set_allsat(true);
+        if(m_vm.count(CMD_SOLUTIONS)){
+            this->set_max_solutions(m_vm[CMD_SOLUTIONS].as<size_t>());
         }
-        if(m_vm.count("solutions")){
-            this->set_max_solutions(m_vm["solutions"].as<size_t>());
-        }
-        if(m_vm.count("save-best")){
+        if(m_vm.count(CMD_SAVE_BEST)){
             this->set_save_best(true);
         }
-        if(m_vm.count("save-all")){
+        if(m_vm.count(CMD_SAVE_ALL)){
             this->set_save_all(true);
         }
-        if(m_vm.count("dump-all")){
+        if(m_vm.count(CMD_DUMP_ALL)){
             this->set_dump_all(true);
         }
-        if (m_vm.count("dump-best")){
+        if (m_vm.count(CMD_DUMP_BEST)){
             this->set_dump_best(true);
         }
-        if(m_vm.count("timeout")){
-            this->set_timeout(m_vm["timeout"].as<size_t>());
+        if(m_vm.count(CMD_TIMEOUT)){
+            this->set_timeout(m_vm[CMD_TIMEOUT].as<size_t>());
         }
-        if(m_vm.count("store-smt")){
+        if(m_vm.count(CMD_STORE_SMT)){
             this->set_store_smt(true);
         }
-        if(m_vm.count("supplement")){
-            this->set_supplement(m_vm["supplement"].as<std::string>());
+        if(m_vm.count(CMD_SUPPLEMENT)){
+            this->set_supplement(m_vm[CMD_SUPPLEMENT].as<std::string>());
         }
-        if(m_vm.count("pareto")){
+        if(m_vm.count(CMD_PARETO)){
             this->set_pareto_optimizer(true);
         }
-        if(m_vm.count("lex")){
+        if(m_vm.count(CMD_LEX)){
             this->set_lex_optimizer(true);
         }
-        if(m_vm.count("box")){
+        if(m_vm.count(CMD_BOX)){
             this->set_box_optimizer(true);
         }
-        if(m_vm.count("partition")){
+        if(m_vm.count(CMD_PARTITION)){
             this->set_partitioning(true);
         }
-        if(m_vm.count("parquet")){
+        if(m_vm.count(CMD_PARQUET)){
             this->set_parquet_fp(true);
         }
-        if(m_vm.count("verbose")){
+        if(m_vm.count(CMD_VERBOSE)){
             this->set_verbose(true);
         }
-        if(m_vm.count("store-log")){
+        if(m_vm.count(CMD_STORE_LOG)){
             this->set_log_active(true);
         }
-        if(m_vm.count("minimize-area")){
+        if(m_vm.count(CMD_MIN_AREA)){
             this->set_minimize_die_mode(true);
         }
-        if (m_vm.count("minimize-hpwl")){
+        if (m_vm.count(CMD_MIN_HPWL)){
             this->set_minimize_hpwl_mode(true);
         }
-        if(m_vm.count("free-terminals")){
+        if(m_vm.count(CMD_FREE_TERMINALS)){
             this->set_free_terminals(true);
         }
+        if (m_vm.count(CMD_SKIP_PWR_SUPPLY)){
+            this->set_skip_power_network(true);
+        }
 
-        if((this->get_def().empty() || this->get_lef().empty()) && this->get_bookshelf_file().empty()){
+        if((this->get_def().empty() || this->get_lef().empty()) &&
+           this->get_bookshelf_file().empty()){
             delete m_options_functions; m_options_functions = nullptr;
             throw std::runtime_error("No LEF/DEF or Bookshelf file has been specified!");
         }
-        if(this->get_site().empty() && this->get_bookshelf_file().empty()){
+        if(this->get_site().empty() &&
+           this->get_bookshelf_file().empty()){
             delete m_options_functions; m_options_functions = nullptr;
             throw std::runtime_error("Site has not been specified!");
         }
-        if(!this->get_def().empty() &&!boost::filesystem::exists(this->get_def())){
+        if(!this->get_def().empty() &&
+           !fs::exists(this->get_def())){
             delete m_options_functions; m_options_functions = nullptr;
             throw std::runtime_error("Could not find DEF File!");
         }
-        if(!this->get_bookshelf_file().empty() && !boost::filesystem::exists(this->get_bookshelf_file())){
-            delete m_options_functions; m_options_functions = nullptr;
-            throw std::runtime_error("Could not find Bookshelf file!");
+        if(!this->get_bookshelf_file().empty() &&
+            !fs::exists(this->get_bookshelf_file())){
+                delete m_options_functions; m_options_functions = nullptr;
+                throw std::runtime_error("Could not find Bookshelf file!");
         }
 
         if(!this->get_lef().empty()){
             for(auto itor: this->get_lef()){
-                if(!boost::filesystem::exists(itor)){
+                if(!fs::exists(itor)){
                     delete m_options_functions; m_options_functions = nullptr;
                     throw std::runtime_error("Could not find LEF File (" + itor + ")");
                 }
@@ -205,7 +213,7 @@ void MacroPlacer::read_configuration()
         }
         this->set_logic(eInt);
         this->set_base_path(Utils::Utils::get_base_path());
-        this->set_working_directory(boost::filesystem::current_path().string());
+        this->set_working_directory(fs::current_path().string());
         this->set_results_directory("results");
         this->set_results_id(this->existing_results() + 1);
         this->set_image_directory("images");
@@ -215,7 +223,7 @@ void MacroPlacer::read_configuration()
         this->set_database_file("results.db");
         this->set_db_to_csv_script(this->get_base_path() + "/04_configuration/db_to_csv.sh");
 
-        boost::filesystem::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));
+        fs::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));
 
         // Create Logger Singleton once the Commandline Information is known!
         m_logger = Utils::Logger::getInstance();

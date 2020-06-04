@@ -24,6 +24,7 @@
 #include <boost/filesystem.hpp>
 
 #include <object.hpp>
+#include <cmdline_arguments.hpp>
 #include <macrocircuit.hpp>
 #include <logger.hpp>
 #include <version.hpp>

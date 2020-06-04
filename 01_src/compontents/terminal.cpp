@@ -13,6 +13,19 @@
 
 using namespace Placer;
 
+/* Keywords which are likely to name a power terminal */
+std::vector<std::string> Terminal::m_terminal_keywords({
+    "vss",
+    "vdd",
+    "gnd1",
+    "gnd2",
+    "vin"
+    "vin1",
+    "vin2",
+    "vssa",
+    "vdda"
+});
+
 
 /**
  * @brief Constructor for Free Placeable Terminal
@@ -27,15 +40,18 @@ Terminal::Terminal(std::string const & name,
     m_encode(new EncodingUtils()),
     m_name(name),
     m_free(true),
+    m_key(m_key_counter++),
     m_direction(direction),
+    m_terminal_type(eTerminalType::eUnknownTerminal),
     m_pos_x(m_encode->get_constant("terminal_" + name + "_x")),
-    m_pos_y(m_encode->get_constant("terminal_" + name + "_y")),
-    m_key(m_key_counter++)
+    m_pos_y(m_encode->get_constant("terminal_" + name + "_y"))
 {
     m_free = true;
     m_bitwidth = 0;
     m_frequency = 0;
     m_logger->add_free_terminal(name);
+
+    this->resolve_terminal_type();
 }
 
 /**
@@ -55,15 +71,18 @@ Terminal::Terminal(std::string const & name,
     m_encode(new EncodingUtils()),
     m_name(name),
     m_free(false),
+    m_key(m_key_counter++),
     m_direction(direction),
+    m_terminal_type(eTerminalType::eUnknownTerminal),
     m_pos_x(m_encode->get_value(pos_x)),
-    m_pos_y(m_encode->get_value(pos_y)),
-    m_key(m_key_counter++)
+    m_pos_y(m_encode->get_value(pos_y))
 {
     m_free = false;
     m_bitwidth = 0;
     m_frequency = 0;
     m_logger->add_fixed_terminal(name, pos_x, pos_y);
+
+    this->resolve_terminal_type();
 }
 
 /**
@@ -315,4 +334,40 @@ void Terminal::set_bitwidth(size_t const width)
 void Terminal::set_frequency(size_t const frequency)
 {
     m_frequency = frequency;
+}
+
+/**
+ * @brief Resolve Terminal Type
+ */
+void Terminal::resolve_terminal_type()
+{
+    auto position = std::find(m_terminal_keywords.begin(),
+                              m_terminal_keywords.end(),
+                              m_name);
+    
+    if (position != m_terminal_keywords.end()){
+        m_terminal_type = eTerminalType::ePowerTerminal;
+    } else {
+        m_terminal_type = eTerminalType::eSignalTerminal;
+    }
+}
+
+/**
+ * @brief Check if Terminal is Type Power
+ * 
+ * @return bool
+ */
+bool Terminal::is_power_terminal()
+{
+    return m_terminal_type == eTerminalType::ePowerTerminal;
+}
+
+/**
+ * @brief Check if Terminal is Type Signal
+ * 
+ * @return bool
+ */
+bool Terminal::is_signal_terminal()
+{
+    return m_terminal_type == eTerminalType::eSignalTerminal;
 }

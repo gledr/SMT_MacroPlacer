@@ -14,6 +14,7 @@
 
 #include <iostream>
 #include <string>
+#include <algorithm>
 
 #include <pin.hpp>
 #include <object.hpp>
@@ -21,6 +22,11 @@
 #include <encoding_utils.hpp>
 
 namespace Placer {
+    
+enum eTerminalType {
+    ePowerTerminal,
+    eSignalTerminal,
+    eUnknownTerminal};
 
 /**
  * @class Terminal
@@ -61,7 +67,10 @@ public:
     bool is_input();
     bool is_output();
     bool is_bidirectional();
-    
+
+    bool is_power_terminal();
+    bool is_signal_terminal();
+
     void set_bitwidth(size_t const width);
     size_t get_bitwidth () const;
     bool has_bitwidth();
@@ -79,6 +88,7 @@ private:
     bool m_free;
     size_t m_key;
     e_pin_direction m_direction;
+    eTerminalType m_terminal_type;
 
     size_t m_bitwidth;
     size_t m_frequency;
@@ -88,6 +98,9 @@ private:
 
     std::vector<size_t> m_solutions_x;
     std::vector<size_t> m_solutions_y;
+
+    void resolve_terminal_type();
+    static std::vector<std::string> m_terminal_keywords;
 };
 
 } /* namespace Placer */

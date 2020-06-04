@@ -925,6 +925,10 @@ void Bookshelf::write_pl()
  */
 void Bookshelf::deduce_layout()
 {
+    if (this->get_free_terminals()){
+        throw PlacerException("Can not deduce Layout from Free Terminals!");
+    }
+    
     size_t x = 0;
     size_t y = 0;
 

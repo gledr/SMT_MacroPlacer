@@ -100,9 +100,6 @@ protected:
     void set_minimize_hpwl_mode(bool const val);
     bool get_minimize_hpwl_mode() const;
 
-    void set_allsat(bool const val);
-    bool get_allsat() const;
-
     void set_max_solutions(size_t const val);
     size_t get_max_solutions() const;
 
@@ -182,6 +179,9 @@ protected:
     std::string get_base_path() const;
 
     std::string orientation_to_string(eOrientation const orientation);
+    
+    void set_skip_power_network(bool const val);
+    bool get_skip_power_network() const;
 
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
@@ -211,7 +211,6 @@ private:
     static bool m_log;
     static bool m_min_die_mode;
     static bool m_min_hpwl_mode;
-    static bool m_allsat;
     static bool m_smt_to_filesystem;
     static bool m_save_all;
     static bool m_save_best;
@@ -225,6 +224,7 @@ private:
     static bool m_partitioning;
     static bool m_free_terminals;
     static bool m_strip_terminals;
+    static bool m_skip_power_network;
     static size_t m_partition_size;
     static size_t m_num_partitions;
     static size_t m_solutions;

@@ -24,10 +24,12 @@ using namespace Placer::Utils;
  * @param to_pin Target Pin
  * @param edge_name Edge Identifier
  */
-Edge::Edge(Node* from, Node* to,
+Edge::Edge(Node* from,
+           Node* to,
            std::string const & from_pin,
            std::string const & to_pin,
            std::string const & edge_name):
+    m_edge_type(eUnknownEdge),
     m_name(edge_name)
 {
     nullpointer_check (from);
@@ -41,7 +43,7 @@ Edge::Edge(Node* from, Node* to,
         m_to = to;
         m_from_pin = from_pin;
         m_to_pin = to_pin;
-        
+
     // Case II: Output
     } else if (from->is_terminal() && 
                from->get_terminal()->is_output() &&
@@ -50,13 +52,15 @@ Edge::Edge(Node* from, Node* to,
         m_to = from;
         m_from_pin = to_pin;
         m_to_pin = from_pin;
-    } else {
 
+    } else {
         m_from = from;
         m_to = to;
         m_from_pin = from_pin;
         m_to_pin = to_pin;
     }
+
+    this->resolve_edge_type();
 }
 
 /**
@@ -331,4 +335,38 @@ size_t Edge::get_frequency_to()
     }
 
     return 0; // Never Reached
+}
+
+/**
+ * @brief Check if Edge is Power Edge
+ * 
+ * @return bool
+ */
+bool Edge::is_power_edge()
+{
+    return m_edge_type == eEdgeType::ePower;
+}
+
+
+/**
+ * @brief Check is Edge is Signal Edge
+ * 
+ * @return bool
+ */
+bool Edge::is_signal_edge()
+{
+    return m_edge_type == eEdgeType::eSignal;
+}
+
+/**
+ * @brief Resolve Type of Edge
+ */
+void Edge::resolve_edge_type()
+{
+    if ((m_from->is_terminal() && m_from->get_terminal()->is_power_terminal()) ||
+        (m_to->is_terminal() && m_to->get_terminal()->is_power_terminal())){
+        m_edge_type = eEdgeType::ePower;
+    } else {
+        m_edge_type = eEdgeType::eSignal;
+    }
 }

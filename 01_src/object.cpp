@@ -34,7 +34,6 @@ bool Object::m_verbose = false;
 bool Object::m_log = false;
 bool Object::m_min_die_mode = false;
 bool Object::m_min_hpwl_mode = false;
-bool Object::m_allsat;
 bool Object::m_smt_to_filesystem = false;
 bool Object::m_save_all = false;
 bool Object::m_save_best = false;
@@ -48,6 +47,7 @@ bool Object::m_partitioning = false;
 bool Object::m_parquet_fp = false;
 bool Object::m_free_terminals = false;
 bool Object::m_strip_terminals = false;
+bool Object::m_skip_power_network = false;
 size_t Object::m_timeout = 0;
 size_t Object::m_bitwidth_orientation;
 size_t Object::m_solutions = 1;
@@ -244,19 +244,9 @@ void Object::set_minimize_hpwl_mode(bool const val)
     m_min_hpwl_mode = val;
 }
 
-bool Object::get_allsat() const
-{
-    return m_allsat;
-}
-
 size_t Object::get_max_solutions() const
 {
     return m_solutions;
-}
-
-void Object::set_allsat(bool const val)
-{
-    m_allsat = val;
 }
 
 void Object::set_max_solutions(size_t const val)
@@ -538,4 +528,16 @@ std::string Object::orientation_to_string(eOrientation const orientation)
     } else {
         notsupported_check("Orientation not Supported!");
     }
+    
+    return ""; // Make Compiler Happy
+}
+
+bool Object::get_skip_power_network() const
+{
+    return m_skip_power_network;
+}
+
+void Object::set_skip_power_network(bool const val)
+{
+    m_skip_power_network = val;
 }

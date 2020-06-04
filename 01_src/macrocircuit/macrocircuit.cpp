@@ -546,18 +546,32 @@ void MacroCircuit::create_image(size_t const solution)
                           " to "  << _ux << ","<<_uy << 
                           " lw 5;"<< std::endl;
         }
-#ifdef PLOT_TERMINAL
-        for(size_t i = 0 ; i < m_terminals.size(); ++ i){
-            size_t x = m_terminals[i]->get_solution_pin_pos_x(solution);
-            size_t y = m_terminals[i]->get_solution_pin_pos_y(solution);
+        if (this->get_minimize_hpwl_mode()){
+            // Terminals
+            for(size_t i = 0 ; i < m_terminals.size(); ++ i){
+                size_t x = m_terminals[i]->get_solution_pos_x(solution);
+                size_t y = m_terminals[i]->get_solution_pos_y(solution);
+                gnu_plot_file << "# " << m_terminals[i]->get_id() << std::endl;
+                gnu_plot_file  << "set object " << i+100 << " rect from " << std::to_string(x-0.25) << "," << std::to_string(y-0.25) 
+                            << " to "  << std::to_string(x+0.25) << ","<< std::to_string(y+0.25) <<" lw 5;"<< std::endl;
+            }
             
-           gnu_plot_file  << "set object " << i+100 << " rect from " << std::to_string(x-0.25) << "," << std::to_string(y-0.25) 
-                           << " to "  << std::to_string(x+0.25) << ","<< std::to_string(y+0.25) <<" lw 5;"<< std::endl;
+            // Pin
+            size_t id_cnt = 200;
+            for (Macro* m: m_macros){
+                for  (Pin* p: m->get_pins()){
+                    size_t x = p->get_solution_pin_pos_x(solution);
+                    size_t y = p->get_solution_pin_pos_y(solution);
+                    gnu_plot_file << "# " << m->get_id() << " " << p->get_name() << std::endl;
+                    gnu_plot_file  << "set object " << id_cnt << " rect from " << std::to_string(x-0.25) << "," << std::to_string(y-0.25) 
+                            << " to "  << std::to_string(x+0.25) << ","<< std::to_string(y+0.25) <<" lw 5;"<< std::endl;
+                    id_cnt++;
+                }
+            }
         }
-#endif
         gnu_plot_file << "plot x " << std::endl,
         gnu_plot_file.close();
-        
+
         std::string cmd = "gnuplot " + gnu_plot_script;
         system(cmd.c_str());
 }

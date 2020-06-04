@@ -18,6 +18,11 @@
 
 namespace Placer {
 
+enum eEdgeType {
+    eSignal       = 0,
+    ePower        = 1,
+    eUnknownEdge  = 2};
+    
 class Node;
 
 /** 
@@ -60,13 +65,18 @@ public:
     size_t get_bitwidth_from();
     size_t get_bitwidth_to();
 
+    bool is_power_edge();
+    bool is_signal_edge();
+
 private:
     Node* m_to;
     Node* m_from;
     std::string m_to_pin;
     std::string m_from_pin;
-
+    eEdgeType m_edge_type;
     std::string m_name;
+
+    void resolve_edge_type();
 };
 
 } /* namespace Placer */

@@ -35,6 +35,7 @@ MacroCircuit::MacroCircuit():
     m_timer = new Utils::Timer();
     m_partitioning = new Partitioning();
     m_parquet = new ParquetFrontend();
+    m_plotter = new Plotter();
 
     m_circuit = nullptr;
     m_solutions = 0;
@@ -80,6 +81,7 @@ MacroCircuit::~MacroCircuit()
     delete m_encode; m_encode = nullptr;
     delete m_timer; m_timer = nullptr;
     delete m_db; m_db = nullptr;
+    delete m_plotter; m_plotter = nullptr;
 
     m_logger = nullptr;
 }
@@ -417,7 +419,8 @@ void MacroCircuit::dump_all()
     m_logger->dump_all();
 
     for(size_t i = 0; i < m_solutions; ++i){
-        this->create_image(i);
+        m_plotter->set_data(m_terminals, m_components, i, m_layout);
+        m_plotter->run();
     }
 }
 
@@ -428,152 +431,9 @@ void MacroCircuit::dump_best()
 {
     std::cout << "Dump best" << std::endl;
     std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
-    this->create_image(best_hpwl.first);
+    m_plotter->set_data(m_terminals, m_components, best_hpwl.first, m_layout);
+    m_plotter->run();
     std::cout << "Best Solution: HPWL = " << best_hpwl.second << std::endl;
-}
-
-/**
- * @brief Create image for particular found solution
- * 
- * @param solution Solution to dump as image
- */
-void MacroCircuit::create_image(size_t const solution)
-{
-    if(!boost::filesystem::exists(this->get_image_directory())){
-        boost::filesystem::create_directories(this->get_image_directory());
-    }
-
-    boost::filesystem::current_path(this->get_image_directory());
-
-    std::string gnu_plot_script = "script_" + std::to_string(solution) + ".plt";
-
-    size_t die_lx = m_layout->get_lx().get_numeral_uint();
-    size_t die_ly = m_layout->get_ly().get_numeral_uint();
-
-    std::stringstream img_name;
-    img_name << "placement_" << this->get_design_name() << "_" << solution << ".png";
-    std::ofstream gnu_plot_file(gnu_plot_script);
-    gnu_plot_file << "set terminal png size 400,300;"  << std::endl;
-    gnu_plot_file << "set output '" << img_name.str() << "';" << std::endl;
-
-    if(m_layout->is_free_ux()){
-        gnu_plot_file << "set xrange[" << die_lx << ":" << m_layout->get_solution_ux(solution) << "];" << std::endl;
-        gnu_plot_file << "set yrange[" << die_ly << ":" << m_layout->get_solution_uy(solution) << "];" << std::endl;
-    } else {
-        gnu_plot_file << "set xrange[" << die_lx << ":" << m_layout->get_ux().get_numeral_uint()<< "];" << std::endl;
-        gnu_plot_file << "set yrange[" << die_ly << ":" << m_layout->get_uy().get_numeral_uint() << "];" << std::endl;
-    }
-
-    size_t _lx = 0;
-    size_t _ly = 0;
-    size_t _ux = 0;
-    size_t _uy = 0;
-
-    for(size_t j = 0; j < m_components.size(); ++j){
-        gnu_plot_file << "# " << m_components[j]->get_id() << ":" << m_components[j]->get_name() 
-                      << " Orientation: " << m_components[j]->get_solution_orientation(solution) << std::endl;
-
-        size_t width = m_components[j]->get_width().get_numeral_uint();
-        size_t height = m_components[j]->get_height().get_numeral_uint();
-
-        size_t o  = m_components[j]->get_solution_orientation(solution);
-        size_t lx = m_components[j]->get_solution_lx(solution);
-        size_t ly = m_components[j]->get_solution_ly(solution);
-
-        // North
-        if(o == eNorth){
-            _lx = lx;
-            _ly = ly;
-            _ux = lx + width;
-            _uy = ly + height;
-
-        // West
-        } else if (o == eWest){
-            _lx = lx - height;
-            _ly = ly;
-            _ux = lx;
-            _uy = ly + width;
-
-        // South
-        } else if (o == eSouth){
-            _lx = lx - width;
-            _ly = ly - height;
-            _ux = lx;
-            _uy = ly;
-
-        // East
-        } else if (o == eEast){
-            _lx = lx;
-            _ly = ly - width;
-            _ux = lx + height;
-            _uy = ly;
-
-        // Flip North
-        } else if (o == eFlipNorth){
-            _lx = lx - width;
-            _ly = ly;
-            _ux = lx;
-            _uy = ly + height;
-
-        // Flip West
-        } else if (o == eFlipWest){
-            _lx = lx;
-            _ly = ly;
-            _ux = _lx + height;
-            _uy = _ly + width;
-
-        // Flip South
-        } else if (o == eFlipSouth){
-            _lx = lx;
-            _ly = ly - height;
-            _ux = lx + width;
-            _uy = ly;
-
-        // Flip East
-        } else if (o == eFlipEast){
-            _lx = lx - height;
-            _ly = ly - width;
-            _ux = lx;
-            _uy = ly;
-
-        // Error
-        } else {
-            notsupported_check("Orientation not Supported!");
-        }
-
-        gnu_plot_file  << "set object " << j+1 << 
-                          " rect from " << _lx << "," << _ly <<
-                          " to "  << _ux << ","<<_uy << 
-                          " lw 5;"<< std::endl;
-        }
-        if (this->get_minimize_hpwl_mode()){
-            // Terminals
-            for(size_t i = 0 ; i < m_terminals.size(); ++ i){
-                size_t x = m_terminals[i]->get_solution_pos_x(solution);
-                size_t y = m_terminals[i]->get_solution_pos_y(solution);
-                gnu_plot_file << "# " << m_terminals[i]->get_id() << std::endl;
-                gnu_plot_file  << "set object " << i+100 << " rect from " << std::to_string(x-0.25) << "," << std::to_string(y-0.25) 
-                            << " to "  << std::to_string(x+0.25) << ","<< std::to_string(y+0.25) <<" lw 5;"<< std::endl;
-            }
-            
-            // Pin
-            size_t id_cnt = 200;
-            for (Macro* m: m_macros){
-                for  (Pin* p: m->get_pins()){
-                    size_t x = p->get_solution_pin_pos_x(solution);
-                    size_t y = p->get_solution_pin_pos_y(solution);
-                    gnu_plot_file << "# " << m->get_id() << " " << p->get_name() << std::endl;
-                    gnu_plot_file  << "set object " << id_cnt << " rect from " << std::to_string(x-0.25) << "," << std::to_string(y-0.25) 
-                            << " to "  << std::to_string(x+0.25) << ","<< std::to_string(y+0.25) <<" lw 5;"<< std::endl;
-                    id_cnt++;
-                }
-            }
-        }
-        gnu_plot_file << "plot x " << std::endl,
-        gnu_plot_file.close();
-
-        std::string cmd = "gnuplot " + gnu_plot_script;
-        system(cmd.c_str());
 }
 
 /**

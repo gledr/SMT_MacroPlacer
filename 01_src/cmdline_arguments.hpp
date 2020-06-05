@@ -25,7 +25,7 @@ namespace Placer {
         = "Show Debug Information";
 
     constexpr const char CMD_BASH_COMPLETION[]
-        = "bash-complition";
+        = "bash-completion";
     constexpr const char CMD_BASH_COMPLETION_TEXT[] 
         = "Generate a Bash Autocompletion Script";
 

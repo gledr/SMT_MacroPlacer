@@ -1,4 +1,5 @@
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
+find_package(Python2 COMPONENTS Development NumPy)
 
 ############################################################
 # include directories 
@@ -114,6 +115,7 @@ add_dependencies(smt_placer
     build_jsoncpp
     build_sqlite3
     build_kahypar
+	build_matplotlib
     placer_config
     ABKCommon
     ParquetFP
@@ -121,6 +123,7 @@ add_dependencies(smt_placer
 
 target_link_libraries(smt_placer
     ${Boost_LIBRARIES}
+    Python2::Python Python2::NumPy
     def
     defzlib
     lef
@@ -141,3 +144,5 @@ target_link_libraries(bookshelf_converter
     ${THIRD_PARTY_LIB}/libz3.so
     ${THIRD_PARTY_LIB}/libjsoncpp.a
 )
+
+target_include_directories(smt_placer PRIVATE ${Python2_INCLUDE_DIRS} ${Python2_NumPy_INCLUDE_DIRS})

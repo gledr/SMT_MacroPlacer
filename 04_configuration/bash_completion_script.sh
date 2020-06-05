@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 # Generted File! Do not modify!
-# Fri May 29 14:57:49 2020
+# Thu Jun  4 16:24:21 2020
 #
 
 #
@@ -23,11 +23,10 @@ local cur
 		-*)
 		COMPREPLY=( $( compgen -W ' \
 			--help \
-			--bash_completion \
+			--bash-completion \
 			--save-best \
 			--dump-best \
 			--dump-all \
-			--allsat \
 			--save-all \
 			--verbose \
 			--store-log \
@@ -40,6 +39,7 @@ local cur
 			--minimize-area \
 			--minimize-hpwl \
 			--free-terminals \
+			--skip-power-supply \
 			--partition-size \
 			--partition-count \
 			--def \

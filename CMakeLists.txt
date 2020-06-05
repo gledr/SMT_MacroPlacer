@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1)
+cmake_minimum_required(VERSION 3.12)
 
 project(SMT_MacroPlacer)
 
@@ -12,6 +12,7 @@ if(CCACHE_PROGRAM)
 endif()
 
 find_package(Doxygen)
+
 if(DOXYGEN_FOUND)
     configure_file(${CMAKE_CURRENT_SOURCE_DIR}/04_configuration/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/04_configuration/Doxyfile.in @ONLY)
     add_custom_target(doc

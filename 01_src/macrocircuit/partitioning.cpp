@@ -738,14 +738,13 @@ void Partitioning::file_based_partitioning()
     for(Macro* m: m_macros){
         key_to_macro[m->get_key()] = m;
     }
-    
+
     kahypar_hypernode_id_t num_vertices = 0;
     kahypar_hyperedge_id_t num_hyperedges = 0;
-    
 
     kahypar_hyperedge_id_t* hyperedges;
     size_t* hyperedge_indices;
- 
+
     double imbalance = 0.03;
     kahypar_partition_id_t k = this->get_num_partitions();
 
@@ -777,14 +776,13 @@ void Partitioning::file_based_partitioning()
                       context,
                       partition.data());
 
-    
     // Partition ID as key, Values as Set of Macro IDs
     std::map<size_t, std::set<size_t>> partition_map;
 
     for(int i = 0; i != num_vertices; ++i) {
         partition_map[partition[i]].insert(i);
     }
-    
+
     for (auto itor: partition_map){
         Partition* next_partition = new Partition();
         m_z3_opt = new z3::optimize(m_z3_ctx);

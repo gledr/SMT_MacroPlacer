@@ -41,6 +41,7 @@
 #include <encoding_utils.hpp>
 #include <utils.hpp>
 #include <database.hpp>
+#include <plotter.hpp>
 
 namespace Placer {
 
@@ -103,6 +104,7 @@ private:
     Partitioning* m_partitioning;
     ParquetFrontend* m_parquet;
     EncodingUtils* m_encode;
+    Plotter* m_plotter;
 
     std::map<std::string, Macro*> m_id2macro;
     std::map<std::string, Terminal*> m_id2terminal;
@@ -138,7 +140,6 @@ private:
 
     void create_macro_definitions();
 
-    void create_image(size_t const solution);
     void write_def(std::string const & name, size_t const solution);
 
     Tree* get_tree();

@@ -53,6 +53,9 @@ public:
     z3::expr& get_pos_x();
     z3::expr& get_pos_y();
 
+    size_t get_pox_x_numerical();
+    size_t get_pos_y_numerical();
+
     void add_solution_pos_x(size_t const val);
     void add_solution_pos_y(size_t const val);
 

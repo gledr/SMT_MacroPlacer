@@ -102,6 +102,14 @@ public:
                     size_t const lx,
                     size_t const ly,
                     eOrientation const orientation);
+    
+    void place_pin_x(std::string const & pin_name,
+                     std::string const & parent_name,
+                     size_t const pos);
+    
+    void place_pin_y(std::string const & pin_name,
+                     std::string const & parent_name,
+                     size_t const pos);
 
     void place_terminal(std::string const & name,
                        size_t const x,
@@ -114,6 +122,14 @@ public:
     void add_fixed_terminal(std::string const & name,
                            size_t const x,
                            size_t const y);
+    
+    void add_free_pin(std::string const & pin_name,
+                      std::string const & parent_name);
+    
+    void add_fixed_pin(std::string const & pin_name,
+                       std::string const & parent_name,
+                       size_t const x,
+                       size_t const y);
 
     void export_db_to_csv(std::string const & filename);
     void export_hypergraph(std::string const & filename);

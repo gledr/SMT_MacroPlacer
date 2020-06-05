@@ -7,7 +7,7 @@
 // Date         : 04. June 2020
 // Compiler     : gcc version 10.1.0 (GCC) 
 // Copyright    : Johannes Kepler University
-// Description  : LEF/DEF MacroCircuit Plotter
+// Description  : MacroCircuit Plotter
 //==================================================================
 #include "plotter.hpp"
 
@@ -64,121 +64,83 @@ void Plotter::run()
 
     size_t die_lx = m_layout->get_lx().get_numeral_uint();
     size_t die_ly = m_layout->get_ly().get_numeral_uint();
-    
+
     if(m_layout->is_free_ux()){
-        matplotlibcpp::xlim(die_lx, m_layout->get_solution_ux(m_solution_id));
-        matplotlibcpp::ylim(die_ly, m_layout->get_solution_uy(m_solution_id));
+        matplotlibcpp::xlim(die_lx-0.5, m_layout->get_solution_ux(m_solution_id)+0.5);
+        matplotlibcpp::ylim(die_ly-0.5, m_layout->get_solution_uy(m_solution_id)+0.5);
     } else {
         size_t ux = m_layout->get_ux().get_numeral_uint();
         size_t uy = m_layout->get_uy().get_numeral_uint();
-        matplotlibcpp::xlim(die_lx, ux);
-        matplotlibcpp::ylim(die_ly, uy);
+        matplotlibcpp::xlim(die_lx-0.5, ux+0.5);
+        matplotlibcpp::ylim(die_ly-0.5, uy+0.5);
     }
-    
-    size_t _lx = 0;
-    size_t _ly = 0;
-    size_t _ux = 0;
-    size_t _uy = 0;
+
+    this->draw_layout();
 
     for(size_t j = 0; j < m_components.size(); ++j){
-        size_t width = m_components[j]->get_width().get_numeral_uint();
-        size_t height = m_components[j]->get_height().get_numeral_uint();
+        Component* cmp = m_components[j];
+        nullpointer_check(cmp);
+        
+        m_id2macro[cmp->get_id()] = cmp;
+        
+        size_t width = cmp->get_width().get_numeral_uint();
+        size_t height = cmp->get_height().get_numeral_uint();
 
-        size_t o  = m_components[j]->get_solution_orientation(m_solution_id);
-        size_t lx = m_components[j]->get_solution_lx(m_solution_id);
-        size_t ly = m_components[j]->get_solution_ly(m_solution_id);
-
+        size_t o  = cmp->get_solution_orientation(m_solution_id);
+        size_t lx = cmp->get_solution_lx(m_solution_id);
+        size_t ly = cmp->get_solution_ly(m_solution_id);
+        std::string id = cmp->get_id();
+        
         // North
         if(o == eNorth){
-            _lx = lx;
-            _ly = ly;
-            _ux = lx + width;
-            _uy = ly + height;
+            this->draw_rectangle(lx, ly, lx + width, ly + height, id);
 
         // West
         } else if (o == eWest){
-            _lx = lx - height;
-            _ly = ly;
-            _ux = lx;
-            _uy = ly + width;
+            this->draw_rectangle(lx - height, ly, lx, ly + width, id);
 
         // South
         } else if (o == eSouth){
-            _lx = lx - width;
-            _ly = ly - height;
-            _ux = lx;
-            _uy = ly;
+            this->draw_rectangle(lx - width, ly - height, lx ,ly, id);
 
         // East
         } else if (o == eEast){
-            _lx = lx;
-            _ly = ly - width;
-            _ux = lx + height;
-            _uy = ly;
+            this->draw_rectangle(lx, ly - width, lx + height, ly, id);
 
         // Flip North
         } else if (o == eFlipNorth){
-            _lx = lx - width;
-            _ly = ly;
-            _ux = lx;
-            _uy = ly + height;
+            this->draw_rectangle(lx - width, ly, lx, ly + height, id);
 
         // Flip West
         } else if (o == eFlipWest){
-            _lx = lx;
-            _ly = ly;
-            _ux = _lx + height;
-            _uy = _ly + width;
+            this->draw_rectangle(lx, ly, lx + height, ly + width, id);
 
         // Flip South
         } else if (o == eFlipSouth){
-            _lx = lx;
-            _ly = ly - height;
-            _ux = lx + width;
-            _uy = ly;
+            this->draw_rectangle(lx, ly - height, lx + width, ly, id);
 
         // Flip East
         } else if (o == eFlipEast){
-            _lx = lx - height;
-            _ly = ly - width;
-            _ux = lx;
-            _uy = ly;
+            this->draw_rectangle(lx - height, ly - width, lx, ly, id);
 
         // Error
         } else {
             notsupported_check("Orientation not Supported!");
         }
 
-        this->draw_rectangle(_lx, _ly, _ux, _uy);
-        
-      /*
-        if (this->get_minimize_hpwl_mode()){
-            // Terminals
-            for(size_t i = 0 ; i < m_terminals.size(); ++ i){
-                size_t x = m_terminals[i]->get_solution_pos_x(m_solution_id);
-                size_t y = m_terminals[i]->get_solution_pos_y(m_solution_id);
-                gnu_plot_file << "# " << m_terminals[i]->get_id() << std::endl;
-                gnu_plot_file  << "set object " << i+100 << " rect from " << std::to_string(x-0.25) << "," << std::to_string(y-0.25) 
-                            << " to "  << std::to_string(x+0.25) << ","<< std::to_string(y+0.25) <<" lw 5;"<< std::endl;
-            }
-            
-            // Pin
-            size_t id_cnt = 200;
-            for (Component* m: m_components){
-                for  (Pin* p: m->get_pins()){
-                    size_t x = p->get_solution_pin_pos_x(m_solution_id);
-                    size_t y = p->get_solution_pin_pos_y(m_solution_id);
-                    gnu_plot_file << "# " << m->get_id() << " " << p->get_name() << std::endl;
-                    gnu_plot_file  << "set object " << id_cnt << " rect from " << std::to_string(x-0.25) << "," << std::to_string(y-0.25) 
-                            << " to "  << std::to_string(x+0.25) << ","<< std::to_string(y+0.25) <<" lw 5;"<< std::endl;
-                    id_cnt++;
-                }
+        // Terminals
+        for(Terminal* t: m_terminals){
+            this->draw_terminal(t);
+        }
+
+        // Pin
+        for (Component* m: m_components){
+            for  (Pin* p: m->get_pins()){
+                this->draw_pin(p);
             }
         }
-        gnu_plot_file << "plot x " << std::endl,
-        gnu_plot_file.close();
-
-        */
+   
+        
         std::stringstream img_name;
         img_name << "placement_" << this->get_design_name() << "_" << m_solution_id << ".png";
         matplotlibcpp::save("./" + img_name.str());
@@ -215,4 +177,87 @@ void Plotter::draw_rectangle(size_t const lx,
     matplotlibcpp::plot(std::vector<size_t>({ux, ux}),
                         std::vector<size_t>({uy, ly}),
                         "-k");
+}
+
+void Plotter::draw_terminal(Terminal* t)
+{
+    nullpointer_check(t);
+    
+    std::vector<size_t> x;
+    std::vector<size_t> y;
+    
+     if (!t->is_free()){
+        x.push_back(t->get_pox_x_numerical());
+        y.push_back(t->get_pos_y_numerical());
+    } else {
+        if (t->has_solution(m_solution_id)){
+            x.push_back(t->get_solution_pos_x(m_solution_id));
+            y.push_back(t->get_solution_pos_y(m_solution_id));
+        }
+    }
+    matplotlibcpp::scatter(x,y,50);
+}
+
+void Plotter::draw_pin(Pin* pin)
+{
+    nullpointer_check(pin);
+
+    // Check on which plane the pin is located
+    // Calculate offset and draw pin inside the macro
+    
+    size_t x_pos = pin->get_solution_pin_pos_x(m_solution_id);
+    size_t y_pos = pin->get_solution_pin_pos_y(m_solution_id);
+
+    std::vector<size_t> x;
+    x.push_back(x_pos);
+
+    std::vector<size_t> y;
+    y.push_back(y_pos);
+
+    matplotlibcpp::scatter(x,y,50);
+}
+
+void Plotter::draw_layout()
+{
+    size_t lx = 0;
+    size_t ly = 0;
+    size_t ux = 0;
+    size_t uy = 0;
+
+    if (m_layout->is_free_lx()){
+        notimplemented_check();
+    } else {
+        lx = m_layout->get_lx_numerical();
+    }
+    if (m_layout->is_free_ly()){
+        notimplemented_check();
+    } else {
+        ly = m_layout->get_ly_numerical();
+    }
+    if (m_layout->is_free_ux()){
+        ux = m_layout->get_solution_ux(m_solution_id);
+    } else {
+        ux = m_layout->get_uy_numerical();
+    }
+    if (m_layout->is_free_uy()){
+        uy = m_layout->get_solution_uy(m_solution_id);
+    } else {
+        uy = m_layout->get_uy_numerical();
+    }
+
+    matplotlibcpp::plot(std::vector<size_t>({lx, ux}),
+                        std::vector<size_t>({ly, ly}),
+                        "--b");
+
+    matplotlibcpp::plot(std::vector<size_t>({lx, ux}),
+                        std::vector<size_t>({uy, uy}),
+                        "--b");
+
+    matplotlibcpp::plot(std::vector<size_t>({lx, lx}),
+                        std::vector<size_t>({ly, uy}),
+                       "--b");
+
+    matplotlibcpp::plot(std::vector<size_t>({ux, ux}),
+                        std::vector<size_t>({uy, ly}),
+                        "--b");
 }

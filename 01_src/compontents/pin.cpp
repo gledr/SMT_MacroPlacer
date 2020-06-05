@@ -12,6 +12,7 @@
 #include "pin.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 /**
  * @brief Constructor
@@ -31,12 +32,13 @@ Pin::Pin(std::string const & name,
     m_direction(direction),
     m_pin_pos_x(m_encode->get_value(x)),
     m_pin_pos_y(m_encode->get_value(y)),
-    m_is_free(false)
+    m_is_free(false),
+    m_logger(Logger::getInstance())
 {
     m_bitwidht = 0;
     m_frequency = 0;
     
-    this->get_verbose() && std::cout << "[Info]: Adding Placed Pin " << name << std::endl;
+    m_logger->add_fixed_pin(name, "", x, y);
 }
 
 /**
@@ -58,12 +60,13 @@ Pin::Pin(std::string const & pin_name,
     m_pin_pos_y(m_encode->get_constant(macro_name + pin_name + "_pos_y")),
     m_offset_x_percentage(0),
     m_offset_y_percentage(0),
-    m_is_free(true)
+    m_is_free(true),
+    m_logger(Logger::getInstance())
 {
     m_bitwidht = 0;
     m_frequency = 0;
     
-    this->get_verbose() && std::cout << "[Info]: Adding Free Pin " << macro_name << "_" << pin_name << std::endl;
+    m_logger->add_free_pin(pin_name, macro_name);
 }
 
 /**
@@ -265,7 +268,7 @@ z3::expr& Pin::get_pin_pos_y()
  */
 void Pin::add_solution_pin_pos_x(size_t const val)
 {
-   std::cout << "[Debug]: Set Solution for " << m_macro_name << ":" << m_pin_name << " x: " << val << std::endl;
+    m_logger->place_pin_x(m_pin_name, m_macro_name, val);
 
     m_solutions_x.push_back(val);
 }
@@ -277,7 +280,7 @@ void Pin::add_solution_pin_pos_x(size_t const val)
  */
 void Pin::add_solution_pin_pos_y(size_t const val)
 {
-    std::cout << "[Debug]: Set Solution for " << m_macro_name << ":" << m_pin_name << " y: " << val << std::endl;
+    m_logger->place_pin_y(m_pin_name, m_macro_name, val);
 
     m_solutions_y.push_back(val);
 }

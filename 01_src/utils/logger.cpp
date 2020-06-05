@@ -455,3 +455,43 @@ void Logger::strip_terminals()
 {
     LOG(eInfo) << "Stripping Terminals from Circuit...";
 }
+
+void Logger::place_pin_x(std::string const & pin_name,
+                     std::string const & parent_name,
+                     size_t const pos)
+{
+    std::stringstream msg;
+    msg << "Place Pin X " << pin_name << "(" << parent_name << ") to " << pos;
+    
+    LOG(eDebug) << msg.str();
+}
+    
+void Logger::place_pin_y(std::string const & pin_name,
+                 std::string const & parent_name,
+                 size_t const pos)
+{
+    std::stringstream msg;
+    msg << "Place Pin Y " << pin_name << "(" << parent_name << ") to " << pos;
+    
+    LOG(eDebug) << msg.str();
+}
+
+void Logger::add_fixed_pin(std::string const & pin_name,
+                           std::string const & parent_name,
+                           size_t const x,
+                           size_t const y)
+{
+    std::stringstream msg;
+    msg << "Adding Fixed Pin " << pin_name << " to " << parent_name << " at (" << x << ":" << y << ")";
+    
+    LOG(eDebug) << msg.str();
+}
+
+void Logger::add_free_pin(std::string const & pin_name,
+                          std::string const & parent_name)
+{
+    std::stringstream msg;
+    msg << "Adding Free Pin " << pin_name << " to " << parent_name;
+
+    LOG(eDebug) << msg.str();
+}

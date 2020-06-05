@@ -68,6 +68,11 @@ public:
     bool is_free_uy();
     bool is_free_ux();
 
+    size_t get_lx_numerical();
+    size_t get_ly_numerical();
+    size_t get_ux_numercial();
+    size_t get_uy_numerical();
+
     size_t get_idx_best_solution();
     bool has_solution(int const solution);
 

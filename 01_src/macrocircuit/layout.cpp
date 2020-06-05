@@ -351,3 +351,51 @@ void Layout::set_formula_uy (z3::expr const & formula)
 {
     m_uy = formula;
 }
+
+/**
+ * @brief ...
+ * 
+ * @return size_t
+ */
+size_t Layout::get_ly_numerical()
+{
+    assert (m_ly.is_numeral());
+
+    return m_ly.get_numeral_uint();
+}
+
+/**
+ * @brief ...
+ * 
+ * @return size_t
+ */
+size_t Layout::get_lx_numerical()
+{
+    assert (m_lx.is_numeral());
+
+    return m_lx.get_numeral_uint();
+}
+
+/**
+ * @brief ...
+ * 
+ * @return size_t
+ */
+size_t Layout::get_ux_numercial()
+{
+    assert (m_ux.is_numeral());
+
+    return m_ux.get_numeral_uint();
+}
+
+/**
+ * @brief ...
+ * 
+ * @return size_t
+ */
+size_t Layout::get_uy_numerical()
+{
+    assert (m_uy.is_numeral());
+
+    return m_uy.get_numeral_uint();
+}

@@ -20,6 +20,7 @@
 #include <object.hpp>
 #include <encoding_utils.hpp>
 #include <exception.hpp>
+#include <logger.hpp>
 
 namespace Placer {
 
@@ -86,6 +87,7 @@ private:
     size_t m_frequency;
 
     EncodingUtils* m_encode;
+    Utils::Logger* m_logger;
 
     std::string m_pin_name;
     std::string m_macro_name;

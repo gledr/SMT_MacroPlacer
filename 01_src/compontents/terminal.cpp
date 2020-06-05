@@ -242,6 +242,7 @@ void Terminal::dump(std::ostream& stream)
     stream << std::string(30, '*') << std::endl;
     stream << "Terminal (" << m_name << ")" << std::endl;
     stream << "Direction (" << Pin::enum2string(m_direction) << ")" << std::endl;
+    stream << "Free " << std::boolalpha << m_free << std::endl;
     stream << std::string(30, '*') << std::endl;
 }
 
@@ -370,4 +371,28 @@ bool Terminal::is_power_terminal()
 bool Terminal::is_signal_terminal()
 {
     return m_terminal_type == eTerminalType::eSignalTerminal;
+}
+
+/**
+ * @brief Get Fixed Terminal Position Y Numerical
+ * 
+ * @return size_t
+ */
+size_t Terminal::get_pos_y_numerical()
+{
+    assert (m_pos_y.is_numeral());
+    
+    return m_pos_y.get_numeral_uint();
+}
+
+/**
+ * @brief Get Fixed Terminal Position X Numerical
+ * 
+ * @return size_t
+ */
+size_t Terminal::get_pox_x_numerical()
+{
+    assert (m_pos_x.is_numeral());
+    
+    return m_pos_x.get_numeral_uint();
 }

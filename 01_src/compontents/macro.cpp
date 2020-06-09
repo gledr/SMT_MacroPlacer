@@ -396,7 +396,7 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
             case_w4.push_back(y == (m_ly + m_width));
             case_w4.push_back(x < m_lx);
             case_w4.push_back(x > (m_lx - m_height));
-            //case_w.push_back(z3::mk_and(case_w4));
+            case_w.push_back(z3::mk_and(case_w4));
 ///}}}
         if (rotation == e2D){
             clauses.push_back(z3::ite(this->is_N(), z3::mk_or(case_n), z3::ite(this->is_W(), z3::mk_or(case_w), m_encode->get_flag(false))));

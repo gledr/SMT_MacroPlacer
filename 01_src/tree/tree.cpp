@@ -32,13 +32,15 @@ Tree::Tree():
  */
 Tree::~Tree()
 {
+    /* No DTOR Possible due to CCTOR Shallow Copying */
+}
+
+/**
+ * @brief Release Resources
+ */
+void Tree::destroy()
+{
     for(auto itor: m_nodes){
-        delete itor; itor = nullptr;
-    }
-    for(auto itor: m_terminals){
-        delete itor; itor = nullptr;
-    }
-    for(auto itor: m_edges){
         delete itor; itor = nullptr;
     }
     m_logger = nullptr;
@@ -51,7 +53,11 @@ Tree::~Tree()
  */
 Tree::Tree(Tree const & tree)
 {
-    notimplemented_check();
+    // Copy Pointer --> Shallow Copy
+    m_edges = tree.m_edges;
+    m_nodes = tree.m_nodes;
+    m_terminals = tree.m_terminals;
+    m_logger = tree.m_logger;
 }
 
 /**

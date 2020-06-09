@@ -31,9 +31,21 @@ public:
 
     void init_database();
 
-    void place_macro(size_t const solution, Macro* macro);
+    void place_component(size_t const solution, Component* component);
+
+    void place_pin(size_t const solution, Component* parent, Pin* pin);
 
     void place_terminal(size_t const solution, Terminal* terminal);
+    
+    void insert_results(size_t const solution,
+                        size_t const area,
+                        size_t const hpwl);
+    
+    void insert_layout(size_t const solution,
+                       size_t const lx,
+                       size_t const ly,
+                       size_t const ux,
+                       size_t const uy);
 
     void export_as_csv(std::string const & filename);
 

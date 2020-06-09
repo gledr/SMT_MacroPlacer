@@ -23,6 +23,7 @@ using namespace Placer::Utils;
 void RunTimeCheck::__assertion_check__(std::string const & file, size_t const line)
 {
 
+    std::cout << file << " " << line << std::endl;
     assert (0);
     throw PlacerException("Assertion Violated (" + file + ":" + std::to_string(line) + ")");
 }

@@ -342,10 +342,13 @@ void Terminal::set_frequency(size_t const frequency)
  */
 void Terminal::resolve_terminal_type()
 {
+    std::string name = m_name;
+    boost::to_lower(name); // directly applied by reference
+
     auto position = std::find(m_terminal_keywords.begin(),
                               m_terminal_keywords.end(),
-                              m_name);
-    
+                              name);
+
     if (position != m_terminal_keywords.end()){
         m_terminal_type = eTerminalType::ePowerTerminal;
     } else {
@@ -381,7 +384,7 @@ bool Terminal::is_signal_terminal()
 size_t Terminal::get_pos_y_numerical()
 {
     assert (m_pos_y.is_numeral());
-    
+
     return m_pos_y.get_numeral_uint();
 }
 
@@ -393,6 +396,6 @@ size_t Terminal::get_pos_y_numerical()
 size_t Terminal::get_pox_x_numerical()
 {
     assert (m_pos_x.is_numeral());
-    
+
     return m_pos_x.get_numeral_uint();
 }

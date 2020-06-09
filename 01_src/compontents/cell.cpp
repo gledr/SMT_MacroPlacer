@@ -56,3 +56,8 @@ size_t Cell::get_key()
 {
     return m_key;
 }
+
+bool Cell::is_free()
+{
+    notimplemented_check();
+}

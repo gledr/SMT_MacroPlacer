@@ -21,8 +21,10 @@
 #include <logger.hpp>
 #include <encoding_utils.hpp>
 
+#include <boost/algorithm/string.hpp>
+
 namespace Placer {
-    
+
 enum eTerminalType {
     ePowerTerminal,
     eSignalTerminal,

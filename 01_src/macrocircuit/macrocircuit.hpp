@@ -178,6 +178,7 @@ private:
      */ 
     void solve();
     void dump_smt_instance();
+
 };
 
 } /* namespace Placer */

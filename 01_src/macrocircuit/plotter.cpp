@@ -140,7 +140,6 @@ void Plotter::run()
     std::stringstream img_name;
     img_name << "placement_" << this->get_design_name() << "_" << m_solution_id << ".png";
     matplotlibcpp::save("./" + img_name.str());
-    
 }
 
 /**
@@ -217,6 +216,18 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
     size_t ux = 0;
     size_t uy = 0;
 
+    if (!pin->is_free()){
+        x_pos = pin->get_pin_pos_x_numeral();
+        y_pos = pin->get_pin_pos_y_numeral();
+    } else {
+        if (pin->has_solution(m_solution_id)){
+            x_pos = pin->get_solution_pin_pos_x(m_solution_id);
+            y_pos = pin->get_solution_pin_pos_y(m_solution_id);
+        } else {
+            return;
+        }
+    }
+
     eOrientation o = parent->get_solution_orientation(m_solution_id);
     if (o == eNorth){
         lx = parent->get_solution_lx(m_solution_id);
@@ -231,9 +242,6 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
     } else {
         notimplemented_check();
     }
-
-    x_pos = pin->get_solution_pin_pos_x(m_solution_id);
-    y_pos = pin->get_solution_pin_pos_y(m_solution_id);
 
     enum ePlane {ePlaneLeft, ePlaneRight, ePlaneUpper, ePlaneLower, ePlaneInit};
     ePlane pin_location = ePlaneInit;

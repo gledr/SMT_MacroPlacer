@@ -358,7 +358,7 @@ void MacroPlacer::post_process()
         m_mckt->dump_best();
     }
     m_mckt->create_statistics();
-    //m_mckt->results_to_db();
+    m_mckt->results_to_db();
 }
 
 /**

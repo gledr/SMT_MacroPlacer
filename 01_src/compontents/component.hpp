@@ -64,6 +64,7 @@ public:
 
     virtual size_t get_area() = 0;
     virtual void dump(std::ostream & stream = std::cout) = 0;
+    virtual bool is_free() = 0;
     
     virtual std::vector<Pin*> get_pins() = 0;
 

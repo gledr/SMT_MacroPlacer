@@ -581,7 +581,6 @@ void Partitioning::hypergraph_partitioning()
 void Partitioning::api_based_partitioning()
 {
     m_logger->start_kahypar();
-    m_tree->strip_terminals();
 
     // Redirect Kahypar Output to File
     std::ofstream out(this->get_active_results_directory() + "/kahypar.txt");
@@ -602,7 +601,10 @@ void Partitioning::api_based_partitioning()
     size_t hyperedge_idx = 0;
     size_t hyperedge_idx_idx = 0;
 
-    std::map<std::string, std::set<std::string>> steiner_tree = m_tree->get_steiner_tree();
+    Tree tmp_tree(*m_tree);
+    
+    tmp_tree.strip_terminals();
+    std::map<std::string, std::set<std::string>> steiner_tree = tmp_tree.get_steiner_tree();
 
     // Resolve Number of Total Needed Array Spaces for Hyperedge Container
     std::vector<std::set<std::string>> key_tree;

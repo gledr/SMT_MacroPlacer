@@ -324,7 +324,9 @@ void Bookshelf::read_nets()
                     Macro* to = nodes[node_index]->get_macro();
                     nullpointer_check(to);
 
-                    m_tree->insert_edge<Terminal, Macro>(from, to, from_pin, to_pin, "");
+                    if (!(this->get_skip_power_network() && from->is_power_terminal())){
+                        m_tree->insert_edge<Terminal, Macro>(from, to, from_pin, to_pin, "");
+                    }
                 } else if (from_case == 'm' && to_case == 't'){
                     Macro* from = nodes[0]->get_macro();
                     nullpointer_check(from);
@@ -332,7 +334,9 @@ void Bookshelf::read_nets()
                     Terminal* to = nodes[node_index]->get_terminal();
                     nullpointer_check(to);
 
-                    m_tree->insert_edge<Macro, Terminal>(from, to, from_pin, to_pin, "");
+                    if (!(this->get_skip_power_network() && to->is_power_terminal())){
+                        m_tree->insert_edge<Macro, Terminal>(from, to, from_pin, to_pin, "");
+                    }
                 } else {
                     notimplemented_check();
                 }

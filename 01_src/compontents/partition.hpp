@@ -41,6 +41,7 @@ public:
     std::vector<Component*>& get_components();
 
     virtual size_t get_area();
+    virtual bool is_free();
     double get_white_space_percentage();
     bool has_white_space();
 

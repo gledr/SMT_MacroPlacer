@@ -262,6 +262,30 @@ z3::expr& Pin::get_pin_pos_y()
 }
 
 /**
+ * @brief Get Pin Position as Numeral Value
+ * 
+ * @return size_t
+ */
+size_t Pin::get_pin_pos_x_numeral()
+{
+    assert (m_pin_pos_x.is_numeral());
+    
+    return m_pin_pos_x.get_numeral_uint();
+}
+
+/**
+ * @brief Get Pin Position as Numeral Value
+ * 
+ * @return size_t
+ */
+size_t Pin::get_pin_pos_y_numeral()
+{
+    assert (m_pin_pos_y.is_numeral());
+    
+    return m_pin_pos_y.get_numeral_uint();
+}
+
+/**
  * @brief Add Solution for X Coordinate
  * 
  * @param val Coordinate
@@ -375,4 +399,17 @@ bool Pin::has_offset_y()
 bool Pin::is_free()
 {
     return m_is_free;
+}
+
+/**
+ * @brief Check if Pin Commands over certain solution
+ *
+ * @param solution_id p_solution_id:...
+ * @return bool
+ */
+bool Pin::has_solution(size_t const solution_id)
+{
+    assert (m_solutions_x.size() == m_solutions_y.size());
+    
+    return m_solutions_x.size() > solution_id;
 }

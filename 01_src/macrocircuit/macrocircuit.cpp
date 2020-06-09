@@ -71,6 +71,7 @@ MacroCircuit::~MacroCircuit()
         delete m_bookshelf; m_bookshelf = nullptr;
     }
 
+    m_tree->destroy();
     delete m_tree; m_tree = nullptr;
     delete m_z3_opt; m_z3_opt = nullptr;
     delete m_eval; m_eval = nullptr;
@@ -610,7 +611,6 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
 
         pin->addLayer("METAL1");
         pin->setPlacement(1,1,1,0);
-        
     }
     */
     FILE* fp = fopen(name.c_str(), "w");
@@ -683,7 +683,6 @@ void MacroCircuit::area_estimator()
     m_layout->set_min_die_predition(m_estimated_area);
 }
 
-
 /**
  * @brief Get access to the connectivity tree
  * 
@@ -720,7 +719,7 @@ size_t MacroCircuit::get_solutions()
 void MacroCircuit::config_z3()
 {
     z3::params param(m_z3_ctx);
-    
+
     if (this->get_logic() == eInt){
         //m_z3_ctx.set("logic", "LIA");
         m_logger->encode_int();
@@ -746,7 +745,7 @@ void MacroCircuit::config_z3()
         m_logger->use_lex_optimizer();
         param.set(":opt.priority", "lex");
     }
-    
+
     if(this->get_timeout() != 0){
       m_logger->use_timeout(this->get_timeout());
       param.set(":timeout", (unsigned)this->get_timeout() * 1000);
@@ -762,11 +761,11 @@ void MacroCircuit::run_encoding()
 {
     this->encode_components_inside_die(e2D);
     this->encode_components_non_overlapping(e2D);
-    
+
     if (this->get_free_terminals()){
         this->encode_terminals_non_overlapping();
         this->encode_terminals_on_frontier();
-        
+
         m_z3_opt->add(m_terminals_non_overlapping);
         m_z3_opt->add(m_terminals_on_frontier);
     }
@@ -774,7 +773,6 @@ void MacroCircuit::run_encoding()
     m_z3_opt->add(m_components_inside_die);
     m_z3_opt->add(m_components_non_overlapping);
     m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
-
 
     if (this->get_partitioning()){
         z3::expr_vector clauses(m_z3_ctx);
@@ -791,7 +789,7 @@ void MacroCircuit::run_encoding()
         }
         m_z3_opt->add(z3::mk_and(clauses));
     }
-    
+
     if (this->get_minimize_die_mode()){
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
@@ -860,7 +858,7 @@ void MacroCircuit::encode_components_inside_die(eRotation const type)
                 z3::expr ite = z3::ite(is_N, z3::mk_and(case_N),
                                z3::ite(is_W, z3::mk_and(case_W), m_z3_ctx.bool_val(false)));
                 clauses.push_back(ite);
-                
+
             } else if (type == eRotation::e4D){
                 z3::expr ite = z3::ite(is_N, z3::mk_and(case_N),
                                z3::ite(is_E, z3::mk_and(case_E),
@@ -1342,30 +1340,60 @@ void MacroCircuit::dump_smt_instance()
 void MacroCircuit::results_to_db()
 {
     for (size_t i = 0; i < m_solutions; ++i){
-        for (Macro* macro: m_macros){
-            m_db->place_macro(i, macro);
+        for (Component* component: m_components){
+            m_db->place_component(i, component);
+
+            for (Pin* pin: component->get_pins()){
+                m_db->place_pin(i, component, pin);
+            }
         }
         for (Terminal* terminal: m_terminals){
             m_db->place_terminal(i, terminal);
         }
+
+        size_t lx = 0, ly = 0, ux = 0, uy = 0;
+        if (m_layout->is_free_lx()){
+            notimplemented_check();
+        } else {
+            lx = m_layout->get_lx_numerical();
+        }
+        if (m_layout->is_free_ly()){
+            notimplemented_check();
+        } else {
+            ly = m_layout->get_ly_numerical();
+        }
+        if (m_layout->is_free_ux()){
+            ux = m_layout->get_solution_ux(i);
+        } else {
+            ux = m_layout->get_ux_numercial();
+        }
+        if (m_layout->is_free_uy()){
+            uy = m_layout->get_solution_uy(i);
+        } else {
+            uy = m_layout->get_uy_numerical();
+        }
+        m_db->insert_layout(i, lx, ly, ux, uy);
     }
     m_db->export_as_csv("results.csv");
 }
 
+/**
+ * @brief Wirelenght Cost Function
+ */
 void MacroCircuit::encode_hpwl_lenght()
 {
     z3::expr_vector clauses(m_z3_ctx);
-    
+
     for (Edge* edge: m_tree->get_edges()){
         Node* from = edge->get_from();
         Node* to   = edge->get_to();
-        
+
         z3::expr from_x = m_encode->get_value(0);
         z3::expr from_y = m_encode->get_value(0);
-        
+
         z3::expr to_x = m_encode->get_value(0);
         z3::expr to_y = m_encode->get_value(0);
-        
+
         if (from->is_terminal()){
             Terminal* t = from->get_terminal();
             nullpointer_check(t);
@@ -1374,10 +1402,10 @@ void MacroCircuit::encode_hpwl_lenght()
         } else if (from->has_macro()){
             Macro* m = from->get_macro();
             nullpointer_check(m);
-            
+
             Pin* p = m->get_pin(edge->get_from_pin());
             nullpointer_check(p);
-            
+
             from_x = p->get_pin_pos_x();
             from_y = p->get_pin_pos_y();
         } else {
@@ -1387,30 +1415,30 @@ void MacroCircuit::encode_hpwl_lenght()
         if (to->is_terminal()){
             Terminal* t = to->get_terminal();
             nullpointer_check(t);
-            
+
             to_x = t->get_pos_x();
             to_y = t->get_pos_y();
         } else if (to->has_macro()){
             Macro* m = to->get_macro();
             nullpointer_check(m);
-            
+
             Pin* p = m->get_pin(edge->get_to_pin());
             nullpointer_check(p);
-            
+
             to_x = p->get_pin_pos_x();
             to_y = p->get_pin_pos_y();
         } else {
             notimplemented_check();
         }
-        
+
         z3::expr hpwl = this->euclidean_distance(from_x, from_y, to_x, to_y);
         clauses.push_back(hpwl);
     }
-    
+
     for (size_t i = 0; i < clauses.size(); ++i){
         m_hpwl_edges.push_back(clauses[i]);
     }
-    
+
     m_hpwl_cost_function = m_encode->mk_sum(clauses);
 }
 

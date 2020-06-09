@@ -48,6 +48,9 @@ public:
     z3::expr& get_pin_pos_x();
     z3::expr& get_pin_pos_y();
 
+    size_t get_pin_pos_x_numeral();
+    size_t get_pin_pos_y_numeral();
+
     void set_x_offset_percentage(int const offset);
     void set_y_offset_percentage(int const offset);
 
@@ -65,7 +68,8 @@ public:
 
     bool is_input();
     bool is_output();
-    bool is_free();
+    virtual bool is_free();
+    bool has_solution(size_t const solution_id);
 
     std::string get_name();
     std::string get_id();

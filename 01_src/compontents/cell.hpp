@@ -37,6 +37,7 @@ public:
     size_t get_key();
 
     virtual std::vector<Pin*> get_pins();
+    virtual bool is_free();
 
 private:
 

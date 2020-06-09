@@ -58,7 +58,7 @@ public:
     Partition* get_parent_partition();
 
     virtual std::vector<Pin*> get_pins();
-    bool is_free();
+    virtual bool is_free();
     bool is_part_of_partition();
     size_t get_key();
 

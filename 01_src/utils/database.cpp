@@ -61,13 +61,21 @@ void Database::init_database()
     this->db_command(stream.str());
 
     stream.str("");
+    stream << "CREATE TABLE pins(";
+    stream << "solution INTEGER,";
+    stream << "parent VARCHAR(50),";
+    stream << "name VARCHAR(50),";
+    stream << "x INTEGER,";
+    stream << "y INTEGER);";
+    this->db_command(stream.str());
+
+    stream.str("");
     stream << "CREATE TABLE layout(",
     stream << "solution INTEGER,";
     stream << "lx INTEGER,";
     stream << "ly INTEGER,";
     stream << "ux INTEGER,";
-    stream << "uy INTEGER,";
-    stream << "orientation VARCHAR(10));";
+    stream << "uy INTEGER);";
     this->db_command(stream.str());
 
     stream.str("");
@@ -106,29 +114,30 @@ int Database::__callback__(int argc, char **argv, char **azColName)
  * @param solution Solution ID
  * @param macro Pointer to Macro
  */
-void Database::place_macro(size_t const solution, Macro* macro)
+void Database::place_component(size_t const solution, Component* component)
 {
-    nullpointer_check (macro);
+    assert (component != nullptr);
+    nullpointer_check (component);
 
     std::string s    = std::to_string(solution);
-    std::string name = macro->get_name();
-    std::string id   = macro->get_id();
-    std::string free = std::to_string(macro->is_free());
-    std::string w    = std::to_string(macro->get_width_numeral());
-    std::string h    = std::to_string(macro->get_height_numeral());
+    std::string name = component->get_name();
+    std::string id   = component->get_id();
+    std::string free = std::to_string(component->is_free());
+    std::string w    = std::to_string(component->get_width_numeral());
+    std::string h    = std::to_string(component->get_height_numeral());
 
     std::string lx;
     std::string ly;
     std::string o;
 
-    if (macro->is_free()){
-        assertion_check (macro->has_solution(solution));
-        lx  = std::to_string(macro->get_solution_lx(solution));
-        ly  = std::to_string(macro->get_solution_ly(solution));
-        o   = this->orientation_to_string(macro->get_solution_orientation(solution));
+    if (component->is_free()){
+        assertion_check (component->has_solution(solution));
+        lx  = std::to_string(component->get_solution_lx(solution));
+        ly  = std::to_string(component->get_solution_ly(solution));
+        o   = this->orientation_to_string(component->get_solution_orientation(solution));
     } else {
-        lx  = std::to_string(macro->get_lx().get_numeral_uint());
-        ly  = std::to_string(macro->get_ly().get_numeral_uint());
+        lx  = std::to_string(component->get_lx().get_numeral_uint());
+        ly  = std::to_string(component->get_ly().get_numeral_uint());
         o   = "D"; // Default for the Moment -Bookshelf has no Orientation afaik TODO
     }
 
@@ -155,17 +164,99 @@ void Database::place_terminal(size_t const solution, Terminal* terminal)
     std::string x;
     std::string y;
 
-    if (terminal->is_free()){
+    if (terminal->is_free() && terminal->has_solution(solution)){
         assertion_check(terminal->has_solution(solution));
         x    = std::to_string(terminal->get_solution_pos_x(solution));
         y    = std::to_string(terminal->get_solution_pos_y(solution));
-    } else {
+    } else if (!terminal->is_free()){
         x = std::to_string(terminal->get_pos_x().get_numeral_uint());
         y = std::to_string(terminal->get_pos_y().get_numeral_uint());
+    } else {
+        return;
     }
     std::stringstream query;
     query << "INSERT INTO terminals VALUES (" 
         << sol << ",'" << name << "'," << x << "," << y << ");";
+    this->db_command(query.str());
+}
+
+/**
+ * @brief Insert Placed Pin to Database
+ * 
+ * @param solution Solution ID
+ * @param parent Pointer to Pin Parent
+ * @param pin Pointer to Pin
+ */
+void Database::place_pin(size_t const solution,
+                         Component* parent,
+                         Pin* pin)
+{
+    nullpointer_check(parent);
+    nullpointer_check(pin);
+    
+    std::string sol = std::to_string(solution);
+    std::string _parent = parent->get_id();
+    std::string name = pin->get_name();
+    size_t x = 0;
+    size_t y = 0;
+    
+    if (pin->is_free() && pin->has_solution(solution)){
+        x = pin->get_solution_pin_pos_x(solution);
+        y = pin->get_solution_pin_pos_y(solution);
+    } else if (!pin->is_free()){
+        x = pin->get_pin_pos_x_numeral();
+        y = pin->get_pin_pos_y_numeral();
+    } else {
+        return;
+    }
+
+    std::stringstream query;
+    query << "INSERT INTO pins VALUES (" << sol << ",'"
+                                         << _parent << "','" 
+                                         << name << "',"
+                                         << x << "," 
+                                         << y << ");";
+    this->db_command(query.str());
+}
+
+/**
+ * @brief Insert HPWL and Area for given Solution
+ * 
+ * @param solution Solution ID
+ * @param area Area needed
+ * @param hpwl Half Perimeter Wirelength Needed
+ */
+void Database::insert_results(size_t const solution,
+                        size_t const area,
+                        size_t const hpwl)
+{
+    std::stringstream query;
+    query << "INSERT INTO results VALUES (" << solution << "," << area << "," << hpwl << ");";
+    this->db_command(query.str());
+}
+
+/**
+ * @brief Insert Layout Version
+ * 
+ * @param solution Solution ID
+ * @param lx p_lx: Lower Left X
+ * @param ly p_ly:.Lower Left Y
+ * @param ux p_ux: Upper Right X
+ * @param uy p_uy: Upper Right Y
+ */
+void Database:: insert_layout(size_t const solution,
+                              size_t const lx,
+                              size_t const ly,
+                              size_t const ux,
+                              size_t const uy)
+{
+    std::stringstream query;
+    query << "INSERT INTO layout VALUES ("
+          << solution << ","
+          << lx << "," 
+          << ly << ","
+          << ux << ","
+          << uy << ");";
     this->db_command(query.str());
 }
 

@@ -12,6 +12,7 @@
 #include "plotter.hpp"
 
 using namespace Placer;
+using namespace Placer::Utils;
 
 /**
  * @brief Constructor
@@ -77,12 +78,15 @@ void Plotter::run()
 
     this->draw_layout();
 
+    // Terminals
+    for(Terminal* t: m_terminals){
+        this->draw_terminal(t);
+    }
+
     for(size_t j = 0; j < m_components.size(); ++j){
         Component* cmp = m_components[j];
         nullpointer_check(cmp);
-        
-        m_id2macro[cmp->get_id()] = cmp;
-        
+
         size_t width = cmp->get_width().get_numeral_uint();
         size_t height = cmp->get_height().get_numeral_uint();
 
@@ -90,7 +94,7 @@ void Plotter::run()
         size_t lx = cmp->get_solution_lx(m_solution_id);
         size_t ly = cmp->get_solution_ly(m_solution_id);
         std::string id = cmp->get_id();
-        
+
         // North
         if(o == eNorth){
             this->draw_rectangle(lx, ly, lx + width, ly + height, id);
@@ -128,23 +132,15 @@ void Plotter::run()
             notsupported_check("Orientation not Supported!");
         }
 
-        // Terminals
-        for(Terminal* t: m_terminals){
-            this->draw_terminal(t);
+        for  (Pin* p: cmp->get_pins()){
+            this->draw_pin(cmp, p);
         }
-
-        // Pin
-        for (Component* m: m_components){
-            for  (Pin* p: m->get_pins()){
-                this->draw_pin(p);
-            }
-        }
-   
-        
-        std::stringstream img_name;
-        img_name << "placement_" << this->get_design_name() << "_" << m_solution_id << ".png";
-        matplotlibcpp::save("./" + img_name.str());
     }
+
+    std::stringstream img_name;
+    img_name << "placement_" << this->get_design_name() << "_" << m_solution_id << ".png";
+    matplotlibcpp::save("./" + img_name.str());
+    
 }
 
 /**
@@ -179,6 +175,11 @@ void Plotter::draw_rectangle(size_t const lx,
                         "-k");
 }
 
+/**
+ * @brief Draw Terminal
+ * 
+ * @param t Pointer to Terminal
+ */
 void Plotter::draw_terminal(Terminal* t)
 {
     nullpointer_check(t);
@@ -198,25 +199,86 @@ void Plotter::draw_terminal(Terminal* t)
     matplotlibcpp::scatter(x,y,50);
 }
 
-void Plotter::draw_pin(Pin* pin)
+/**
+ * @brief Draw Pin
+ * 
+ * @param parent Pointer to Pin's Parent Component
+ * @param pin Pointer to Pin
+ */
+void Plotter::draw_pin(Component* parent, Pin* pin)
 {
     nullpointer_check(pin);
-
-    // Check on which plane the pin is located
-    // Calculate offset and draw pin inside the macro
+    nullpointer_check(parent);
     
-    size_t x_pos = pin->get_solution_pin_pos_x(m_solution_id);
-    size_t y_pos = pin->get_solution_pin_pos_y(m_solution_id);
+    size_t x_pos = 0;
+    size_t y_pos = 0;
+    size_t lx = 0;
+    size_t ly = 0;
+    size_t ux = 0;
+    size_t uy = 0;
 
-    std::vector<size_t> x;
-    x.push_back(x_pos);
+    eOrientation o = parent->get_solution_orientation(m_solution_id);
+    if (o == eNorth){
+        lx = parent->get_solution_lx(m_solution_id);
+        ly = parent->get_solution_ly(m_solution_id);
+        ux = lx + parent->get_width_numeral();
+        uy = ly + parent->get_height_numeral();
+    } else if (o == eWest){
+        lx = parent->get_solution_lx(m_solution_id) - parent->get_height_numeral();
+        ly = parent->get_solution_ly(m_solution_id);
+        ux = parent->get_solution_lx(m_solution_id);
+        uy = parent->get_solution_ly(m_solution_id) + parent->get_width_numeral();
+    } else {
+        notimplemented_check();
+    }
 
-    std::vector<size_t> y;
-    y.push_back(y_pos);
+    x_pos = pin->get_solution_pin_pos_x(m_solution_id);
+    y_pos = pin->get_solution_pin_pos_y(m_solution_id);
+
+    enum ePlane {ePlaneLeft, ePlaneRight, ePlaneUpper, ePlaneLower, ePlaneInit};
+    ePlane pin_location = ePlaneInit;
+
+    // Left Plane
+    if ((x_pos == lx) && ((y_pos >= ly) && (y_pos <= uy))){
+        pin_location = ePlaneLeft;
+    // Right Plane
+    } else if ((x_pos == ux) && ((y_pos >= ly) && (y_pos <= uy))){
+        pin_location = ePlaneRight;
+    // Lower Plane
+    } else if ((y_pos == ly) && ((x_pos >= lx) && (x_pos <= ux))){
+        pin_location = ePlaneLower;
+    // Upper Plane 
+    } else if ((y_pos == uy) && ((x_pos >= lx) && (x_pos <= ux))){
+        pin_location = ePlaneUpper;
+    } else {
+        throw PlacerException("Pin Position Not Supported!");
+    }
+    double pin_offset = 0.2;
+    std::vector<double> x;
+    std::vector<double> y;
+
+    if (pin_location == ePlaneLeft){
+        x.push_back(x_pos + pin_offset);
+        y.push_back(y_pos);
+    } else if (pin_location == ePlaneLower){
+        x.push_back(x_pos);
+        y.push_back(y_pos + pin_offset);
+    } else if (pin_location == ePlaneRight){
+        x.push_back(x_pos - pin_offset);
+        y.push_back(y_pos);
+    } else if (pin_location == ePlaneUpper){
+        x.push_back(x_pos);
+        y.push_back(y_pos - pin_offset);
+    } else {
+        throw PlacerException("Invalid Pin Position Detected!");
+    }
 
     matplotlibcpp::scatter(x,y,50);
 }
 
+/**
+ * @brief Draw Layout Shape
+ */
 void Plotter::draw_layout()
 {
     size_t lx = 0;

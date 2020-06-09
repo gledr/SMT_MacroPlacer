@@ -110,6 +110,12 @@ public:
     void place_pin_y(std::string const & pin_name,
                      std::string const & parent_name,
                      size_t const pos);
+    
+    void place_terminal_x(std::string const & terminal_name,
+                          size_t const pos);
+    
+    void place_terminal_y(std::string const & terminal_name,
+                          size_t const pos);
 
     void place_terminal(std::string const & name,
                        size_t const x,

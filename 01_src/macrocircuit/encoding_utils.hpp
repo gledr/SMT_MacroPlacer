@@ -100,7 +100,7 @@ public:
     {
         try {
             if(clauses.size() == 0){
-                notimplemented_check();
+                return m_z3_ctx.int_val(0);
             } else if (clauses.size() == 1){
                 return clauses[0];
             } else {

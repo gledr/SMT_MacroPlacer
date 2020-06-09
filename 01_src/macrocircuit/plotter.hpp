@@ -15,6 +15,7 @@
 #include <object.hpp>
 #include <components.hpp>
 #include <layout.hpp>
+#include <exception.hpp>
 
 #include <matplotlibcpp.h>
 
@@ -36,7 +37,7 @@ public:
 private:
     std::vector<Terminal*> m_terminals;
     std::vector<Component*> m_components;
-    std::map<std::string, Component*> m_id2macro;
+    std::map<std::string, Component*> m_id2component;
     Layout* m_layout;
     size_t m_solution_id;
     
@@ -48,7 +49,7 @@ private:
     
     void draw_terminal(Terminal* terminal);
     
-    void draw_pin(Pin* pin);
+    void draw_pin(Component* parent, Pin* pin);
 
     void draw_layout();
 };

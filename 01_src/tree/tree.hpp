@@ -39,6 +39,11 @@ public:
 
     virtual ~Tree();
 
+    Tree(Tree const & tree);
+
+    bool operator== (Tree const & tree);
+    Tree& operator= (Tree const & tree);
+
     template<typename from,typename to>
     void insert_edge(from* from_val,
                      to* to_val,

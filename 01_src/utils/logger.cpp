@@ -476,6 +476,24 @@ void Logger::place_pin_y(std::string const & pin_name,
     LOG(eDebug) << msg.str();
 }
 
+void Logger::place_terminal_x(std::string const & terminal_name,
+                              size_t const pos)
+{
+    std::stringstream msg;
+    msg << "Place Terminal X " << terminal_name << " to " << pos;
+    
+    LOG(eDebug) << msg.str();
+}
+
+void Logger::place_terminal_y(std::string const & terminal_name,
+                              size_t const pos)
+{
+    std::stringstream msg;
+    msg << "Place Terminal Y " << terminal_name << " to " << pos;
+    
+    LOG(eDebug) << msg.str();
+}
+
 void Logger::add_fixed_pin(std::string const & pin_name,
                            std::string const & parent_name,
                            size_t const x,

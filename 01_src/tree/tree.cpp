@@ -45,6 +45,38 @@ Tree::~Tree()
 }
 
 /**
+ * @brief Copy Constructor
+ * 
+ * @param tree Tree to Copy
+ */
+Tree::Tree(Tree const & tree)
+{
+    notimplemented_check();
+}
+
+/**
+ * @brief Assignment Operator
+ * 
+ * @param tree Tree to Assign
+ * @return Placer::Tree&
+ */
+Tree& Tree::operator=(Tree const & tree)
+{
+    notimplemented_check();
+}
+
+/**
+ * @brief Compare Operator
+ * 
+ * @param tree Tree to Compare
+ * @return bool
+ */
+bool Tree::operator==(Tree const & tree)
+{
+    notimplemented_check();
+}
+
+/**
  * @brief Get all Edges building up the Tree
  * 
  * @return std::vector<Edge*> 
@@ -303,7 +335,7 @@ void Tree::show_png()
 std::map<std::string, std::set<std::string> > Tree::get_steiner_tree()
 {
     m_steiner_tree.clear();
-    
+
     for (Edge* edge: m_edges){
         Node* from = edge->get_from();
         std::string from_id = from->get_id();
@@ -312,14 +344,12 @@ std::map<std::string, std::set<std::string> > Tree::get_steiner_tree()
         Node* to = edge->get_to();
         std::string to_id = to->get_id();
         std::string to_pin = edge->get_to_pin();
-    
+
         std::string id1 = from_id + ":" + from_pin;
         std::string id2 = to_id + ":" + to_pin;
         m_steiner_tree[id1].insert(id2);
     }
-
     return m_steiner_tree;
-
 }
 
 /**
@@ -329,7 +359,6 @@ void Tree::export_hypergraph()
 {
     std::string filename = this->get_design_name() + ".hgr";
     m_logger->export_hypergraph(filename);
-    this->strip_terminals();
 
     std::ofstream hgr_file (this->get_active_results_directory() +
                             "/" +
@@ -411,17 +440,18 @@ void Tree::strip_terminals()
 {
     std::vector<Edge*> next_edges;
     std::vector<Edge*> delete_me;
+
     for(Edge* edge: m_edges){
         Node* from = edge->get_from();
         Node* to = edge->get_to();
-        
+
         if (to->is_terminal() || from->is_terminal()){
             delete_me.push_back(edge);
         } else {
             next_edges.push_back(edge);
         }
     }
-    
+
     for (Edge* edge: delete_me){
         delete edge; edge = nullptr;
     }
@@ -429,7 +459,7 @@ void Tree::strip_terminals()
         delete itor; itor = nullptr;
     }
     m_terminals.clear();
-    
+
     m_edges.clear();
     std::copy(next_edges.begin(), next_edges.end(), std::back_inserter(m_edges));
 }

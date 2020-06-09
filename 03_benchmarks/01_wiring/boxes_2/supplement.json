@@ -1,0 +1,21 @@
+[
+    {
+    "macro" :
+        {
+            "typeA" : 
+            {
+                "pin_o" :
+                {
+                    "frequency" : "100",
+                    "width"     : 45
+                },
+                
+                "pin_i" :
+                {
+                    "frequency" : "100",
+                    "width"     : 45
+                }
+            }
+        }
+    }
+]

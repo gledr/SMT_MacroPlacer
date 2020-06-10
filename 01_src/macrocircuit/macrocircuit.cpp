@@ -801,7 +801,7 @@ void MacroCircuit::run_encoding()
     }
 
     if (this->get_minimize_hpwl_mode()){
-        this->encode_hpwl_lenght();
+        this->encode_hpwl_length();
         
         for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
             m_z3_opt->minimize(m_hpwl_edges[i]);
@@ -1380,13 +1380,17 @@ void MacroCircuit::results_to_db()
 /**
  * @brief Wirelenght Cost Function
  */
-void MacroCircuit::encode_hpwl_lenght()
+void MacroCircuit::encode_hpwl_length()
 {
     z3::expr_vector clauses(m_z3_ctx);
 
     for (Edge* edge: m_tree->get_edges()){
+        nullpointer_check(edge);
+        
         Node* from = edge->get_from();
         Node* to   = edge->get_to();
+        nullpointer_check(from);
+        nullpointer_check(to);
 
         z3::expr from_x = m_encode->get_value(0);
         z3::expr from_y = m_encode->get_value(0);

@@ -54,9 +54,9 @@ void Tree::destroy()
 Tree::Tree(Tree const & tree)
 {
     // Copy Pointer --> Shallow Copy
-    m_edges = tree.m_edges;
-    m_nodes = tree.m_nodes;
-    m_terminals = tree.m_terminals;
+    std::copy(tree.m_edges.begin(), tree.m_edges.end(), std::back_inserter(m_edges));
+    std::copy(tree.m_nodes.begin(), tree.m_nodes.end(), std::back_inserter(m_nodes));
+    std::copy(tree.m_terminals.begin(), tree.m_terminals.end(), std::back_inserter(m_terminals));
     m_logger = tree.m_logger;
 }
 
@@ -343,11 +343,16 @@ std::map<std::string, std::set<std::string> > Tree::get_steiner_tree()
     m_steiner_tree.clear();
 
     for (Edge* edge: m_edges){
+        nullpointer_check(edge);
+        
         Node* from = edge->get_from();
+        nullpointer_check(from);
+        
         std::string from_id = from->get_id();
         std::string from_pin = edge->get_from_pin();
 
         Node* to = edge->get_to();
+        nullpointer_check(to);
         std::string to_id = to->get_id();
         std::string to_pin = edge->get_to_pin();
 

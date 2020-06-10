@@ -43,8 +43,26 @@ set_source_files_properties(
 )
 
 set(CMAKE_BUILD_TYPE Debug)
-set(CMAKE_CXX_FLAGS_DEBUG "-g")
+set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+
+add_library(placer_utils
+    utils/timer.cpp
+    utils/logger.cpp
+    utils/base_logger.cpp
+    utils/utils.cpp
+    utils/base_database.cpp
+    utils/database.cpp
+    utils/exception.cpp
+)
+
+target_link_libraries (placer_utils 
+    ${THIRD_PARTY_LIB}/libsqlite3.a
+)
+
+add_dependencies(placer_utils
+    build_sqlite3
+)
 
 add_executable(smt_placer
     main.cpp
@@ -74,13 +92,6 @@ add_executable(smt_placer
     tree/node.cpp
     tree/tree.cpp
     evaluate/evaluate.cpp
-    utils/timer.cpp
-    utils/logger.cpp
-    utils/base_logger.cpp
-    utils/utils.cpp
-    utils/base_database.cpp
-    utils/database.cpp
-    utils/exception.cpp
     clustering/centroid.cpp
     clustering/cluster.cpp
     clustering/kmeans.cpp
@@ -95,10 +106,6 @@ add_executable(bookshelf_converter
     tree/tree.cpp
     tree/node.cpp
     tree/edge.cpp
-    utils/exception.cpp
-    utils/logger.cpp
-    utils/base_logger.cpp
-    utils/utils.cpp
     compontents/terminal.cpp
     compontents/macro.cpp
     compontents/component.cpp
@@ -113,15 +120,15 @@ add_dependencies(smt_placer
     lef
     build_z3
     build_jsoncpp
-    build_sqlite3
     build_kahypar
-	build_matplotlib
+    build_matplotlib
     placer_config
     ABKCommon
     ParquetFP
+    placer_utils
 )
 
-target_link_libraries(smt_placer
+target_link_libraries(smt_placer PUBLIC
     ${Boost_LIBRARIES}
     Python2::Python Python2::NumPy
     def
@@ -130,12 +137,17 @@ target_link_libraries(smt_placer
     lefzlib
     ${THIRD_PARTY_LIB}/libz3.so
     ${THIRD_PARTY_LIB}/libjsoncpp.a
-    ${THIRD_PARTY_LIB}/libsqlite3.a
     ${THIRD_PARTY_LIB}/libkahypar.so
     ${PARQUET_HOME}/lib/libParquetFP.a
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
     pthread
     dl
+    placer_utils
+)
+
+target_include_directories(smt_placer PRIVATE 
+    ${Python2_INCLUDE_DIRS} 
+    ${Python2_NumPy_INCLUDE_DIRS}
 )
 
 target_link_libraries(bookshelf_converter
@@ -143,6 +155,6 @@ target_link_libraries(bookshelf_converter
     pthread
     ${THIRD_PARTY_LIB}/libz3.so
     ${THIRD_PARTY_LIB}/libjsoncpp.a
+    dl
+    placer_utils
 )
-
-target_include_directories(smt_placer PRIVATE ${Python2_INCLUDE_DIRS} ${Python2_NumPy_INCLUDE_DIRS})

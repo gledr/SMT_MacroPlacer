@@ -129,9 +129,8 @@ public:
     PlacerNullPointerException (std::string const & what):
         std::exception() 
     {
-        std::cerr << std::endl;
         std::cerr << what << std::endl;
-        exit(-1);
+        exit(0);
     }
 };
 

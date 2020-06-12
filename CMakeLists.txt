@@ -36,7 +36,6 @@ set(LEFLIB_HOME ${PROJECT_SOURCE_DIR}/02_module/lef)
 set(MATPLOTLIBCPP_HOME ${PROJECT_SOURCE_DIR}/02_module/matplotlib-cpp)
 set(ABKCOMMON_HOME ${PROJECT_SOURCE_DIR}/02_module/ABKCommon)
 set(PARQUET_HOME ${PROJECT_SOURCE_DIR}/02_module/ParquetFP)
-set(KAHYPAR_HOME ${PROJECT_SOURCE_DIR}/05_third_party/kahypar)
 
 set(THIRD_PARTY_INCLUDE ${PROJECT_SOURCE_DIR}/05_third_party/include)
 set(THIRD_PARTY_LIB ${PROJECT_SOURCE_DIR}/05_third_party/lib)

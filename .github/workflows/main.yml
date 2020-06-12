@@ -12,8 +12,8 @@ env:
   global: 
   
 jobs:
-  include:
-    - os: linux
+  Master:
+      os: linux
       dist: focal
       compiler: g++
       addons:

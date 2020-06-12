@@ -1,9 +1,9 @@
 [submodule "02_module/lef"]
-	path = 02_module/lef
-	url = https://github.com/The-OpenROAD-Project/lef
+    path = 02_module/lef
+    url = https://github.com/The-OpenROAD-Project/lef
 [submodule "02_module/def"]
-	path = 02_module/def
-	url = https://github.com/The-OpenROAD-Project/def
-[submodule "02_modules/matplotlibcpp"]
-    path = 02_modules/matplotlibcpp
-    url = https://github.com/lava/matplotlib-cpp
+    path = 02_module/def
+    url = https://github.com/The-OpenROAD-Project/def
+[submodule "02_module/matplotlib-cpp"]
+	path = 02_module/matplotlib-cpp
+	url = https://github.com/lava/matplotlib-cpp

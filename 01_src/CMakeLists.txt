@@ -12,6 +12,7 @@ add_definitions(-D_CPPUNWIND)
 include_directories(
     ${Boost_INCLUDE_DIRS}
     ${JSONCPP_INCLUDE_DIRS}
+    ${MATPLOTLIBCPP_HOME}
     ${DEFLIB_HOME}/def
     ${DEFLIB_HOME}/defzlib
     ${DEFLIB_HOME}/cdef
@@ -125,6 +126,7 @@ add_executable(bookshelf_converter
 add_dependencies(smt_placer
     def
     lef
+    matplotlibcpp
     #build_z3
     #build_jsoncpp
     build_kahypar

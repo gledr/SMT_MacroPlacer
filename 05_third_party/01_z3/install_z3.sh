@@ -7,5 +7,5 @@ if [ ! -d z3 ]; then
     python scripts/mk_make.py --prefix=../../../
     cd build
     make -j 2
-    make install
+    sudo make install
 fi

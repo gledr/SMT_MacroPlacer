@@ -18,6 +18,8 @@ jobs:
                 - graphviz
                 - bison
                 - zlib1g-dev
+                - python2-dev
+                - python-numpy
               
 install:
   - echo "Install"

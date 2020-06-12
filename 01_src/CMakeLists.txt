@@ -1,5 +1,8 @@
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 find_package(Python2 COMPONENTS Development NumPy)
+find_package(PkgConfig REQUIRED)
+
+pkg_check_modules(JSONCPP jsoncpp)
 
 add_definitions(-D_CPPUNWIND)
 
@@ -141,7 +144,7 @@ target_link_libraries(smt_placer PUBLIC
     lefzlib
     ${THIRD_PARTY_LIB}/libz3.so
     #${THIRD_PARTY_LIB}/libjsoncpp.a
-    jsoncpp
+    ${JSONCPP_LIBRARIES}
     ${THIRD_PARTY_LIB}/libkahypar.so
     ${PARQUET_HOME}/lib/libParquetFP.a
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
@@ -153,10 +156,12 @@ target_link_libraries(smt_placer PUBLIC
 target_include_directories(smt_placer PRIVATE 
     ${Python2_INCLUDE_DIRS} 
     ${Python2_NumPy_INCLUDE_DIRS}
+    ${JSONCPP_LIBRARIES}
 )
 
 target_link_libraries(bookshelf_converter
     ${Boost_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
     pthread
     ${THIRD_PARTY_LIB}/libz3.so
     #${THIRD_PARTY_LIB}/libjsoncpp.a

@@ -21,6 +21,7 @@ jobs:
                 - zlib1g-dev
                 - python2-dev
                 - python-numpy
+                - z3
               
 install:
   - echo "Install"

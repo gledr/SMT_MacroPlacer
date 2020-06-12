@@ -63,7 +63,7 @@ target_link_libraries (placer_utils
 )
 
 add_dependencies(placer_utils
-    build_z3
+    #build_z3
     build_sqlite3
 )
 
@@ -121,7 +121,7 @@ add_executable(bookshelf_converter
 add_dependencies(smt_placer
     def
     lef
-    build_z3
+    #build_z3
     build_jsoncpp
     build_kahypar
     build_matplotlib

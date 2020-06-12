@@ -63,10 +63,10 @@ target_link_libraries (placer_utils
     sqlite3
 )
 
-add_dependencies(placer_utils
+#add_dependencies(placer_utils
     #build_z3
     #build_sqlite3
-)
+#)
 
 add_executable(smt_placer
     main.cpp

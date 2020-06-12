@@ -128,7 +128,7 @@ add_dependencies(smt_placer
     #build_z3
     #build_jsoncpp
     build_kahypar
-    build_matplotlib
+    #build_matplotlib
     placer_config
     ABKCommon
     ParquetFP

@@ -126,7 +126,6 @@ add_executable(bookshelf_converter
 add_dependencies(smt_placer
     def
     lef
-    matplotlibcpp
     #build_z3
     #build_jsoncpp
     build_kahypar

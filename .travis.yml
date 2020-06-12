@@ -9,7 +9,7 @@ jobs:
       addons:
         apt:
          sources:
-             - sourceline: 'ppa:ubuntu-toolchain-r/universe'
+             - sourceline: 'universe'
         packages:
             - cmake
             - git

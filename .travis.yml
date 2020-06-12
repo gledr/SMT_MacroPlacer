@@ -16,12 +16,6 @@ jobs:
                 - g++
                 - libboost-program-options-dev
                 - libboost-filesystem-dev
-                - python2-dev
-                - doxygen
-                - graphviz
-                - bison
-                - zlib1g-dev
-                - python-numpy
               
 install:
   - echo "Install"

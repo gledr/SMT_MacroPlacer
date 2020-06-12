@@ -10,6 +10,14 @@ jobs:
             apt:
               packages:
                 - cmake
+                - git
+                - g++
+                - libboost-program-options-dev
+                - libboost-filesystem-dev
+                - doxygen
+                - graphviz
+                - bison
+                - zlib1g-dev
               
 install:
   - echo "Install"

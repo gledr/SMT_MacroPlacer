@@ -59,12 +59,13 @@ add_library(placer_utils
 )
 
 target_link_libraries (placer_utils 
-    ${THIRD_PARTY_LIB}/libsqlite3.a
+    #${THIRD_PARTY_LIB}/libsqlite3.a
+    sqlite3
 )
 
 add_dependencies(placer_utils
     #build_z3
-    build_sqlite3
+    #build_sqlite3
 )
 
 add_executable(smt_placer
@@ -122,7 +123,7 @@ add_dependencies(smt_placer
     def
     lef
     #build_z3
-    build_jsoncpp
+    #build_jsoncpp
     build_kahypar
     build_matplotlib
     placer_config
@@ -139,7 +140,8 @@ target_link_libraries(smt_placer PUBLIC
     lef
     lefzlib
     ${THIRD_PARTY_LIB}/libz3.so
-    ${THIRD_PARTY_LIB}/libjsoncpp.a
+    #${THIRD_PARTY_LIB}/libjsoncpp.a
+    jsoncpp
     ${THIRD_PARTY_LIB}/libkahypar.so
     ${PARQUET_HOME}/lib/libParquetFP.a
     ${ABKCOMMON_HOME}/lib/libABKCommon.a
@@ -157,7 +159,8 @@ target_link_libraries(bookshelf_converter
     ${Boost_LIBRARIES}
     pthread
     ${THIRD_PARTY_LIB}/libz3.so
-    ${THIRD_PARTY_LIB}/libjsoncpp.a
+    #${THIRD_PARTY_LIB}/libjsoncpp.a
+    jsoncpp
     dl
     placer_utils
 )

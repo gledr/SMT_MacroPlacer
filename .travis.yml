@@ -23,6 +23,9 @@ jobs:
                 - python-numpy
                 - z3
                 - libz3-dev
+                - libjsoncpp-dev
+                - libsqlite3-dev
+                
               
 install:
   - echo "Install"

@@ -5,7 +5,7 @@ VLSI MacroPlacer for System on Chip Design
 
 Macro Placement for System on Chip design based on solving engines for the Satisfiability Modulo Theories  like z3. 
 
-
+![](./06_doc/placement_inverter_chain_0_shrink.png)
 
 SMT_MacroPlacer heavily depends on external modules and libraries. External modules used in this build are getting resolved automatically. External libraries have to provided by the user.
 

@@ -22,6 +22,7 @@ jobs:
                 - python2-dev
                 - python-numpy
                 - z3
+                - libz3-dev
               
 install:
   - echo "Install"

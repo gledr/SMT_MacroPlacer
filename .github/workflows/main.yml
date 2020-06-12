@@ -9,7 +9,7 @@ on:
 env: 
   global: 
   
-matrix:
+jobs:
   include:
     - os: linux
       dist: ubuntu-latest

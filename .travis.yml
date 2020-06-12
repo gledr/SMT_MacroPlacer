@@ -1,29 +1,27 @@
 language: cpp
+os: linux
 
-env: 
-  global: 
-  
-matrix:
+jobs:
   include:
     - os: linux
-      dist: ubuntu-latest
+      dist: focal
       compiler: g++
       addons:
         apt:
          sources:
-             sourceline: 'ppa:ubuntu-toolchain-r/universe'
-             packages:
-              - cmake
-              - git
-              - g++
-              - libboost-program-options-dev
-              - libboost-filesystem-dev
-              - python2-dev
-              - doxygen
-              - graphviz
-              - bison
-              - zlib1g-dev
-              - python-numpy
+             - sourceline: 'ppa:ubuntu-toolchain-r/universe'
+        packages:
+            - cmake
+            - git
+            - g++
+            - libboost-program-options-dev
+            - libboost-filesystem-dev
+            - python2-dev
+            - doxygen
+            - graphviz
+            - bison
+            - zlib1g-dev
+            - python-numpy
               
 install:
   - echo "Install"

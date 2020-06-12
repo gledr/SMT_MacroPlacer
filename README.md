@@ -25,6 +25,8 @@ In oder to resolve the packages needed for Ubuntu 20.04 LTS, please make sure th
 - zlib1g-dev
 - python-numpy (Python2)
 - python2-dev
+- libjsoncpp-dev
+- libsqlite3-dev
 
 If the package manager can not resolve the Python2 packages, please add the **universe** repository to your system via "apt-add-repository universe".
 
@@ -35,7 +37,7 @@ smt_placer  --lef=boxes.lef  \
             --def=boxes.def  \
             --site=CORE \
             --store-log=true \
-            --store-smt=true \ 
+            --store-smt=true \
             --minimize-area \
             --free-terminals \
             --minimize-hpwl \

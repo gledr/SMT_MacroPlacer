@@ -27,6 +27,7 @@ install:
 before_script:
   - mkdir -p build && cd build
   - cmake ..
+  - make
     
 script:
   - echo "After Script"

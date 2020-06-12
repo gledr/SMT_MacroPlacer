@@ -3,29 +3,32 @@
 # SMT Macro Placer
 VLSI MacroPlacer for System on Chip Design
 
-
-
-Solving SoC Macro Placement using SMT Optimization. This version is based on Microsoft's Z3 solver.       We have also been using OptiMathSAT for some experiments. 
-
-
-
-Our SMT Macro Placer is using parts of the OpenROAD project. To this end, we are very thankful for being able to reuse their LEF/DEF parser infrastructure. 
+Macro Placement for System on Chip design based on solving engines for the Satisfiability Modulo Theories  like z3. 
 
 
 
-In oder to compare our results we have been using the Parquet floorplanning tool.  Therefore we could
-
-also use OpenROADs Parquet build. Thank you very much for that.
+SMT_MacroPlacer heavily depends on external modules and libraries. External modules used in this build are getting resolved automatically. External libraries have to provided by the user.
 
 
 
-The tool is under steady development. To this end, there may be lots of bugs and other non expected things. Next steps for us is to try different SMT coding strategies.
+The tool is developed using Arch Linux and is tested using CI for Ubuntu 20.04 LTS.
+
+In oder to resolve the packages needed for Ubuntu 20.04 LTS, please make sure the following packages have been installed:
+
+- git
+- libboost-program-options-dev
+- libboost-filesystem-dev
+- g++
+- doxygen
+- graphviz
+- bison
+- zlib1g-dev
+- python-numpy (Python2)
+- python2-dev
+
+If the package manager can not resolve the Python2 packages, please add the **universe** repository to your system via "apt-add-repository universe".
 
 
 
-For any questions, do not hesitate to contact me, I will be glad to help.
-
-
-
-
+SMT_MacroPlacer is developed at the Institute for Integrated Circuits at the Johannes Kepler University Linz, Austria in cooperation with Infineon Technologies Duisburg, Germany.
 

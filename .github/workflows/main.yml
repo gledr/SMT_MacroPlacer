@@ -1,51 +1,33 @@
-language: cpp
-os: linux
-dist: focal
+# This is a basic workflow to help you get started with Actions
 
+name: CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+# events but only for the master branch
 on:
   push:
     branches: [ master ]
   pull_request:
     branches: [ master ]
 
-env: 
-  global: 
-  
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  Master:
-      os: linux
-      dist: focal
-      compiler: g++
-      addons:
-        apt:
-         sources:
-             sourceline: 'ppa:ubuntu-toolchain-r/universe'
-         packages:
-           - cmake
-           - git
-           - g++
-           - libboost-program-options-dev
-           - libboost-filesystem-dev
-           - python2-dev
-           - doxygen
-           - graphviz
-           - bison
-           - zlib1g-dev
-           - python-numpy
-              
-install:
-  - echo "Install"
+  # This workflow contains a single job called "build"
+  build:
+    # The type of runner that the job will run on
+    runs-on: ubuntu-latest
 
-before_script:
-  - mkdir -p build && cd build
-  - cmake ..
-    
-script:
-  - echo "After Script"
-    
-after_success:
- - echo 
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - uses: actions/checkout@v2
 
+    # Runs a single command using the runners shell
+    - name: Run a one-line script
+      run: echo Hello, world!
 
-
-       
+    # Runs a set of commands using the runners shell
+    - name: Run a multi-line script
+      run: |
+        echo Add other actions to build,
+        echo test, and deploy your project.

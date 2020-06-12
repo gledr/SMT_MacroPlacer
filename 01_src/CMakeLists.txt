@@ -133,7 +133,7 @@ add_dependencies(smt_placer
 
 target_link_libraries(smt_placer PUBLIC
     ${Boost_LIBRARIES}
-    Python2::Python Python2::NumPy
+    ${PYTHON_LIBRARIES}
     def
     defzlib
     lef

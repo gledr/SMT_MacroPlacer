@@ -138,13 +138,13 @@ add_dependencies(smt_placer
 
 target_link_libraries(smt_placer PUBLIC
     ${Boost_LIBRARIES}
-    ${PYTHON_LIBRARIES}
+    ${Python2_LIBRARIES}
     ${JSONCPP_LIBRARIES}
     def
     defzlib
     lef
     lefzlib
-    ${THIRD_PARTY_LIB}/libz3.so
+    #${THIRD_PARTY_LIB}/libz3.so
     #${THIRD_PARTY_LIB}/libjsoncpp.a
     ${THIRD_PARTY_LIB}/libkahypar.so
     ${PARQUET_HOME}/lib/libParquetFP.a
@@ -152,6 +152,8 @@ target_link_libraries(smt_placer PUBLIC
     pthread
     dl
     placer_utils
+    jsoncpp
+    z3
 )
 
 target_include_directories(smt_placer PRIVATE 
@@ -164,8 +166,9 @@ target_link_libraries(bookshelf_converter
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
     pthread
-    ${THIRD_PARTY_LIB}/libz3.so
+    #${THIRD_PARTY_LIB}/libz3.so
     #${THIRD_PARTY_LIB}/libjsoncpp.a
+    z3
     jsoncpp
     dl
     placer_utils

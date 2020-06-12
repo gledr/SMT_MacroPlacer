@@ -1,5 +1,8 @@
-language: cpp
-os: linux
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
 
 jobs:
   include:

@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.com/gledr/qfr.svg?branch=master)](https://travis-ci.com/gledr/SMT_MacroPlacer)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 # SMT Macro Placer
 VLSI MacroPlacer for System on Chip Design
 

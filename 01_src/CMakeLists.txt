@@ -66,6 +66,10 @@ target_link_libraries (placer_utils
     sqlite3
 )
 
+target_include_directories(placer_utils PRIVATE 
+    ${JSONCPP_LIBRARIES}
+)
+
 #add_dependencies(placer_utils
     #build_z3
     #build_sqlite3

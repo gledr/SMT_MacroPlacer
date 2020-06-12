@@ -12,10 +12,6 @@ jobs:
                - sourceline: 'universe'
               packages:
                 - cmake
-                - git
-                - g++
-                - libboost-program-options-dev
-                - libboost-filesystem-dev
               
 install:
   - echo "Install"

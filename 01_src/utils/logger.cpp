@@ -184,6 +184,11 @@ void Logger::unsat_solution()
     LOG(eInfo) << "UNSAT: No valid Solution could be found!";
 }
 
+void Logger::unknown_solution()
+{
+    LOG(eInfo) << "UNKNOWN: No Solution Found! Check Timeout and Memory Limits!";
+}
+
 void Logger::solve_optimize()
 {
     LOG(eInfo) << "Solving Optimization Problem...";

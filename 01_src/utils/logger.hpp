@@ -68,6 +68,7 @@ public:
     void solve_allsat();
 
     void unsat_solution();
+    void unknown_solution();
 
     void use_timeout(size_t const sec);
 

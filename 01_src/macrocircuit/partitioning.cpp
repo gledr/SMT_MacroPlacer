@@ -606,8 +606,7 @@ void Partitioning::api_based_partitioning()
     Tree tmp_tree(*m_tree);
     tmp_tree.strip_terminals();
     
-    
-    std::map<std::string, std::set<std::string>> steiner_tree = m_tree->get_steiner_tree();
+    std::map<std::string, std::set<std::string>> steiner_tree = tmp_tree.get_steiner_tree();
 
     // Resolve Number of Total Needed Array Spaces for Hyperedge Container
     std::vector<std::set<std::string>> key_tree;

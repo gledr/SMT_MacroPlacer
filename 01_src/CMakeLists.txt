@@ -1,6 +1,8 @@
 find_package(Boost REQUIRED COMPONENTS program_options filesystem)
 find_package(Python2 COMPONENTS Development NumPy)
 
+add_definitions(-D_CPPUNWIND)
+
 ############################################################
 # include directories 
 ############################################################
@@ -61,6 +63,7 @@ target_link_libraries (placer_utils
 )
 
 add_dependencies(placer_utils
+    build_z3
     build_sqlite3
 )
 

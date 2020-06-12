@@ -50,11 +50,11 @@ MacroCircuit::~MacroCircuit()
     for(auto itor: m_macros){
         delete itor; itor = nullptr;
     }
-    
+
     for(auto itor: m_partitons){
         delete itor; itor = nullptr;
     }
-    
+
     for(auto itor: m_terminals){
         delete itor; itor = nullptr;
     }
@@ -556,8 +556,6 @@ void MacroCircuit::build_tree_from_lefdef()
             }
         }
     }
-
-    m_tree->construct_tree();
 }
 
 /**
@@ -718,8 +716,6 @@ size_t MacroCircuit::get_solutions()
  */
 void MacroCircuit::config_z3()
 {
-    z3::params param(m_z3_ctx);
-
     if (this->get_logic() == eInt){
         //m_z3_ctx.set("logic", "LIA");
         m_logger->encode_int();
@@ -729,6 +725,7 @@ void MacroCircuit::config_z3()
         m_logger->encode_bv();
     }
 
+    z3::params param(m_z3_ctx);
     //param.set(":opt.solution_prefix", "intermediate_result");
     //param.set(":opt.dump_models", true);
     param.set(":opt.pb.compile_equality", true);
@@ -748,7 +745,7 @@ void MacroCircuit::config_z3()
 
     if(this->get_timeout() != 0){
       m_logger->use_timeout(this->get_timeout());
-      param.set(":timeout", (unsigned)this->get_timeout() * 1000);
+      param.set("timeout", (unsigned)this->get_timeout() * 1000);
     }
 
     m_z3_opt->set(param);
@@ -1221,10 +1218,14 @@ void MacroCircuit::solve()
 
         z3::check_result sat = m_z3_opt->check();
 
-        if(sat == z3::check_result::unsat || sat == z3::check_result::unknown){
+        if(sat == z3::check_result::unsat){
             m_logger->unsat_solution();
             exit(0);
 
+        } else if (sat == z3::check_result::unknown){
+            m_logger->unknown_solution();
+            exit(0);
+            
         } else if (sat == z3::check_result::sat){
             m_solutions = 0;
 

@@ -139,6 +139,7 @@ Pin* Macro::get_pin(std::string const & id)
 {
     assertion_check (id != "");
     Pin* p = m_pins[id];
+    assert (p != nullptr);
     nullpointer_check(p);
 
     return p;
@@ -259,11 +260,12 @@ void Macro::encode_pins()
     
     // Pins are at the macro edge non overlapping
     this->encode_pins_on_macro_frontier(e2D);
-    this->encode_pins_non_overlapping();
+    //this->encode_pins_non_overlapping();
 
     // Pins are positioned relative to the macro center
-    //this->encode_pins_relative_to_center();
-
+    //this->encode_pins_relative_to_center(e2D);
+    //clauses.push_back(m_encode_pins_relative_to_center);
+    
     clauses.push_back(m_encode_pin_macro_frontier);
     //clauses.push_back(m_encode_pins_not_overlapping);
     
@@ -273,7 +275,7 @@ void Macro::encode_pins()
 /**
  * @brief Encode Pins Relative to Center for Bookshelf Data
  */
-void Macro::encode_pins_relative_to_center()
+void Macro::encode_pins_relative_to_center(eRotation const rotation)
 {
     z3::expr_vector clauses(m_z3_ctx);
 
@@ -312,13 +314,20 @@ void Macro::encode_pins_relative_to_center()
         case_e.push_back(pin->get_pin_pos_x() == (center_e_x + offset_x));
         case_e.push_back(pin->get_pin_pos_y() == (center_e_y + offset_y));
 ///}}}
-        z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
-                          z3::ite(this->is_W(), z3::mk_and(case_w),
-                          z3::ite(this->is_S(), z3::mk_and(case_s),
-                          z3::ite(this->is_E(), z3::mk_and(case_e),
-                                  m_z3_ctx.bool_val(false)))));
-
-        clauses.push_back(clause);
+        if (rotation == e2D){
+            z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
+                            z3::ite(this->is_W(), z3::mk_and(case_w), m_z3_ctx.bool_val(false)));
+            clauses.push_back(clause);
+        } else if (rotation == e4D){
+            z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
+                            z3::ite(this->is_W(), z3::mk_and(case_w),
+                            z3::ite(this->is_S(), z3::mk_and(case_s),
+                            z3::ite(this->is_E(), z3::mk_and(case_e),
+                                    m_z3_ctx.bool_val(false)))));
+            clauses.push_back(clause);
+        } else {
+            throw PlacerException("Only 2D and 4D Rotations are Supported!");
+        }
     }
     m_encode_pins_relative_to_center = z3::mk_and(clauses);
 }

@@ -43,6 +43,12 @@ void Tree::destroy()
     for(auto itor: m_nodes){
         delete itor; itor = nullptr;
     }
+    for (auto itor: m_terminals){
+        delete itor; itor = nullptr;
+    }
+    for (auto itor: m_edges){
+        delete itor; itor = nullptr;
+    }
     m_logger = nullptr;
 }
 
@@ -462,15 +468,8 @@ void Tree::strip_terminals()
             next_edges.push_back(edge);
         }
     }
-
-    for (Edge* edge: delete_me){
-        delete edge; edge = nullptr;
-    }
-    for(auto itor: m_terminals){
-        delete itor; itor = nullptr;
-    }
     m_terminals.clear();
-
     m_edges.clear();
+
     std::copy(next_edges.begin(), next_edges.end(), std::back_inserter(m_edges));
 }

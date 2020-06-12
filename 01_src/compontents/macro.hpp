@@ -92,7 +92,7 @@ private:
     void encode_pins_on_macro_frontier(eRotation const rotation);
     void encode_pins_non_overlapping();
     void encode_pins_center_of_macro();
-    void encode_pins_relative_to_center();
+    void encode_pins_relative_to_center(eRotation const rotation);
 
     z3::expr m_pin_constraints;
     z3::expr m_encode_pin_macro_frontier;

@@ -26,12 +26,12 @@ jobs:
                 - libjsoncpp-dev
                 - libsqlite3-dev
                 
+        - before_script:
+            - mkdir -p build && cd build
+            - cmake ..
+    
 install:
   - echo "Install"
-
-before_script:
-  - mkdir -p build && cd build
-  - cmake ..
 
 script:
   - make

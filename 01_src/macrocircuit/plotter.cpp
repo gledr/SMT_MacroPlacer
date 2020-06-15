@@ -243,7 +243,7 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
         notimplemented_check();
     }
 
-    enum ePlane {ePlaneLeft, ePlaneRight, ePlaneUpper, ePlaneLower, ePlaneInit};
+    enum ePlane {ePlaneLeft, ePlaneRight, ePlaneUpper, ePlaneLower, eCenter, ePlaneInit};
     ePlane pin_location = ePlaneInit;
 
     // Left Plane
@@ -258,8 +258,11 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
     // Upper Plane 
     } else if ((y_pos == uy) && ((x_pos >= lx) && (x_pos <= ux))){
         pin_location = ePlaneUpper;
+    //} else if ((y_pos == uy/2) && (x_pos == ux/2)){
+    //    pin_location = eCenter;
     } else {
-        throw PlacerException("Pin Position Not Supported!");
+        pin_location = eCenter;
+        //throw PlacerException("Pin Position Not Supported!");
     }
     double pin_offset = 0.2;
     std::vector<double> x;
@@ -277,6 +280,9 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
     } else if (pin_location == ePlaneUpper){
         x.push_back(x_pos);
         y.push_back(y_pos - pin_offset);
+    } else if (pin_location == eCenter){
+        x.push_back(x_pos);
+        y.push_back(y_pos);
     } else {
         throw PlacerException("Invalid Pin Position Detected!");
     }

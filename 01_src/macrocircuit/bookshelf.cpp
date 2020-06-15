@@ -261,11 +261,11 @@ void Bookshelf::read_nets()
                         std::string pin = rel_pos_x + "_" + rel_pos_y;
                         this->add_pin_to_macro(id, pin, direction, rel_pos_x, rel_pos_y);
                         pins.push_back(pin);
-                    // Pin is center
+                    // Pin is free
                     } else {
-                        std::cout << "Pin is center" << std::endl;
-                        this->add_pin_to_macro(id, "center", direction, "", "");
-                        pins.push_back("%0.0_%0.0");
+                         std::string pin =  "%0.0_%0.0";
+                        this->add_pin_to_macro(id, pin, direction, "", "");
+                        pins.push_back(pin);
                     }
                     Node* n = new Node(this->find_macro(id));
                     nodes.push_back(n);
@@ -449,10 +449,6 @@ void Bookshelf::read_pl()
     }
     if (processed_terminals.size() < m_excepted_terminals){
         throw PlacerException("Not all Terminals have been processed!");
-    }
-
-    if (!this->get_minimize_die_mode()){
-        this->deduce_layout();
     }
 }
 

@@ -114,8 +114,8 @@ void Supplement::read_supplement_file()
                     throw std::runtime_error("Missing uy entry in Supplement!");
                 }
                 
-                nullpointer_check (m_layout);
                 m_layout = new SupplementLayout(lx, ly, ux, uy);
+                nullpointer_check (m_layout);
             }
         }
     }

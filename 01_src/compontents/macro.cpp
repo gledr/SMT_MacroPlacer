@@ -256,17 +256,18 @@ void Macro::encode_pins()
     z3::expr_vector clauses(m_z3_ctx);
 
     // Pins are at the center of the Macro
-    //this->encode_pins_center_of_macro();
+    this->encode_pins_center_of_macro(e2D);
+    clauses.push_back(m_encode_pins_center_of_macro);
     
     // Pins are at the macro edge non overlapping
-    this->encode_pins_on_macro_frontier(e2D);
+    //this->encode_pins_on_macro_frontier(e2D);
     //this->encode_pins_non_overlapping();
 
     // Pins are positioned relative to the macro center
     //this->encode_pins_relative_to_center(e2D);
     //clauses.push_back(m_encode_pins_relative_to_center);
     
-    clauses.push_back(m_encode_pin_macro_frontier);
+    //clauses.push_back(m_encode_pin_macro_frontier);
     //clauses.push_back(m_encode_pins_not_overlapping);
     
     m_pin_constraints =  z3::mk_and(clauses);
@@ -465,7 +466,7 @@ void Macro::encode_pins_non_overlapping()
  * 
  * Center Position may vary due to Integer rounding!
  */
-void Macro::encode_pins_center_of_macro()
+void Macro::encode_pins_center_of_macro(eRotation const rotation)
 {
     z3::expr_vector clauses(m_z3_ctx);
 
@@ -492,13 +493,21 @@ void Macro::encode_pins_center_of_macro()
         case_e.push_back(pin->get_pin_pos_x() == (m_lx + (m_height/2)));
         case_e.push_back(pin->get_pin_pos_y() == (m_ly - (m_width/2)));
 ///}}}
-        z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
-                          z3::ite(this->is_W(), z3::mk_and(case_w),
-                          z3::ite(this->is_S(), z3::mk_and(case_s),
-                          z3::ite(this->is_E(), z3::mk_and(case_e),
-                                  m_z3_ctx.bool_val(false)))));
-            
-        clauses.push_back(clause);
+        if (rotation == e4D){
+        
+            z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
+                            z3::ite(this->is_W(), z3::mk_and(case_w),
+                            z3::ite(this->is_S(), z3::mk_and(case_s),
+                            z3::ite(this->is_E(), z3::mk_and(case_e),
+                                    m_z3_ctx.bool_val(false)))));
+            clauses.push_back(clause);
+        } else if (rotation == e2D){
+              z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
+                            z3::ite(this->is_W(), z3::mk_and(case_w), m_z3_ctx.bool_val(false)));
+            clauses.push_back(clause);
+        } else {
+            assert (0);
+        }
     }
     m_encode_pins_center_of_macro = z3::mk_and(clauses);
 }

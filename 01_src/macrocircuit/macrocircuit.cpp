@@ -182,8 +182,8 @@ void MacroCircuit::build_circuit_bookshelf()
                         m_layout->set_uy(upper_corner.second);
 
                     } else {
-                           if (!m_supplement->has_layout()){
-                        throw std::runtime_error("No Layout Supplement Defined!");
+                        if (!m_supplement->has_layout()){
+                            throw std::runtime_error("No Layout Supplement Defined!");
                         } else {
                             SupplementLayout* _layout = m_supplement->get_layout();
                             m_layout->set_lx(_layout->get_lx());

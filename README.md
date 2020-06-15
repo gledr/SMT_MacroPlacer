@@ -27,6 +27,8 @@ In oder to resolve the packages needed for Ubuntu 20.04 LTS, please make sure th
 - python2-dev
 - libjsoncpp-dev
 - libsqlite3-dev
+- z3
+- libz3-dev
 
 If the package manager can not resolve the Python2 packages, please add the **universe** repository to your system via "apt-add-repository universe".
 

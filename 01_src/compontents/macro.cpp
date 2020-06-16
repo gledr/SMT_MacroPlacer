@@ -27,13 +27,13 @@ Macro::Macro(std::string const & name,
              size_t const width,
              size_t const height):
     Component(),
+    m_parent(nullptr),
+    m_key(m_key_counter++),
+    m_pin_constraints(m_encode->get_value(0)),
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_encode_pins_relative_to_center(m_encode->get_value(0)),
-    m_pin_constraints(m_encode->get_value(0)),
-    m_key(m_key_counter++),
-    m_parent(nullptr)
+    m_encode_pins_relative_to_center(m_encode->get_value(0))
 {
     m_free = true;
     m_supplement = nullptr;
@@ -69,13 +69,13 @@ Macro::Macro(std::string const & name,
              size_t const pos_ly,
              size_t const orientation):
     Component(),
+    m_parent(nullptr),
+    m_key(m_key_counter++),
+    m_pin_constraints(m_encode->get_value(0)),
     m_encode_pin_macro_frontier(m_encode->get_value(0)),
     m_encode_pins_not_overlapping(m_encode->get_value(0)),
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
-    m_pin_constraints(m_encode->get_value(0)),
-    m_encode_pins_relative_to_center(m_encode->get_value(0)),
-    m_key(m_key_counter++),
-    m_parent(nullptr)
+    m_encode_pins_relative_to_center(m_encode->get_value(0))
 {
     m_lx = m_encode->get_value(pos_lx);
     m_ly = m_encode->get_value(pos_ly);
@@ -270,7 +270,11 @@ void Macro::encode_pins()
     //clauses.push_back(m_encode_pin_macro_frontier);
     //clauses.push_back(m_encode_pins_not_overlapping);
     
-    m_pin_constraints =  z3::mk_and(clauses);
+    if (clauses.size() == 1){
+        m_pin_constraints = clauses[0];
+    } else {
+        m_pin_constraints =  z3::mk_and(clauses);
+    }
 }
 
 /**

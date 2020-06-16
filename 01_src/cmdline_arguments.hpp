@@ -14,6 +14,11 @@
 
 namespace Placer {
 
+    constexpr const char CMD_INI_FILE[]
+        = "ini";
+    constexpr const char CMD_INI_FILE_TEXT[]
+        = "Choose Configuration File";
+
     constexpr const char CMD_HELP[] 
         = "help";
     constexpr const char CMD_HELP_TEXT[] 
@@ -68,11 +73,6 @@ namespace Placer {
         = "lex";
     constexpr const char CMD_LEX_TEXT[] 
         = "Utilize Z3s Lex Optimizer";
-
-    constexpr const char CMD_BOX[] 
-        = "box";
-    constexpr const char CMD_BOX_TEXT[] 
-        = "Utilize Z3s Box Optimizer";
 
     constexpr const char CMD_PARQUET[] 
         = "parquet";

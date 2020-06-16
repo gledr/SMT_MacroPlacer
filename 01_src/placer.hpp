@@ -61,6 +61,7 @@ private:
     void print_header();
 
     void read_configuration();
+    void handle_configuration();
 
     size_t existing_results();
     void store_configuration();

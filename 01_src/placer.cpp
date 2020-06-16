@@ -49,139 +49,64 @@ void MacroPlacer::read_configuration()
     try {
         namespace po = boost::program_options;
         namespace fs = boost::filesystem;
-        
+
         std::string desc = "Usage: " + this->get_binary_name() + " [options]";
         m_options_functions  = new po::options_description(desc);
 
         m_options_functions->add_options()
-            (CMD_HELP,                                      CMD_HELP_TEXT)
-            (CMD_BASH_COMPLETION,                           CMD_BASH_COMPLETION)
-            (CMD_SAVE_BEST,                                 CMD_SAVE_BEST_TEXT)
-            (CMD_DUMP_BEST,                                 CMD_DUMP_BEST_TEXT)
-            (CMD_DUMP_ALL,                                  CMD_DUMP_ALL_TEXT)
-            (CMD_SAVE_ALL,                                  CMD_SAVE_ALL_TEXT)
-            (CMD_VERBOSE,                                   CMD_VERBOSE_TEXT)
-            (CMD_STORE_LOG,                                 CMD_STORE_LOG_TEXT)
-            (CMD_STORE_SMT,                                 CMD_STORE_SMT_TEXT)
-            (CMD_PARETO,                                    CMD_PARETO_TEXT)
-            (CMD_LEX,                                       CMD_LEX_TEXT)
-            (CMD_BOX,                                       CMD_BOX_TEXT)
-            (CMD_PARQUET,                                   CMD_PARQUET_TEXT)
-            (CMD_PARTITION,                                 CMD_PARTITION_TEXT)
-            (CMD_MIN_AREA,                                  CMD_MIN_AREA_TEXT)
-            (CMD_MIN_HPWL,                                  CMD_MIN_HPWL_TEXT)
-            (CMD_FREE_TERMINALS,                            CMD_FREE_TERMINALS_TEXT)
-            (CMD_SKIP_PWR_SUPPLY,                           CMD_SKIP_PWR_SUPPLY_TEXT)
-            (CMD_PARTITION_SIZE,  po::value<size_t>(),      CMD_PARTITION_SIZE_TEXT)
-            (CMD_PARTITION_COUNT, po::value<size_t>(),      CMD_PARTITION_COUNT_TEXT)
-            (CMD_DEF,             po::value<std::string>(), CMD_DEF_TEXT)
-            (CMD_LEF,             po::value<std::string>(), CMD_LEF_TEXT)
-            (CMD_BOOKSHELF,       po::value<std::string>(), CMD_BOOKSHELF_TEXT)
-            (CMD_SUPPLEMENT,      po::value<std::string>(), CMD_SUPPLEMENT_TEXT)
-            (CMD_SITE,            po::value<std::string>(), CMD_SITE_TEXT)
-            (CMD_TIMEOUT,         po::value<size_t>(),      CMD_TIMEOUT_TEXT)
-            (CMD_SOLUTIONS,       po::value<size_t>(),      CMD_SOLUTIONS_TEXT);
+            (CMD_HELP,            CMD_HELP_TEXT)
+            (CMD_BASH_COMPLETION, CMD_BASH_COMPLETION)
+            (CMD_SAVE_BEST,       CMD_SAVE_BEST_TEXT)
+            (CMD_DUMP_BEST,       CMD_DUMP_BEST_TEXT)
+            (CMD_DUMP_ALL,        CMD_DUMP_ALL_TEXT)
+            (CMD_SAVE_ALL,        CMD_SAVE_ALL_TEXT)
+            (CMD_VERBOSE,         CMD_VERBOSE_TEXT)
+            (CMD_STORE_LOG,       CMD_STORE_LOG_TEXT)
+            (CMD_STORE_SMT,       CMD_STORE_SMT_TEXT)
+            (CMD_PARETO,          CMD_PARETO_TEXT)
+            (CMD_LEX,             CMD_LEX_TEXT)
+            (CMD_PARQUET,         CMD_PARQUET_TEXT)
+            (CMD_PARTITION,       CMD_PARTITION_TEXT)
+            (CMD_MIN_AREA,        CMD_MIN_AREA_TEXT)
+            (CMD_MIN_HPWL,        CMD_MIN_HPWL_TEXT)
+            (CMD_FREE_TERMINALS,  CMD_FREE_TERMINALS_TEXT)
+            (CMD_SKIP_PWR_SUPPLY, CMD_SKIP_PWR_SUPPLY_TEXT)
+            (CMD_PARTITION_SIZE,  po::value<size_t>(),                                   CMD_PARTITION_SIZE_TEXT)
+            (CMD_PARTITION_COUNT, po::value<size_t>(),                                   CMD_PARTITION_COUNT_TEXT)
+            (CMD_DEF,             po::value<std::string>(),                              CMD_DEF_TEXT)
+            (CMD_LEF,             po::value<std::string>(),                              CMD_LEF_TEXT)
+            (CMD_BOOKSHELF,       po::value<std::string>(),                              CMD_BOOKSHELF_TEXT)
+            (CMD_SUPPLEMENT,      po::value<std::string>(),                              CMD_SUPPLEMENT_TEXT)
+            (CMD_SITE,            po::value<std::string>(),                              CMD_SITE_TEXT)
+            (CMD_TIMEOUT,         po::value<size_t>()->default_value(60),                CMD_TIMEOUT_TEXT)
+            (CMD_SOLUTIONS,       po::value<size_t>()->default_value(1),                 CMD_SOLUTIONS_TEXT)
+            (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT);
 
-        // Top Level Priority: Command Line:
+        // Top Level Priority: Command Line
+        // Second Level Priority: Local Ini File
+        // Commandline Overwrites Config File Arguments
         po::command_line_parser parser(m_argc, m_argv);
         parser.options(*m_options_functions).allow_unregistered().style(
                 po::command_line_style::default_style | 
                 po::command_line_style::allow_slash_for_short);
 
-        // Second Level Priority: Local Ini File
         po::parsed_options parsed_options1 = parser.run();
         po::store(parsed_options1, m_vm);
-
-        std::fstream project_ini = std::fstream("config.ini", std::ios::in);
+        
+        po::notify(m_vm);
+        this->handle_configuration();
+        
+        std::ifstream project_ini(this->get_ini_file());
         po::store(po::parse_config_file(project_ini, *m_options_functions), m_vm);
         project_ini.close();
 
         po::notify(m_vm);
+        this->handle_configuration();
 
-        if(m_vm.count(CMD_HELP)){
-            std::cout << *m_options_functions << std::endl;
-            exit(0);
+        if (!fs::exists(this->get_ini_file())){
+            delete m_options_functions; m_options_functions = nullptr;
+            throw std::runtime_error("Config File Not Found!!");
         }
-        if(m_vm.count(CMD_BASH_COMPLETION)){
-            this->bash_completion_script();
-            exit(0);
-        }
-        if(m_vm.count(CMD_LEF)){
-            this->add_lef(m_vm[CMD_LEF].as<std::string>());
-        }
-        if(m_vm.count(CMD_DEF)){
-            this->add_def(m_vm[CMD_DEF].as<std::string>());
-        }
-        if(m_vm.count(CMD_BOOKSHELF)){
-            this->set_bookshelf_file(m_vm[CMD_BOOKSHELF].as<std::string>());
-        }
-        if (m_vm.count(CMD_SITE)){
-            this->set_site(m_vm[CMD_SITE].as<std::string>());
-        }
-        if(m_vm.count(CMD_PARTITION_SIZE)){
-            this->set_partition_size(m_vm[CMD_PARTITION_SIZE].as<size_t>());
-        }
-        if(m_vm.count(CMD_PARTITION_COUNT)){
-            this->set_num_partition(m_vm[CMD_PARTITION_COUNT].as<size_t>());
-        }
-        if(m_vm.count(CMD_SOLUTIONS)){
-            this->set_max_solutions(m_vm[CMD_SOLUTIONS].as<size_t>());
-        }
-        if(m_vm.count(CMD_SAVE_BEST)){
-            this->set_save_best(true);
-        }
-        if(m_vm.count(CMD_SAVE_ALL)){
-            this->set_save_all(true);
-        }
-        if(m_vm.count(CMD_DUMP_ALL)){
-            this->set_dump_all(true);
-        }
-        if (m_vm.count(CMD_DUMP_BEST)){
-            this->set_dump_best(true);
-        }
-        if(m_vm.count(CMD_TIMEOUT)){
-            this->set_timeout(m_vm[CMD_TIMEOUT].as<size_t>());
-        }
-        if(m_vm.count(CMD_STORE_SMT)){
-            this->set_store_smt(true);
-        }
-        if(m_vm.count(CMD_SUPPLEMENT)){
-            this->set_supplement(m_vm[CMD_SUPPLEMENT].as<std::string>());
-        }
-        if(m_vm.count(CMD_PARETO)){
-            this->set_pareto_optimizer(true);
-        }
-        if(m_vm.count(CMD_LEX)){
-            this->set_lex_optimizer(true);
-        }
-        if(m_vm.count(CMD_BOX)){
-            this->set_box_optimizer(true);
-        }
-        if(m_vm.count(CMD_PARTITION)){
-            this->set_partitioning(true);
-        }
-        if(m_vm.count(CMD_PARQUET)){
-            this->set_parquet_fp(true);
-        }
-        if(m_vm.count(CMD_VERBOSE)){
-            this->set_verbose(true);
-        }
-        if(m_vm.count(CMD_STORE_LOG)){
-            this->set_log_active(true);
-        }
-        if(m_vm.count(CMD_MIN_AREA)){
-            this->set_minimize_die_mode(true);
-        }
-        if (m_vm.count(CMD_MIN_HPWL)){
-            this->set_minimize_hpwl_mode(true);
-        }
-        if(m_vm.count(CMD_FREE_TERMINALS)){
-            this->set_free_terminals(true);
-        }
-        if (m_vm.count(CMD_SKIP_PWR_SUPPLY)){
-            this->set_skip_power_network(true);
-        }
-
         if((this->get_def().empty() || this->get_lef().empty()) &&
            this->get_bookshelf_file().empty()){
             delete m_options_functions; m_options_functions = nullptr;
@@ -236,6 +161,93 @@ void MacroPlacer::read_configuration()
         std::cerr << "Description: " << exp.what() << std::endl;
         std::cerr << "See: " << this->get_binary_name() <<  " --help" << std::endl;
         exit(-1);
+    }
+}
+
+void MacroPlacer::handle_configuration()
+{
+    if(m_vm.count(CMD_HELP)){
+        std::cout << *m_options_functions << std::endl;
+        exit(0);
+    }
+    if(m_vm.count(CMD_BASH_COMPLETION)){
+        this->bash_completion_script();
+        exit(0);
+    }
+    if(m_vm.count(CMD_LEF)){
+        this->add_lef(m_vm[CMD_LEF].as<std::string>());
+    }
+    if(m_vm.count(CMD_DEF)){
+        this->add_def(m_vm[CMD_DEF].as<std::string>());
+    }
+    if(m_vm.count(CMD_BOOKSHELF)){
+        this->set_bookshelf_file(m_vm[CMD_BOOKSHELF].as<std::string>());
+    }
+    if (m_vm.count(CMD_SITE)){
+        this->set_site(m_vm[CMD_SITE].as<std::string>());
+    }
+    if(m_vm.count(CMD_PARTITION_SIZE)){
+        this->set_partition_size(m_vm[CMD_PARTITION_SIZE].as<size_t>());
+    }
+    if(m_vm.count(CMD_PARTITION_COUNT)){
+        this->set_num_partition(m_vm[CMD_PARTITION_COUNT].as<size_t>());
+    }
+    if(m_vm.count(CMD_SOLUTIONS)){
+        this->set_max_solutions(m_vm[CMD_SOLUTIONS].as<size_t>());
+    }
+    if(m_vm.count(CMD_SAVE_BEST)){
+        this->set_save_best(true);
+    }
+    if(m_vm.count(CMD_SAVE_ALL)){
+        this->set_save_all(true);
+    }
+    if(m_vm.count(CMD_DUMP_ALL)){
+        this->set_dump_all(true);
+    }
+    if (m_vm.count(CMD_DUMP_BEST)){
+        this->set_dump_best(true);
+    }
+    if(m_vm.count(CMD_TIMEOUT)){
+        this->set_timeout(m_vm[CMD_TIMEOUT].as<size_t>());
+    }
+    if(m_vm.count(CMD_STORE_SMT)){
+        this->set_store_smt(true);
+    }
+    if(m_vm.count(CMD_SUPPLEMENT)){
+        this->set_supplement(m_vm[CMD_SUPPLEMENT].as<std::string>());
+    }
+    if(m_vm.count(CMD_PARETO)){
+        this->set_pareto_optimizer(true);
+    }
+    if(m_vm.count(CMD_LEX)){
+        this->set_lex_optimizer(true);
+    }
+    if(m_vm.count(CMD_PARTITION)){
+        this->set_partitioning(true);
+    }
+    if(m_vm.count(CMD_PARQUET)){
+        this->set_parquet_fp(true);
+    }
+    if(m_vm.count(CMD_VERBOSE)){
+        this->set_verbose(true);
+    }
+    if(m_vm.count(CMD_STORE_LOG)){
+        this->set_log_active(true);
+    }
+    if(m_vm.count(CMD_MIN_AREA)){
+        this->set_minimize_die_mode(true);
+    }
+    if (m_vm.count(CMD_MIN_HPWL)){
+        this->set_minimize_hpwl_mode(true);
+    }
+    if(m_vm.count(CMD_FREE_TERMINALS)){
+        this->set_free_terminals(true);
+    }
+    if (m_vm.count(CMD_SKIP_PWR_SUPPLY)){
+        this->set_skip_power_network(true);
+    }
+    if(m_vm.count(CMD_INI_FILE)){
+        this->set_ini_file(m_vm[CMD_INI_FILE].as<std::string>());
     }
 }
 
@@ -389,7 +401,7 @@ void MacroPlacer::store_configuration ()
 {
     std::string filename = this->get_results_directory() + "/" +
                            std::to_string(this->get_results_id()) +
-                           "/config.ini";
+                           this->get_ini_file();
 
     std::ofstream config(filename);
     config << "def:" << this->get_def() << std::endl;
@@ -401,7 +413,6 @@ void MacroPlacer::store_configuration ()
     config << "bookshelf:" << this->get_bookshelf_file() << std::endl;
     config << "pareto:" << this->get_pareto_optimizer() << std::endl;
     config << "lex:" << this->get_lex_optimizer() << std::endl;
-    config << "box:" << this->get_box_optimizer() << std::endl;
     config << "solutions:" << this->get_max_solutions() << std::endl;
     config << "min_die_mode:" << this->get_minimize_die_mode() << std::endl;
     config << "min_hpwl_mode:" << this->get_minimize_hpwl_mode() << std::endl;

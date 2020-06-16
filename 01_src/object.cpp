@@ -29,6 +29,7 @@ std::string Object::m_binary_name;
 std::string Object::m_database_file;
 std::string Object::m_db_to_csv_script;
 std::string Object::m_base_path;
+std::string Object::m_ini_file;
 std::vector<std::string> Object::m_lef;
 bool Object::m_verbose = false;
 bool Object::m_log = false;
@@ -42,7 +43,6 @@ bool Object::m_dump_best = false;
 bool Object::m_store_smt = false;
 bool Object::m_pareto_optimizer = false;
 bool Object::m_lex_optimizer = false;
-bool Object::m_box_optimizer = false;
 bool Object::m_partitioning = false;
 bool Object::m_parquet_fp = false;
 bool Object::m_free_terminals = false;
@@ -364,16 +364,6 @@ void Object::set_lex_optimizer(bool const val)
     m_lex_optimizer = val;
 }
 
-bool Object::get_box_optimizer() const
-{
-    return m_box_optimizer;
-}
-
-void Object::set_box_optimizer(bool const val)
-{
-    m_box_optimizer = val;
-}
-
 bool Object::get_parquet_fp() const
 {
     return m_parquet_fp;
@@ -528,7 +518,7 @@ std::string Object::orientation_to_string(eOrientation const orientation)
     } else {
         notsupported_check("Orientation not Supported!");
     }
-    
+
     return ""; // Make Compiler Happy
 }
 
@@ -540,4 +530,14 @@ bool Object::get_skip_power_network() const
 void Object::set_skip_power_network(bool const val)
 {
     m_skip_power_network = val;
+}
+
+std::string Object::get_ini_file() const
+{
+    return m_ini_file;
+}
+
+void Object::set_ini_file(std::string const & file)
+{
+    m_ini_file = file;
 }

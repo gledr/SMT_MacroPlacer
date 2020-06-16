@@ -350,14 +350,23 @@ void MacroCircuit::add_macros()
                              macro_definition.width,
                              macro_definition.height);
 
-        for (PinDefinition pin_definition: macro_definition.pin_definitions){
-            Pin* p = new Pin(pin_definition.name,
-                             pin_definition.parent,
-                             Pin::string2enum(pin_definition.direction));
-            nullpointer_check (p);
-            m->add_pin(p);
+        if (this->get_minimize_die_mode()){
+            if (macro_definition.pin_definitions.size() > 0){
+                Pin* p = new Pin ("center",
+                                  macro_definition.id,
+                                  e_pin_direction::eBidirectional);
+                nullpointer_check(p);
+                m->add_pin(p);
+            }
+        } else {
+            for (PinDefinition pin_definition: macro_definition.pin_definitions){
+                Pin* p = new Pin(pin_definition.name,
+                    pin_definition.parent,
+                    Pin::string2enum(pin_definition.direction));
+                nullpointer_check (p);
+                m->add_pin(p);
+            }
         }
-
         if(m_supplement->has_supplement()){
             m->set_supplement(m_supplement);
         }
@@ -488,7 +497,6 @@ void MacroCircuit::build_tree_from_lefdef()
                 from_t = m_id2terminal[itor.pin(0)];
                  _case << "t";
             } else {
-                std::cout << itor.instance(0) << std::endl;
                 notimplemented_check();
             }
 
@@ -502,7 +510,6 @@ void MacroCircuit::build_tree_from_lefdef()
                 to_t = m_id2terminal[itor.pin(i)];
                   _case << "t";
             } else {
-                std::cout << itor.instance(i) << std::endl;
                 notimplemented_check();
             }
 
@@ -514,8 +521,8 @@ void MacroCircuit::build_tree_from_lefdef()
             } else if (_case.str() == "mc"){
                 nullpointer_check (from_m);
                 nullpointer_check (to_c);
-
                 m_tree->insert_edge<Macro, Cell>(from_m, to_c, itor.pin(0), itor.pin(i), itor.name());
+
             } else if (_case.str() == "mt"){
                   nullpointer_check (from_m);
                   nullpointer_check (to_t );
@@ -732,9 +739,6 @@ void MacroCircuit::config_z3()
     if(this->get_pareto_optimizer()){
         m_logger->use_pareto_optimizer();
         param.set(":opt.priority", "pareto");
-    } else if (this->get_box_optimizer()){
-        m_logger->use_box_optimizer();
-        param.set(":opt.priority", "box");
     } else if (this->get_lex_optimizer()){
         m_logger->use_lex_optimizer();
         param.set(":opt.priority", "lex");
@@ -790,20 +794,13 @@ void MacroCircuit::run_encoding()
     if (this->get_minimize_die_mode()){
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
-
-        if(this->get_box_optimizer()){
-            m_z3_opt->minimize(m_layout->get_uy() + m_layout->get_ux());
-            m_z3_opt->check();
-        }
     }
 
-    if (this->get_minimize_hpwl_mode()){
-        this->encode_hpwl_length();
-        
-        for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
-            m_z3_opt->minimize(m_hpwl_edges[i]);
-        }
+    this->encode_hpwl_length();
+    for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
+        m_z3_opt->minimize(m_hpwl_edges[i]);
     }
+ 
 }
 
 /**

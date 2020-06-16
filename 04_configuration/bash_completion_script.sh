@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 # Generted File! Do not modify!
-# Thu Jun  4 16:24:21 2020
+# Tue Jun 16 09:57:15 2020
 #
 
 #
@@ -33,7 +33,6 @@ local cur
 			--store-smt \
 			--pareto \
 			--lex \
-			--box \
 			--parquet \
 			--partition \
 			--minimize-area \
@@ -49,6 +48,7 @@ local cur
 			--site \
 			--timeout \
 			--solutions \
+			--ini \
 			' -- $cur ) );;
 	esac
 

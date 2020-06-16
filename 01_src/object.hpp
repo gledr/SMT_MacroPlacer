@@ -136,9 +136,6 @@ protected:
     void set_lex_optimizer(bool const val);
     bool get_lex_optimizer() const;
 
-    void set_box_optimizer(bool const val);
-    bool get_box_optimizer() const;
-
     void set_parquet_fp(bool const val);
     bool get_parquet_fp() const;
 
@@ -179,9 +176,12 @@ protected:
     std::string get_base_path() const;
 
     std::string orientation_to_string(eOrientation const orientation);
-    
+
     void set_skip_power_network(bool const val);
     bool get_skip_power_network() const;
+
+    void set_ini_file(std::string const & file);
+    std::string get_ini_file() const;
 
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
@@ -204,6 +204,7 @@ private:
     static std::string m_binary_name;
     static std::string m_database_file;
     static std::string m_db_to_csv_script;
+    static std::string m_ini_file;
     static size_t m_timeout;
     static size_t m_bitwidth_orientation;
     static size_t m_partition_id;
@@ -219,7 +220,6 @@ private:
     static bool m_store_smt;
     static bool m_pareto_optimizer;
     static bool m_lex_optimizer;
-    static bool m_box_optimizer;
     static bool m_parquet_fp;
     static bool m_partitioning;
     static bool m_free_terminals;

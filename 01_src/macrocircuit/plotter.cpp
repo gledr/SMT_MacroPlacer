@@ -138,7 +138,11 @@ void Plotter::run()
     }
 
     std::stringstream img_name;
-    img_name << "placement_" << this->get_design_name() << "_" << m_solution_id << ".png";
+    if (m_filename == ""){
+        img_name << "placement_" << this->get_def() << "_" << m_solution_id << ".png";
+    } else {
+        img_name << m_filename << ".png";
+    }
     matplotlibcpp::save("./" + img_name.str());
 }
 
@@ -336,4 +340,14 @@ void Plotter::draw_layout()
     matplotlibcpp::plot(std::vector<size_t>({ux, ux}),
                         std::vector<size_t>({uy, ly}),
                         "--b");
+}
+
+/**
+ * @brief Set Name for Export
+ *
+ * @param name Name to Apply
+ */
+void Plotter::set_filename(std::string const & name)
+{
+    m_filename = name;
 }

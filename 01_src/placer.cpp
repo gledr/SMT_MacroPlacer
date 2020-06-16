@@ -164,6 +164,9 @@ void MacroPlacer::read_configuration()
     }
 }
 
+/**
+ * @brief Handle Configuration from Commandline and Ini File
+ */
 void MacroPlacer::handle_configuration()
 {
     if(m_vm.count(CMD_HELP)){

@@ -121,12 +121,42 @@ void Supplement::read_supplement_file()
     }
 }
 
+void Supplement::write_supplement_file()
+{
+    boost::filesystem::current_path(this->get_active_results_directory());
+    Json::Value root;
+   
+    if (this->has_layout()){
+        Json::Value layout;
+        layout["layout"]["lx"] = m_layout->get_lx();
+        layout["layout"]["ly"] = m_layout->get_ly();
+        layout["layout"]["ux"] = m_layout->get_ux();
+        layout["layout"]["uy"] = m_layout->get_uy();
+        
+        root.append(layout);
+    }
+    if (m_macros.size() > 0){
+        
+    } 
+    if (m_terminals.size() > 0){
+        
+    }
+    std::ofstream supplement_file(this->get_supplement());
+    supplement_file << root;
+    supplement_file.close();
+}
+
 SupplementMacro* Supplement::get_macro(std::string const & id)
 {
     SupplementMacro* retval = m_macros[id];
     nullpointer_check (retval);
 
     return retval;
+}
+
+void Supplement::add_macro(SupplementMacro const * macro)
+{
+    notimplemented_check();
 }
 
 SupplementTerminal* Supplement::get_terminal(std::string const & id)
@@ -137,9 +167,22 @@ SupplementTerminal* Supplement::get_terminal(std::string const & id)
     return retval;
 }
 
+void Supplement::add_terminal(SupplementTerminal const * terminal)
+{
+    notimplemented_check();
+}
+
 SupplementLayout* Supplement::get_layout()
 {
     return m_layout;
+}
+
+void Supplement::set_layout(SupplementLayout* layout)
+{
+    delete m_layout;
+    nullpointer_check(layout);
+
+    m_layout = layout;
 }
 
 bool Supplement::has_macro(std::string const & id)

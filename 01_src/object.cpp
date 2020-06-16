@@ -206,6 +206,8 @@ std::string Object::get_bookshelf_file() const
 
 std::string Object::get_bookshelf_export() const
 {
+    assert (m_bookshelf_export != "");
+    
     return m_bookshelf_export;
 }
 

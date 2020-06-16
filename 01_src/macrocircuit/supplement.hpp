@@ -23,6 +23,8 @@
 #include <unordered_map>
 #include <iostream>
 
+#include <boost/filesystem.hpp>
+
 namespace Placer {
 
 /**
@@ -38,6 +40,8 @@ public:
 
     void read_supplement_file();
 
+    void write_supplement_file();
+
     bool has_supplement();
 
     bool has_macro(std::string const & id);
@@ -47,10 +51,13 @@ public:
     bool has_layout();
 
     SupplementMacro* get_macro(std::string const & id);
+    void add_macro(SupplementMacro const * macro);
 
     SupplementLayout* get_layout();
+    void set_layout(SupplementLayout * layout);
 
     SupplementTerminal* get_terminal(std::string const & id);
+    void add_terminal(SupplementTerminal const * terminal);
 
 private:
     Utils::Logger* m_logger;

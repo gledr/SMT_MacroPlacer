@@ -719,9 +719,11 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
  */
 void Bookshelf::write_placement(size_t const solution_id)
 {
+    boost::filesystem::current_path(this->get_active_results_directory());
+    
     this->write_aux();
     this->write_blocks();
-    this->write_nets();
+    //this->write_nets();
     this->write_pl(solution_id);
 }
 
@@ -732,6 +734,7 @@ void Bookshelf::write_aux()
 {
     std::string filename = this->get_bookshelf_export() + ".aux";
     m_logger->bookshelf_write_aux(filename);
+    std::cout << filename << std::endl;
 
     std::ofstream auxFile(filename);
     auxFile << this->get_bookshelf_export() << ".pl ";

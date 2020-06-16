@@ -347,7 +347,6 @@ bool Edge::is_power_edge()
     return m_edge_type == eEdgeType::ePower;
 }
 
-
 /**
  * @brief Check is Edge is Signal Edge
  * 

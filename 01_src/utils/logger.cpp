@@ -280,12 +280,28 @@ void Logger::dump_all ()
     LOG(eInfo) << "Exporting All Placement Solutions as PNG";
 }
 
+void Logger::dump_best()
+{
+    LOG(eInfo) << "Exporting Best Placement Solution as PNG";
+}
+
 void Logger::save_all (eInputFormat const type)
 {
     if (type == eLEFDEF){
         LOG(eInfo) << "Exporting all Placement Solutions as DEF";
     } else if (type == eBookshelf){
         LOG(eInfo) << "Exporting all Placement Solutions as Bookshelf";
+    } else {
+        assert (0);
+    }
+}
+
+void Logger::save_best(eInputFormat const type)
+{
+    if (type == eLEFDEF){
+        LOG(eInfo) << "Exporting Best Placement Solutions as DEF";
+    } else if (type == eBookshelf){
+        LOG(eInfo) << "Exporting Best Placement Solutions as Bookshelf";
     } else {
         assert (0);
     }

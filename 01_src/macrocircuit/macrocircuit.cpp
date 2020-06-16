@@ -5,7 +5,7 @@
 // Workfile     : macrocircuit.cpp
 //
 // Date         : 22. December 2019
-// Compiler     : gcc version 9.2.0 (GCC) 
+// Compiler     : gcc version 10.0.1 (GCC) 
 // Copyright    : Johannes Kepler University
 // Description  : SoC Macro Circuit
 //==================================================================
@@ -400,6 +400,7 @@ void MacroCircuit::add_terminals()
     m_logger->start_terminal_thread();
 
     for(auto & itor: m_circuit->defPinStor){
+        std::cout << itor.pinName() << " has port " << itor.hasPort() << std::endl;
         e_pin_direction direction = Pin::string2enum(itor.direction());
         Terminal* tmp;
         
@@ -417,7 +418,6 @@ void MacroCircuit::add_terminals()
         m_terminals.push_back(tmp);
         m_id2terminal[itor.pinName()] = tmp;
     }
-    
     m_logger->end_terminal_thread();
 }
 
@@ -439,11 +439,18 @@ void MacroCircuit::dump_all()
  */
 void MacroCircuit::dump_best()
 {
-    std::cout << "Dump best" << std::endl;
-    std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
-    m_plotter->set_data(m_terminals, m_components, best_hpwl.first, m_layout);
+    m_logger->dump_best();
+    m_plotter->set_filename("best_" + this->get_def());
+    if (this-get_minimize_die_mode()){
+        std::pair<size_t, size_t> best_area = m_eval->best_area();
+        m_plotter->set_data(m_terminals, m_components, best_area.first, m_layout);
+    } else if (this->get_minimize_hpwl_mode()){
+        std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
+        m_plotter->set_data(m_terminals, m_components, best_hpwl.first, m_layout);
+    } else {
+        assert (0);
+    };
     m_plotter->run();
-    std::cout << "Best Solution: HPWL = " << best_hpwl.second << std::endl;
 }
 
 /**
@@ -462,7 +469,9 @@ void MacroCircuit::save_all()
     } else if (!this->get_bookshelf_file().empty()){
         m_logger->save_all(eBookshelf);
         for(size_t i = 0; i < m_solutions; ++i){
+            this->set_bookshelf_export("placed_" + std::to_string(i) + "_" + this->get_design_name()) ;
             m_bookshelf->write_placement(i);
+            m_supplement->write_supplement_file();
         }
     } else {
         assert (0);
@@ -476,14 +485,22 @@ void MacroCircuit::save_best()
 {
     boost::filesystem::current_path(this->get_active_results_directory());
 
-    if (this->get_minimize_die_mode()){
+    if(!this->get_def().empty() && !this->get_lef().empty()) {
+        m_logger->save_best(eLEFDEF);
+        if (this->get_minimize_die_mode()){
         std::pair<size_t, size_t> best_area = m_eval->best_area();
-        std::string name = "best_" + this->get_def();
-        this->write_def(name, best_area.first);
-    } else if (this->get_minimize_hpwl_mode()){
-        std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
-        std::string name = "best_" + this->get_def();
-        this->write_def(name, best_hpwl.first);
+            std::string name = "best_" + this->get_def();
+            this->write_def(name, best_area.first);
+        } else if (this->get_minimize_hpwl_mode()){
+            std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
+            std::string name = "best_" + this->get_def();
+            this->write_def(name, best_hpwl.first);
+        }
+    } else if (!this->get_bookshelf_file().empty()){
+        m_logger->save_best(eBookshelf);
+        notimplemented_check();
+    } else {
+        assert (0);
     }
 }
 
@@ -608,6 +625,8 @@ void MacroCircuit::add_cell(LefDefParser::defiComponent const & cmp)
  */
 void MacroCircuit::write_def(std::string const & name, size_t const solution)
 {
+    // Write Shape of Die
+///{{{
     size_t lx = 0, ly = 0, ux = 0, uy = 0;
     if (m_layout->is_free_lx()){
         notimplemented_check();
@@ -638,7 +657,9 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
     m_circuit->defDieArea.Destroy();
     m_circuit->defDieArea.Init();
     m_circuit->defDieArea.addPoint(&data);
-   
+///}}}
+    // Write Position and Orientation of Macros
+///{{{
     for(auto itor: m_macros){
         if(!itor->is_free()){
             continue;
@@ -651,21 +672,30 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
                                    itor->get_solution_ly(solution),
                                    itor->get_solution_orientation(solution));
     }
-
+///}}}
+    // Write Position of Terminals
+///{{{
     for(auto itor: m_terminals){
         if(!itor->is_free()){
             continue;
         }
 
-        size_t pos_x = itor->get_solution_pos_x(solution);
-        size_t pos_y = itor->get_solution_pos_y(solution);
+        if (itor->has_solution(solution)){
+            size_t pos_x = itor->get_solution_pos_x(solution);
+            size_t pos_y = itor->get_solution_pos_y(solution);
 
-        auto idx = m_circuit->defPinMap.find(itor->get_id());
-        LefDefParser::defiPin* pin = &m_circuit->defPinStor[idx->second];
-        nullpointer_check(pin);
-        pin->setPlacement(1, pos_x, pos_y, 0);
+            auto idx = m_circuit->defPinMap.find(itor->get_id());
+            LefDefParser::defiPin& pin = m_circuit->defPinStor[idx->second];
+            
+            std::cout << pin.hasPort() << std::endl;
+            
+            std::cout << pin.pinName() << std::endl;
+            std::cout << pin.netName() << std::endl;
+            pin.setPlacement(1, pos_x, pos_y, 0);
+            m_circuit->defPinStor[idx->second] = pin;
+        }
     }
-
+///}}}
     FILE* fp = fopen(name.c_str(), "w");
     m_circuit->WriteDef(fp);
     fclose(fp);
@@ -679,10 +709,18 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
  */
 bool MacroCircuit::is_macro(LefDefParser::defiComponent const & macro)
 {
-    auto idx = m_circuit->lefMacroMap.find(macro.name());
-    LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
+    try {
+        auto idx = m_circuit->lefMacroMap.find(macro.name());
+        assert (idx != m_circuit->lefMacroMap.end());
 
-    return lef_data.sizeY() != m_standard_cell_height;
+        LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
+
+        return lef_data.sizeY() != m_standard_cell_height;
+
+    } catch(std::exception const & exp){
+        std::cout << exp.what() << std::endl;
+        assert (0);
+    }
 }
 
 /**

@@ -32,6 +32,8 @@ public:
                   size_t const soultion_id,
                   Layout* const layout);
 
+    void set_filename(std::string const & name);
+
     void run();
 
 private:
@@ -40,7 +42,8 @@ private:
     std::map<std::string, Component*> m_id2component;
     Layout* m_layout;
     size_t m_solution_id;
-    
+    std::string m_filename;
+
     void draw_rectangle(size_t const lx,
                         size_t const ly,
                         size_t const ux,

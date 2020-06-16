@@ -47,7 +47,11 @@ public:
     void add_supplement_macro(std::string const & id);
 
     void dump_all();
+    void dump_best();
+    
     void save_all(eInputFormat const type);
+    void save_best(eInputFormat const type);
+    
     void solver_version(std::string const & version);
 
     void supplement_file(std::string const & file);
@@ -78,7 +82,6 @@ public:
 
     void construct_tree(size_t const edges);
     void insert_edge(std::string const & from, std::string const & to);
-    
 
     void min_die_area(double const & area);
     void result_die_area(double const & area);

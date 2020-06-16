@@ -254,22 +254,25 @@ void Bookshelf::read_nets()
                 if (this->has_macro(id)){
                     std::string direction = sub_token[1];
                     // Pin has relative position
-                    if (sub_token.size() > 2) {
-                        assertion_check (sub_token[2] == ":");
-                        std::string rel_pos_x = sub_token[3];
-                        std::string rel_pos_y = sub_token[4];
-                        std::string pin = rel_pos_x + "_" + rel_pos_y;
-                        this->add_pin_to_macro(id, pin, direction, rel_pos_x, rel_pos_y);
-                        pins.push_back(pin);
-                    // Pin is free
-                    } else {
-                         std::string pin =  "%0.0_%0.0";
-                        this->add_pin_to_macro(id, pin, direction, "", "");
-                        pins.push_back(pin);
+                    if (!this->get_minimize_die_mode()){
+                        if (sub_token.size() > 2) {
+                            assertion_check (sub_token[2] == ":");
+                            std::string rel_pos_x = sub_token[3];
+                            std::string rel_pos_y = sub_token[4];
+                            std::string pin = rel_pos_x + "_" + rel_pos_y;
+                            this->add_pin_to_macro(id, pin, direction, rel_pos_x, rel_pos_y);
+                            pins.push_back(pin);
+                        // Pin is free
+                        } else {
+                            std::string pin =  "%0.0_%0.0";
+                            this->add_pin_to_macro(id, pin, direction, "", "");
+                            pins.push_back(pin);
+                        }
                     }
                     Node* n = new Node(this->find_macro(id));
                     nodes.push_back(n);
                     num_pins++;
+
                 } else if (this->has_terminal(id)){
                     Node* n = new Node(this->find_terminal(id));
                     nodes.push_back(n);
@@ -305,10 +308,16 @@ void Bookshelf::read_nets()
                 } else {
                     notimplemented_check();
                 }
+                std::string from_pin;
+                std::string to_pin;
+                if (this->get_minimize_die_mode()){
+                    from_pin  = "center";
+                    to_pin = "center";
+                } else {
+                    from_pin  = pins[0];
+                    to_pin = pins[node_index];
+                }
 
-                std::string from_pin = pins[0];
-                std::string to_pin = pins[node_index];
-                
                 if (from_case == 'm' && to_case == 'm'){
                     Macro* from = nodes[0]->get_macro();
                     nullpointer_check(from);
@@ -414,15 +423,29 @@ void Bookshelf::read_pl()
                                      macro->name,
                                      macro->width,
                                      macro->height);
+                nullpointer_check(m);
                 m_macros.push_back(m);
+                
+                Pin* p = new Pin("center", macro->name, eBidirectional);
+                nullpointer_check(p);
+                m->add_pin(p);
             } else if((x != 0) || (y != 0)){
+                assert (0);
                // m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
             // Free Macro
             } else {
-                m_macros.push_back(new Macro(macro->name,
-                                             macro->name,
-                                             macro->width,
-                                             macro->height));
+               Macro* m = new Macro(macro->name,
+                                     macro->name,
+                                     macro->width,
+                                     macro->height);
+                nullpointer_check(m);
+                m_macros.push_back(m);
+
+                if (this->get_minimize_die_mode()){
+                    Pin* p = new Pin("center", macro->name, eBidirectional);
+                    nullpointer_check(p);
+                    m->add_pin(p);
+                }
             }
 
         } else if(terminal != m_terminal_definitions.end()){
@@ -694,12 +717,12 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
 /**
  * @brief Dump Placement of Macros to Placement File
  */
-void Bookshelf::write_placement()
+void Bookshelf::write_placement(size_t const solution_id)
 {
     this->write_aux();
     this->write_blocks();
     this->write_nets();
-    this->write_pl();
+    this->write_pl(solution_id);
 }
 
 /**
@@ -817,8 +840,17 @@ void Bookshelf::write_nets()
             nullpointer_check(m);
             size_t width = m->get_width().get_numeral_uint();
             size_t height = m->get_height().get_numeral_uint();
-            double factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
-            double factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+            
+            double factor_width = 0.0;
+            double factor_height = 0.0;
+            if (this->get_minimize_die_mode()){
+                factor_width = 0.5;
+                factor_height = 0.5;
+            } else {
+                factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
+                factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+            }
+           
             //feed << "# " << m->get_id() << std::endl;
             if (m->is_free()){
                 feed << "o" << m->get_key() << " B : " << width * factor_width << " " << height * factor_height << std::endl;
@@ -846,8 +878,17 @@ void Bookshelf::write_nets()
                 nullpointer_check(m);
                 size_t width = m->get_width().get_numeral_uint();
                 size_t height = m->get_height().get_numeral_uint();
-                double factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
-                double factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+                
+                double factor_width = 0.0;
+                double factor_height = 0.0;
+                if (this->get_minimize_die_mode()){
+                    factor_width = 0.5;
+                    factor_height = 0.5;
+                } else {
+                    factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
+                    factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+                }
+
                 //feed << "# " << m->get_id() << std::endl;
                 if (m->is_free()){
                     feed << "o" << m->get_key() << " B : " << width * factor_width << " " << height * factor_height << std::endl;
@@ -865,7 +906,7 @@ void Bookshelf::write_nets()
 /**
  * @brief Write Placement File
  */
-void Bookshelf::write_pl()
+void Bookshelf::write_pl(size_t const solution_id)
 {
     std::string filename = this->get_bookshelf_export() + ".pl";
     m_logger->bookshelf_write_place(filename);
@@ -885,9 +926,9 @@ void Bookshelf::write_pl()
         if (macro->is_free()){
             feed << "o" <<macro->get_key() << " " << "0" << " " << "0" << std::endl;
         } else {
-            size_t lx = macro->get_solution_lx(0);
-            size_t ly = macro->get_solution_ly(0);
-            eOrientation o = macro->get_solution_orientation(0);
+            size_t lx = macro->get_solution_lx(solution_id);
+            size_t ly = macro->get_solution_ly(solution_id);
+            eOrientation o = macro->get_solution_orientation(solution_id);
             size_t h = macro->get_height_numeral();
             size_t w = macro->get_width_numeral();
             

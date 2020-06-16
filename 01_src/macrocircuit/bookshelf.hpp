@@ -5,7 +5,7 @@
 // Workfile     : bookshelf.hpp
 //
 // Date         : 13. January 2019
-// Compiler     : gcc version 9.2.0 (GCC) 
+// Compiler     : gcc version 10.0.1 (GCC) 
 // Copyright    : Johannes Kepler University
 // Description  : Bookshelf Input Reader
 //==================================================================
@@ -45,7 +45,7 @@ public:
 
     void read_files();
 
-    void write_placement();
+    void write_placement(size_t const solution_id = 0);
 
     void strip_terminals();
 
@@ -74,7 +74,7 @@ private:
     void write_aux();
     void write_blocks();
     void write_nets();
-    void write_pl();
+    void write_pl(size_t const solution_id);
 
     std::string m_design_name;
     std::string m_blocks_file;

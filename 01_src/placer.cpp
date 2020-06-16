@@ -401,6 +401,7 @@ void MacroPlacer::store_configuration ()
 {
     std::string filename = this->get_results_directory() + "/" +
                            std::to_string(this->get_results_id()) +
+                           "/" +
                            this->get_ini_file();
 
     std::ofstream config(filename);

@@ -47,6 +47,7 @@ public:
     void add_supplement_macro(std::string const & id);
 
     void dump_all();
+    void save_all(eInputFormat const type);
     void solver_version(std::string const & version);
 
     void supplement_file(std::string const & file);

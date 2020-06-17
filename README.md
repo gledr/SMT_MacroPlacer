@@ -29,8 +29,9 @@ In oder to resolve the packages needed for Ubuntu 20.04 LTS, please make sure th
 - libsqlite3-dev
 - z3
 - libz3-dev
+- cmake
 
-If the package manager can not resolve the Python2 packages, please add the **universe** repository to your system via "apt-add-repository universe".
+If the package manager can not resolve the Python 2 packages, please add the **universe** repository to your system via "apt-add-repository universe".
 
 SMT_MacroPlacer is configured by using command line arguments which can be applied via the command line or config.ini files placed into the folder holding the source files.
 
@@ -48,7 +49,7 @@ smt_placer  --lef=boxes.lef  \
             --verbose  \
             --solutions=2  
 
-Running this command will use the benchmark stored in the boxes.lef/def files and tries to minimize the used area for placement as well as the length of the Half Perimetric Wireleght by invoking a Pareto Optimizer and searching for two solution. The generated solutions are gettings stored in the results folder under its specific results ID. If you want to export the generated placement please considering using the --save-all/--save-best  options
+Running this command will use the benchmark stored in the boxes.lef/def files and tries to minimize the used area for placement as well as the length of the Half Perimeter Wirelenght by invoking a Pareto Optimizer and searching for two solution. The generated solutions are getting stored in the results folder under its specific results ID. If you want to export the generated placement please considering using the --save-all/--save-best  options
 
-SMT_MacroPlacer is developed at the Institute for Integrated Circuits at the Johannes Kepler University Linz, Austria in cooperation with Infineon Technologies Duisburg, Germany.
+SMT_MacroPlacer is developed at the Institute for Integrated Circuits at the Johannes Kepler University Linz, Austria.
 

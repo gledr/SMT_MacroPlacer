@@ -20,18 +20,21 @@ ROW ROW_10 CoreSite 0 34200 FS DO 236 by 1 STEP 760 0 ;
 TRACKS X 380 DO 526 STEP 380 LAYER metal1 ;
 
 COMPONENTS 3 ;
-- _square01_ typeB ;
+- _square01_ typeA ;
 - _square02_ typeA ;
 - _square03_ typeA ;
 - _square04_ typeA ;
 END COMPONENTS
 
 
-
-
 PINS 2 ;
-- in1_i + NET in1_i + DIRECTION INPUT ;
-- out_o + NET out_o + DIRECTION OUTPUT ;
+- in1_i + NET in1_i + DIRECTION INPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
+        
+- out_o + NET out_o + DIRECTION OUTPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
 END PINS
 
 NETS 4 ;

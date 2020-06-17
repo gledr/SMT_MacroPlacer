@@ -17,10 +17,16 @@
 namespace Placer {
 
 struct TerminalDefinition {
+
+    TerminalDefinition()
+    {
+        is_free = false;
+    }
     std::string name;
 
     size_t pos_x;
     size_t pos_y;
+    bool is_free;
 };
 
 } /* namespace Placer */

@@ -65,7 +65,8 @@ Terminal::Terminal(std::string const & name,
 Terminal::Terminal(std::string const & name,
                    size_t const pos_x,
                    size_t const pos_y,
-                   e_pin_direction const direction):
+                   e_pin_direction const direction,
+                   eOrientation const orientation):
     Object(),
     m_logger(Utils::Logger::getInstance()),
     m_encode(new EncodingUtils()),
@@ -75,7 +76,8 @@ Terminal::Terminal(std::string const & name,
     m_direction(direction),
     m_terminal_type(eTerminalType::eUnknownTerminal),
     m_pos_x(m_encode->get_value(pos_x)),
-    m_pos_y(m_encode->get_value(pos_y))
+    m_pos_y(m_encode->get_value(pos_y)),
+    m_orientation(orientation)
 {
     m_free = false;
     m_bitwidth = 0;

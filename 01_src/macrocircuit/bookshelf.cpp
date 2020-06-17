@@ -456,7 +456,7 @@ void Bookshelf::read_pl()
                 size_t x = std::stoi(token[1]);
                 size_t y = std::stoi(token[2]);
 
-                Terminal* tmp = new Terminal(name, x, y, e_pin_direction::eUnknown);
+                Terminal* tmp = new Terminal(name, x, y, e_pin_direction::eUnknown, eNorth);
                 m_terminals.push_back(tmp);
             } else {
                Terminal* tmp = new Terminal(name, e_pin_direction::eUnknown);

@@ -13,17 +13,31 @@
 #define MACRO_DEFINITION_HPP
 
 #include <string>
+#include <object.hpp>
 
 #include <pin_definition.hpp>
 
 namespace Placer {
 
 struct MacroDefinition {
+    
+    MacroDefinition()
+    {
+        lx = 0;
+        ly = 0;
+        is_placed = false;
+    }
+
     std::string name;
     std::string id;
+    bool is_placed;
 
     size_t width;
     size_t height;
+
+    size_t lx;
+    size_t ly;
+    eOrientation orientation;
 
     std::vector<PinDefinition> pin_definitions;
 };

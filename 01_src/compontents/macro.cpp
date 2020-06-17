@@ -256,18 +256,26 @@ void Macro::encode_pins()
     z3::expr_vector clauses(m_z3_ctx);
 
     // Pins are at the center of the Macro
-    this->encode_pins_center_of_macro(e2D);
-    clauses.push_back(m_encode_pins_center_of_macro);
+    
+    if (this->get_minimize_die_mode()){
+        this->encode_pins_center_of_macro(e2D);
+        clauses.push_back(m_encode_pins_center_of_macro);
+    } else if (this->get_minimize_hpwl_mode()){
+        this->encode_pins_on_macro_frontier(e2D);
+        clauses.push_back(m_encode_pin_macro_frontier);
+    } else {
+        assert (0);
+    }
     
     // Pins are at the macro edge non overlapping
-    //this->encode_pins_on_macro_frontier(e2D);
+   
     //this->encode_pins_non_overlapping();
 
     // Pins are positioned relative to the macro center
     //this->encode_pins_relative_to_center(e2D);
     //clauses.push_back(m_encode_pins_relative_to_center);
     
-    //clauses.push_back(m_encode_pin_macro_frontier);
+  
     //clauses.push_back(m_encode_pins_not_overlapping);
     
     if (clauses.size() == 1){

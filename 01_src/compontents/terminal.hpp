@@ -43,7 +43,8 @@ public:
     Terminal(std::string const & name,
              size_t const pos_x,
              size_t const pos_y,
-             e_pin_direction const direction);
+             e_pin_direction const direction,
+             eOrientation const orientation);
 
     virtual ~Terminal();
 
@@ -100,6 +101,7 @@ private:
 
     z3::expr m_pos_x;
     z3::expr m_pos_y;
+    eOrientation m_orientation;
 
     std::vector<size_t> m_solutions_x;
     std::vector<size_t> m_solutions_y;

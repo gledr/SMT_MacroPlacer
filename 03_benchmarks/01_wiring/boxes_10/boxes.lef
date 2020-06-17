@@ -60,7 +60,7 @@ MACRO typeA
     CLASS CORE ;
     FOREIGN typeA 0.000 0.000 ;
     ORIGIN 0.000 0.000 ;
-    SIZE 3.00 BY 3.00 ;
+    SIZE 300.00 BY 300.00 ;
     SYMMETRY X Y ;
     SITE CoreSite ;
     PIN o

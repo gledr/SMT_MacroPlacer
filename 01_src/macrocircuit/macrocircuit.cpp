@@ -229,17 +229,24 @@ void MacroCircuit::init_tree(eInputFormat const type)
  */
 void MacroCircuit::create_macro_definitions()
 {
+    using namespace LefDefParser;
+
     for(auto& itor: m_circuit->defComponentStor){
         if(this->is_macro(itor)){
             auto idx = m_circuit->lefMacroMap.find(itor.name());
-            LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
-            std::vector<LefDefParser::lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
+            lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
+            std::vector<lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
 
             MacroDefinition macro_definition;
             macro_definition.name = itor.name();
             macro_definition.id = itor.id();
             macro_definition.width = lef_data.sizeX();
             macro_definition.height = lef_data.sizeY();
+            macro_definition.lx = itor.placementX();
+            macro_definition.ly = itor.placementY();
+            macro_definition.orientation = 
+                static_cast<eOrientation>(itor.placementOrient());
+            macro_definition.is_placed = itor.isPlaced();
 
             for(auto pin: lef_pins){
                 PinDefinition pin_def;
@@ -276,6 +283,13 @@ void MacroCircuit::partitioning()
  */
 void MacroCircuit::encode()
 {
+    if (this->get_minimize_die_mode()){
+        std::cout << Utils::Utils::get_bash_string_blink_red("Minimize Die Mode") << std::endl;
+    } 
+    if (this->get_minimize_hpwl_mode()){
+        std::cout << Utils::Utils::get_bash_string_blink_red("Minimize HPWL Mode") << std::endl;
+    }
+    
     // TODO Mixture of Macros, Partitions and Cells
     if (this->get_partitioning()){
         std::copy(m_partitons.begin(), m_partitons.end(), std::back_inserter(m_components));
@@ -345,10 +359,23 @@ void MacroCircuit::add_macros()
     m_logger->start_macro_thread();
 
     for (MacroDefinition macro_definition: m_macro_definitions){
-        Macro* m = new Macro(macro_definition.name,
-                             macro_definition.id,
-                             macro_definition.width,
-                             macro_definition.height);
+        Macro* m = nullptr;
+
+        if (macro_definition.is_placed){
+            m = new Macro(macro_definition.name,
+                          macro_definition.id,
+                          macro_definition.width,
+                          macro_definition.height,
+                          macro_definition.lx,
+                          macro_definition.ly,
+                          macro_definition.orientation);
+        } else {
+            m = new Macro(macro_definition.name,
+                          macro_definition.id,
+                          macro_definition.width,
+                          macro_definition.height);
+        }
+        nullpointer_check(m);
 
         if (this->get_minimize_die_mode()){
             if (macro_definition.pin_definitions.size() > 0){
@@ -401,13 +428,17 @@ void MacroCircuit::add_terminals()
 
     for(auto & itor: m_circuit->defPinStor){
         e_pin_direction direction = Pin::string2enum(itor.direction());
-        Terminal* tmp;
-        
-        if (itor.hasPlacement() && !this->get_free_terminals()){
-            int x = itor.placementX();
-            int y = itor.placementY();
-            tmp = new Terminal(itor.pinName(), x, y, direction);
+        Terminal* tmp = nullptr;
 
+        assert (itor.numPorts() == 1);
+
+        if (this->get_free_terminals()){
+            tmp = new Terminal(itor.pinName(), direction);
+        } else if (itor.pinPort(0)->isPlaced()){
+            int x = itor.pinPort(0)->placementX();
+            int y = itor.pinPort(0)->placementY();
+            eOrientation o = static_cast<eOrientation>(itor.pinPort(0)->orient());
+            tmp = new Terminal(itor.pinName(), x, y, direction, o);
         } else {
             tmp = new Terminal(itor.pinName(), direction);
         }
@@ -440,7 +471,7 @@ void MacroCircuit::dump_best()
 {
     m_logger->dump_best();
     m_plotter->set_filename("best_" + this->get_def());
-    if (this-get_minimize_die_mode()){
+    if (this->get_minimize_die_mode()){
         std::pair<size_t, size_t> best_area = m_eval->best_area();
         m_plotter->set_data(m_terminals, m_components, best_area.first, m_layout);
     } else if (this->get_minimize_hpwl_mode()){
@@ -646,12 +677,12 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
      if (m_layout->is_free_ux()){
         ux = m_layout->get_solution_ux(solution);
     } else {
-        notimplemented_check();
+        ux = m_layout->get_ux_numercial();
     }
      if (m_layout->is_free_uy()){
         uy = m_layout->get_solution_uy(solution);
     } else {
-        notimplemented_check();
+        uy = m_layout->get_uy_numerical();
     }
 
     defiGeometries data(nullptr);
@@ -1551,6 +1582,7 @@ z3::expr MacroCircuit::euclidean_distance(z3::expr const & from_x,
  */
 void MacroCircuit::create_statistics()
 {
+    return;
     if (this->get_minimize_die_mode()){
         auto all_area = m_eval->all_area();
         

@@ -400,7 +400,6 @@ void MacroCircuit::add_terminals()
     m_logger->start_terminal_thread();
 
     for(auto & itor: m_circuit->defPinStor){
-        std::cout << itor.pinName() << " has port " << itor.hasPort() << std::endl;
         e_pin_direction direction = Pin::string2enum(itor.direction());
         Terminal* tmp;
         
@@ -471,6 +470,11 @@ void MacroCircuit::save_all()
         for(size_t i = 0; i < m_solutions; ++i){
             this->set_bookshelf_export("placed_" + std::to_string(i) + "_" + this->get_design_name()) ;
             m_bookshelf->write_placement(i);
+            SupplementLayout* layout = new SupplementLayout(0, // TODO
+                                                            0, // TODO
+                                                            m_layout->get_solution_ux(i),
+                                                            m_layout->get_solution_uy(i));
+            m_supplement->set_layout(layout);
             m_supplement->write_supplement_file();
         }
     } else {
@@ -534,6 +538,7 @@ void MacroCircuit::build_tree_from_lefdef()
                 from_t = m_id2terminal[itor.pin(0)];
                  _case << "t";
             } else {
+                std::cout << itor.instance(0) << " " << itor.pin(0) << std::endl;
                 notimplemented_check();
             }
 
@@ -686,13 +691,7 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
 
             auto idx = m_circuit->defPinMap.find(itor->get_id());
             LefDefParser::defiPin& pin = m_circuit->defPinStor[idx->second];
-            
-            std::cout << pin.hasPort() << std::endl;
-            
-            std::cout << pin.pinName() << std::endl;
-            std::cout << pin.netName() << std::endl;
-            pin.setPlacement(1, pos_x, pos_y, 0);
-            m_circuit->defPinStor[idx->second] = pin;
+            m_circuit->defPinStor[idx->second].setPlacement(DEFI_COMPONENT_PLACED, pos_x, pos_y, 1);
         }
     }
 ///}}}

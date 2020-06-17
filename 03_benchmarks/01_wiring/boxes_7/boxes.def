@@ -31,8 +31,13 @@ END COMPONENTS
 
 
 PINS 2 ;
-- in1_i + NET in1_i + DIRECTION INPUT ;
-- out_o + NET out_o + DIRECTION OUTPUT ;
+- in1_i + NET in1_i + DIRECTION INPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
+        
+- out_o + NET out_o + DIRECTION OUTPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
 END PINS
 
 NETS 8 ;

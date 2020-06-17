@@ -14,6 +14,10 @@
 using namespace Placer;
 using namespace Placer::Utils;
 
+/**
+ * @brief ...
+ * 
+ */
 Supplement::Supplement():
     Object()
 {
@@ -21,6 +25,10 @@ Supplement::Supplement():
     m_layout = nullptr;
 }
 
+/**
+ * @brief ...
+ * 
+ */
 Supplement::~Supplement()
 {
     m_logger = nullptr;
@@ -30,11 +38,20 @@ Supplement::~Supplement()
     }
 }
 
+/**
+ * @brief ...
+ * 
+ * @return bool
+ */
 bool Supplement::has_supplement()
 {
     return (m_macros.size() > 0) || (m_layout != nullptr);
 }
 
+/**
+ * @brief ...
+ * 
+ */
 void Supplement::read_supplement_file()
 {
     if(this->get_supplement().empty()){
@@ -121,8 +138,14 @@ void Supplement::read_supplement_file()
     }
 }
 
+/**
+ * @brief ...
+ * 
+ */
 void Supplement::write_supplement_file()
 {
+    std::cout << "Write Supplement" << std::endl;
+    
     boost::filesystem::current_path(this->get_active_results_directory());
     Json::Value root;
    
@@ -141,11 +164,17 @@ void Supplement::write_supplement_file()
     if (m_terminals.size() > 0){
         
     }
-    std::ofstream supplement_file(this->get_supplement());
+    std::ofstream supplement_file("supplement.json");
     supplement_file << root;
     supplement_file.close();
 }
 
+/**
+ * @brief ...
+ * 
+ * @param id p_id:...
+ * @return Placer::SupplementMacro*
+ */
 SupplementMacro* Supplement::get_macro(std::string const & id)
 {
     SupplementMacro* retval = m_macros[id];
@@ -154,11 +183,22 @@ SupplementMacro* Supplement::get_macro(std::string const & id)
     return retval;
 }
 
+/**
+ * @brief ...
+ * 
+ * @param macro p_macro:...
+ */
 void Supplement::add_macro(SupplementMacro const * macro)
 {
     notimplemented_check();
 }
 
+/**
+ * @brief ...
+ * 
+ * @param id p_id:...
+ * @return Placer::SupplementTerminal*
+ */
 SupplementTerminal* Supplement::get_terminal(std::string const & id)
 {
     SupplementTerminal* retval = m_terminals[id];
@@ -167,16 +207,31 @@ SupplementTerminal* Supplement::get_terminal(std::string const & id)
     return retval;
 }
 
+/**
+ * @brief ...
+ * 
+ * @param terminal p_terminal:...
+ */
 void Supplement::add_terminal(SupplementTerminal const * terminal)
 {
     notimplemented_check();
 }
 
+/**
+ * @brief ...
+ * 
+ * @return Placer::SupplementLayout*
+ */
 SupplementLayout* Supplement::get_layout()
 {
     return m_layout;
 }
 
+/**
+ * @brief ...
+ * 
+ * @param layout p_layout:...
+ */
 void Supplement::set_layout(SupplementLayout* layout)
 {
     delete m_layout;
@@ -185,16 +240,33 @@ void Supplement::set_layout(SupplementLayout* layout)
     m_layout = layout;
 }
 
+/**
+ * @brief ...
+ * 
+ * @param id p_id:...
+ * @return bool
+ */
 bool Supplement::has_macro(std::string const & id)
 {
     return m_macros[id] != nullptr;
 }
 
+/**
+ * @brief ...
+ * 
+ * @param id p_id:...
+ * @return bool
+ */
 bool Supplement::has_terminal(std::string const & id)
 {
     return m_terminals[id] != nullptr;
 }
 
+/**
+ * @brief ...
+ * 
+ * @return bool
+ */
 bool Supplement::has_layout()
 {
     return m_layout != nullptr;

@@ -461,7 +461,7 @@ void Macro::encode_pins_non_overlapping()
                 z3::expr right = m_encode->gt(a->get_pin_pos_x(), b->get_pin_pos_x());
                 z3::expr upper = m_encode->gt(a->get_pin_pos_y(), b->get_pin_pos_y());
                 z3::expr lower = m_encode->lt(a->get_pin_pos_y(), b->get_pin_pos_y());
-                
+
                 clause.push_back(left);
                 clause.push_back(right);
                 clause.push_back(upper);
@@ -506,7 +506,7 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
         case_e.push_back(pin->get_pin_pos_y() == (m_ly - (m_width/2)));
 ///}}}
         if (rotation == e4D){
-        
+
             z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
                             z3::ite(this->is_W(), z3::mk_and(case_w),
                             z3::ite(this->is_S(), z3::mk_and(case_s),

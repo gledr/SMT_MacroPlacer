@@ -91,6 +91,7 @@ void Bookshelf::read_aux()
         } else if (parts[1] == "pl"){
             m_pl_file = file;
         } else {
+            std::cout << parts[1] << std::endl;
             throw PlacerException("Unknown Format used in Aux file!");
         }
     }
@@ -583,14 +584,16 @@ std::string Bookshelf::get_design_name () const
 Macro* Bookshelf::find_macro(std::string const & name)
 {
     Macro* ret_val = nullptr;
-
+    std::cout << "find macro: " << name << std::endl;
     for (auto itor: m_macros){
         if (itor->get_name() == name){
             ret_val = itor;
             break;
         }
     }
-    assertion_check (name == ret_val->get_id());
+    assert (ret_val != nullptr);
+    std::cout << name << " " << ret_val->get_id() << std::endl;
+    assert (name == ret_val->get_id());
     
     return ret_val;
 }
@@ -734,11 +737,10 @@ void Bookshelf::write_aux()
 {
     std::string filename = this->get_bookshelf_export() + ".aux";
     m_logger->bookshelf_write_aux(filename);
-    std::cout << filename << std::endl;
 
     std::ofstream auxFile(filename);
     auxFile << this->get_bookshelf_export() << ".pl ";
-    auxFile << this->get_bookshelf_export() << ".blk ";
+    auxFile << this->get_bookshelf_export() << ".blocks ";
     auxFile << this->get_bookshelf_export() << ".nets ";
     auxFile.close();
 }
@@ -748,7 +750,7 @@ void Bookshelf::write_aux()
  */
 void Bookshelf::write_blocks()
 {
-    std::string filename = this->get_bookshelf_export() + ".blk";
+    std::string filename = this->get_bookshelf_export() + ".blocks";
     m_logger->bookshelf_write_blocks(filename);
 
     std::ofstream blkFile(filename);
@@ -767,7 +769,11 @@ void Bookshelf::write_blocks()
     for(auto& curMacro : m_macros) {
         //feed << "# " << curMacro->get_id() << std::endl;
         if (curMacro->is_free()){
-            feed << "o" << curMacro->get_key() << " hardrectilinear 4 ";
+            if (curMacro->has_solution(0)){
+                feed << "p" << curMacro->get_key() << " hardrectilinear 4 ";
+            } else {
+                feed << "o" << curMacro->get_key() << " hardrectilinear 4 ";
+            }
         } else {
             feed << "p" << curMacro->get_key() << " hardrectilinear 4 ";
         }
@@ -781,7 +787,11 @@ void Bookshelf::write_blocks()
     for(auto terminal: m_terminals){
         //feed << "# " << terminal->get_name() << std::endl;
         if (terminal->is_free()){
-            feed << "o" << terminal->get_key()  << " terminal" << std::endl;
+            if (terminal->has_solution(0)){
+                feed << "p" << terminal->get_key()  << " terminal" << std::endl;
+            } else {
+                feed << "o" << terminal->get_key()  << " terminal" << std::endl;
+            }
         } else {
             feed << "p" << terminal->get_key()  << " terminal" << std::endl;
         }
@@ -828,7 +838,9 @@ void Bookshelf::write_nets()
         std::vector<std::string> token = Utils::Utils::tokenize(itor.first, ":");
         assertion_check (token.size() == 2);
         // Terminal
-        if (token[0] == token[1]){
+        std::cout << token[0] << " " << token[1] << std::endl;
+        getchar();
+        if (this->has_terminal(token[0])){
             Terminal* t = this->find_terminal(token[0]);
             nullpointer_check(t)
             //feed << "# " << t->get_name() << std::endl;
@@ -838,6 +850,7 @@ void Bookshelf::write_nets()
                 feed << "p" <<  t->get_key() << " B" << std::endl;
             }
         } else {
+            std::cout << token[0] << std::endl;
             std::vector<std::string> token2 = Utils::Utils::tokenize(token[1], "_");
             Macro* m = this->find_macro(token[0]);
             nullpointer_check(m);
@@ -866,6 +879,7 @@ void Bookshelf::write_nets()
             std::vector<std::string> token = Utils::Utils::tokenize(itor2, ":");
             assertion_check (token.size() == 2);
             // Terminal
+            std::cout << token[0] << " " << token[1] << std::endl;
             if (token[0] == token[1]){
                 Terminal* t = this->find_terminal(token[0]);
                 nullpointer_check(t);
@@ -927,25 +941,29 @@ void Bookshelf::write_pl(size_t const solution_id)
     for(auto macro: m_macros){
         //feed << "# " << macro->get_id() << std::endl;
         if (macro->is_free()){
-            feed << "o" <<macro->get_key() << " " << "0" << " " << "0" << std::endl;
-        } else {
-            size_t lx = macro->get_solution_lx(solution_id);
-            size_t ly = macro->get_solution_ly(solution_id);
-            eOrientation o = macro->get_solution_orientation(solution_id);
-            size_t h = macro->get_height_numeral();
-            size_t w = macro->get_width_numeral();
-            
-            if (o == eNorth){
-                feed << "p" << macro->get_key() << " " << lx << " " << ly << std::endl;
-            } else if (o == eWest){
-                feed << "p" << macro->get_key() << " " << lx -h << " " << ly << std::endl;
-            } else if (o == eSouth){
-                feed << "p" << macro->get_key() << " " << lx - w << " " << ly - h << std::endl;
-            } else if (o == eEast){
-                feed << "p" << macro->get_key() << " " << lx << " " <<  ly - h << std::endl;
+            if (macro->has_solution(solution_id)){
+                size_t lx = macro->get_solution_lx(solution_id);
+                size_t ly = macro->get_solution_ly(solution_id);
+                eOrientation o = macro->get_solution_orientation(solution_id);
+                size_t h = macro->get_height_numeral();
+                size_t w = macro->get_width_numeral();
+                
+                if (o == eNorth){
+                    feed << "p" << macro->get_key() << " " << lx << " " << ly << std::endl;
+                } else if (o == eWest){
+                    feed << "p" << macro->get_key() << " " << lx -h << " " << ly << std::endl;
+                } else if (o == eSouth){
+                    feed << "p" << macro->get_key() << " " << lx - w << " " << ly - h << std::endl;
+                } else if (o == eEast){
+                    feed << "p" << macro->get_key() << " " << lx << " " <<  ly - h << std::endl;
+                } else {
+                    notimplemented_check();
+                }
             } else {
-                notimplemented_check();
+            feed << "o" <<macro->get_key() << " " << "0" << " " << "0" << std::endl;   
             }
+        } else {
+            feed << "p" << macro->get_key() << " " << macro->get_lx_numeral() << " " << macro->get_ly_numeral() << std::endl;
         }
     }
     feed << std::endl;
@@ -953,10 +971,13 @@ void Bookshelf::write_pl(size_t const solution_id)
     for(auto terminal: m_terminals){
         //feed << "# " << terminal->get_name() << std::endl;
         if (terminal->is_free()){
-            feed << "o" << terminal->get_key() << " 0 0" << std::endl;
+            if (terminal->has_solution(solution_id)){
+                feed << "p" << terminal->get_key() << " " << terminal->get_solution_pos_x(solution_id) << " "<< terminal->get_solution_pos_y(solution_id) << std::endl;
+            } else {
+                feed << "o" << terminal->get_key() << " 0 0" << std::endl;
+            }
         } else {
-            // TODO
-            feed << "p" << terminal->get_key() << " 0 0" << std::endl;
+            feed << "p" << terminal->get_key() << " " << terminal->get_pox_x_numerical() << " " << terminal->get_pos_y_numerical() << std::endl;
         }
     }
 

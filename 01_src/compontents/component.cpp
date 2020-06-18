@@ -333,3 +333,14 @@ z3::expr Component::is_E()
 {
     return m_orientation == m_encode->get_value(eEast);
 }
+
+size_t Component::get_lx_numeral()
+{
+    return m_lx.get_numeral_uint();
+}
+
+size_t Component::get_ly_numeral()
+{
+    return m_ly.get_numeral_uint();
+}
+

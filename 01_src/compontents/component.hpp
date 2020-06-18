@@ -34,6 +34,9 @@ public:
     z3::expr get_ly(eOrientation const orientation);
     z3::expr get_ux(eOrientation const orientation);
     z3::expr get_uy(eOrientation const orientation);
+    
+    size_t get_lx_numeral();
+    size_t get_ly_numeral();
 
     z3::expr& get_lx();
     z3::expr& get_ly();
@@ -81,6 +84,7 @@ protected:
     z3::expr m_orientation;
     z3::expr m_width;
     z3::expr m_height;
+    bool m_free;
 
     std::vector<size_t> m_sol_lx;
     std::vector<size_t> m_sol_ly;

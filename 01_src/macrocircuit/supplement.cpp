@@ -15,8 +15,7 @@ using namespace Placer;
 using namespace Placer::Utils;
 
 /**
- * @brief ...
- * 
+ * @brief Constructor
  */
 Supplement::Supplement():
     Object()
@@ -26,8 +25,7 @@ Supplement::Supplement():
 }
 
 /**
- * @brief ...
- * 
+ * @brief Destructor
  */
 Supplement::~Supplement()
 {
@@ -49,8 +47,7 @@ bool Supplement::has_supplement()
 }
 
 /**
- * @brief ...
- * 
+ * @brief Read Supplement JSON File
  */
 void Supplement::read_supplement_file()
 {
@@ -139,8 +136,7 @@ void Supplement::read_supplement_file()
 }
 
 /**
- * @brief ...
- * 
+ * @brief Write Supplement JSON File
  */
 void Supplement::write_supplement_file()
 {
@@ -151,10 +147,10 @@ void Supplement::write_supplement_file()
    
     if (this->has_layout()){
         Json::Value layout;
-        layout["layout"]["lx"] = m_layout->get_lx();
-        layout["layout"]["ly"] = m_layout->get_ly();
-        layout["layout"]["ux"] = m_layout->get_ux();
-        layout["layout"]["uy"] = m_layout->get_uy();
+        layout["layout"]["lx"] = static_cast<int>(m_layout->get_lx());
+        layout["layout"]["ly"] = static_cast<int>(m_layout->get_ly());
+        layout["layout"]["ux"] = static_cast<int>(m_layout->get_ux());
+        layout["layout"]["uy"] = static_cast<int>(m_layout->get_uy());
         
         root.append(layout);
     }
@@ -218,7 +214,7 @@ void Supplement::add_terminal(SupplementTerminal const * terminal)
 }
 
 /**
- * @brief ...
+ * @brief Get Supplement Layout
  * 
  * @return Placer::SupplementLayout*
  */
@@ -228,9 +224,9 @@ SupplementLayout* Supplement::get_layout()
 }
 
 /**
- * @brief ...
+ * @brief Set Supplement Layout
  * 
- * @param layout p_layout:...
+ * @param layout Pointer to Layout
  */
 void Supplement::set_layout(SupplementLayout* layout)
 {
@@ -241,9 +237,9 @@ void Supplement::set_layout(SupplementLayout* layout)
 }
 
 /**
- * @brief ...
+ * @brief Check if Macro with ID has been set
  * 
- * @param id p_id:...
+ * @param id Macro ID
  * @return bool
  */
 bool Supplement::has_macro(std::string const & id)
@@ -252,9 +248,9 @@ bool Supplement::has_macro(std::string const & id)
 }
 
 /**
- * @brief ...
+ * @brief Check if Terminal with ID has been set
  * 
- * @param id p_id:...
+ * @param id Terminal ID
  * @return bool
  */
 bool Supplement::has_terminal(std::string const & id)
@@ -263,7 +259,7 @@ bool Supplement::has_terminal(std::string const & id)
 }
 
 /**
- * @brief ...
+ * @brief Check if Supplement Layout has been set
  * 
  * @return bool
  */

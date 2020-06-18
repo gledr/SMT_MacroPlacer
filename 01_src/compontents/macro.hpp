@@ -78,7 +78,6 @@ private:
     Partition* m_parent;
 
     size_t m_key;
-    bool m_free;
 
     size_t m_layout_x;
     size_t m_layout_y;

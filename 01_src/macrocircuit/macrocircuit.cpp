@@ -230,10 +230,10 @@ void MacroCircuit::init_tree(eInputFormat const type)
 void MacroCircuit::create_macro_definitions()
 {
     using namespace LefDefParser;
-
     for(auto& itor: m_circuit->defComponentStor){
         if(this->is_macro(itor)){
             auto idx = m_circuit->lefMacroMap.find(itor.name());
+            assert (idx != m_circuit->lefMacroMap.end());
             lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
             std::vector<lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
 
@@ -533,7 +533,23 @@ void MacroCircuit::save_best()
         }
     } else if (!this->get_bookshelf_file().empty()){
         m_logger->save_best(eBookshelf);
-        notimplemented_check();
+        if (this->get_minimize_die_mode()){
+            std::pair<size_t, size_t> best_area = m_eval->best_area();
+            std::string name = "best_" + this->get_design_name();
+            this->set_bookshelf_export(name);
+            SupplementLayout* layout = new SupplementLayout(0, // TODO
+                                                            0, // TODO
+                                                            m_layout->get_solution_ux(best_area.first),
+                                                            m_layout->get_solution_uy(best_area.first));
+            m_supplement->set_layout(layout);
+            m_supplement->write_supplement_file();
+            m_bookshelf->write_placement(best_area.first);
+        } else if (this->get_minimize_hpwl_mode()){
+            std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
+            std::string name = "best_" + this->get_design_name();
+            this->set_bookshelf_export(name);
+            m_bookshelf->write_placement(best_hpwl.first);
+        }
     } else {
         assert (0);
     }
@@ -748,8 +764,7 @@ bool MacroCircuit::is_macro(LefDefParser::defiComponent const & macro)
         return lef_data.sizeY() != m_standard_cell_height;
 
     } catch(std::exception const & exp){
-        std::cout << exp.what() << std::endl;
-        assert (0);
+        throw PlacerException(exp.what());
     }
 }
 
@@ -762,6 +777,7 @@ bool MacroCircuit::is_macro(LefDefParser::defiComponent const & macro)
 bool MacroCircuit::is_standard_cell(LefDefParser::defiComponent const & cell)
 {
     auto idx = m_circuit->lefMacroMap.find(cell.name());
+    assert (idx != m_circuit->lefMacroMap.end());
     LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
 
     return lef_data.sizeY() == m_standard_cell_height;

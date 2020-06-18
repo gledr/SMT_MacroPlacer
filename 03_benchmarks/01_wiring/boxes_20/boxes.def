@@ -30,21 +30,26 @@ COMPONENTS 20 ;
 - _square08_ typeA ;
 - _square09_ typeA ;
 - _square10_ typeA ;
-- _square11_ typeA ;
-- _square12_ typeA ;
-- _square13_ typeA ;
-- _square14_ typeA ;
-- _square15_ typeA ;
-- _square16_ typeA ;
-- _square17_ typeA ;
-- _square18_ typeA ;
-- _square19_ typeA ;
-- _square20_ typeA ;
+- _square11_ typeB ;
+- _square12_ typeB ;
+- _square13_ typeB ;
+- _square14_ typeB ;
+- _square15_ typeB ;
+- _square16_ typeB ;
+- _square17_ typeB ;
+- _square18_ typeB ;
+- _square19_ typeB ;
+- _square20_ typeB ;
 END COMPONENTS
 
 PINS 2 ;
-- in1_i + NET in1_i + DIRECTION INPUT ;
-- out_o + NET out_o + DIRECTION OUTPUT ;
+- in1_i + NET in1_i + DIRECTION INPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
+        
+- out_o + NET out_o + DIRECTION OUTPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
 END PINS
 
 NETS 20 ;

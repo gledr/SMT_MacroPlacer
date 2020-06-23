@@ -165,7 +165,7 @@ void Tree::construct_tree()
           from->insert_edge(edge);
           to->insert_edge(edge);
         }
-          this->verify_edges();
+          //this->verify_edges(); FIXME
     } catch (PlacerException const & exp){
         std::cout << "Could not create connectivity tree (" << exp.what() << ")" << std::endl;
         exit(-1);
@@ -234,7 +234,6 @@ void Tree::iterate_tree_recursive(Node* _root,
             Node* to   = itor->get_to();
             nullpointer_check (from);
             nullpointer_check (to);
-            std::cout << from->get_id() << " -> " << to->get_id() << ";" << std::endl;
             stream << "\t" << from->get_id() << " -> " << to->get_id() << ";" << std::endl;
 
             if(itor->get_to()->is_terminal()){

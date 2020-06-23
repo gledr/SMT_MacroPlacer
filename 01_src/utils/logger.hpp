@@ -55,6 +55,7 @@ public:
     void solver_version(std::string const & version);
 
     void supplement_file(std::string const & file);
+    void write_supplement(std::string const & file);
 
     void start_macro_thread();
     void end_macro_thread();
@@ -102,12 +103,14 @@ public:
     void set_die_lx(size_t const val);
     void set_die_ly(size_t const val);
     void add_solution_layout(size_t const ux, size_t const uy);
+    void add_solution_die_ux(size_t const val);
+    void add_solution_die_uy(size_t const val);
 
     void place_macro(std::string const & name,
                     size_t const lx,
                     size_t const ly,
                     eOrientation const orientation);
-    
+
     void place_pin_x(std::string const & pin_name,
                      std::string const & parent_name,
                      size_t const pos);

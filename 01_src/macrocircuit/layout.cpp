@@ -277,7 +277,7 @@ size_t Layout::get_solution_uy(size_t const idx)
  */
 void Layout::set_solution_ux(size_t const val)
 {
-    std::cout << "Setting Solution for UX: " << val << std::endl;
+    m_logger->add_solution_die_ux(val);
     m_solutions_ux.push_back(val);
 }
 
@@ -289,7 +289,7 @@ void Layout::set_solution_ux(size_t const val)
  */
 void Layout::set_solution_uy(size_t const val)
 {
-    std::cout << "Setting Solution for UY:" << val << std::endl;
+    m_logger->add_solution_die_ux(val);
     m_solutions_uy.push_back(val);
 }
 

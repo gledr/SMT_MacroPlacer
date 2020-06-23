@@ -80,6 +80,11 @@ void Logger::supplement_file(std::string const & file)
     LOG(eInfo) << "Using Supplement File: " + file;
 }
 
+void Logger::write_supplement(std::string const & file)
+{
+    LOG(eInfo) << "Writing Supplement File: " + file;
+}
+
 void Logger::start_macro_thread()
 {
     LOG(eDebug) << "Thread 'macro_worker' fired";
@@ -258,13 +263,32 @@ void Logger::place_terminal(std::string const & name,
                             size_t const x,
                             size_t const y)
 {
+    std::stringstream msg;
+    msg << "Placing Terminal " << name << ": " << x << "-" << y ;
 
+    LOG(eDebug) << msg.str();
 }
 
 void Logger::add_solution_layout(size_t const ux, size_t const uy)
 {
     std::stringstream msg;
     msg << "Setting Layout to: " << ux << "x" << uy;
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::add_solution_die_ux(size_t const val)
+{
+    std::stringstream msg;
+    msg << "Add Solution Layout UX: " << val;
+
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::add_solution_die_uy(size_t const val)
+{
+        std::stringstream msg;
+    msg << "Add Solution Layout UY: " <<  val;
+
     LOG(eInfo) << msg.str();
 }
 

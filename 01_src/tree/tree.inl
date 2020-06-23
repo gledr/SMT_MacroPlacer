@@ -38,12 +38,8 @@ void Tree::insert_edge(from* from_val,
         this->new_element(_to);
     }
 
-    if (this->get_minimize_die_mode()){
-        Edge* _edge = new Edge(_from, _to, "center", "center", edge_name);
-        m_edges.push_back(_edge);
-    } else {
-        Edge* _edge = new Edge(_from, _to, from_pin, to_pin, edge_name);
-        m_edges.push_back(_edge);
-    }
+    Edge* _edge = new Edge(_from, _to, from_pin, to_pin, edge_name);
+    m_edges.push_back(_edge);
+
     m_logger->insert_edge(_from->get_id(), _to->get_id());
 }

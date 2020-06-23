@@ -262,6 +262,26 @@ z3::expr& Pin::get_pin_pos_y()
 }
 
 /**
+ * @brief 
+ * 
+ * @param pos 
+ */
+void Pin::set_pin_pos_x(const size_t pos)
+{
+    notimplemented_check();
+}
+
+/**
+ * @brief 
+ * 
+ * @param pos 
+ */
+void Pin::set_pin_pos_y(const size_t pos)
+{
+    notimplemented_check();
+}
+
+/**
  * @brief Get Pin Position as Numeral Value
  * 
  * @return size_t
@@ -349,6 +369,26 @@ void Pin::set_x_offset_percentage(int const offset)
 void Pin::set_y_offset_percentage(int const offset)
 {
     m_offset_y_percentage = offset;
+}
+
+/**
+ * @brief 
+ * 
+ * @param offset Offset
+ */
+void Pin::set_x_offset(int const offset)
+{
+   m_offset_x = offset;
+}
+
+/**
+ * @brief 
+ * 
+ * @param offset Offset
+ */
+void Pin::set_y_offset(int const offset)
+{
+    m_offset_y = offset;
 }
 
 /**

@@ -1,16 +1,17 @@
 UCSC blocks 1.0
-# Created      : Thu Nov 16 02:11:52 PST 2000
-# User         : huaizhi@olympus
-# Platform     : SunOS 5.6 sparc
+# Created Tue Jun 23 09:16:36 2020
+# User sebastian
+# Platform Linux 5.4.47-1-lts x86_64
+# Exported by SMT_MacroPlacer
 
 NumSoftRectangularBlocks : 0
 NumHardRectilinearBlocks : 4
 NumTerminals : 2
 
-a hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
-b hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
-c hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
-d hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3, 0)
+o0 hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3,0) 
+o1 hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3,0) 
+o2 hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3,0) 
+o3 hardrectilinear 4 (0, 0) (0, 3) (3, 3) (3,0) 
 
-in terminal
-out terminal
+o4 terminal
+o5 terminal

@@ -102,8 +102,13 @@ public:
             this->set_working_directory(boost::filesystem::current_path().string());
             this->set_results_directory("results");
 
+            if (boost::filesystem::exists(this->get_active_results_directory())){
+                boost::filesystem::remove_all(this->get_active_results_directory());
+            }
+
         } catch (Utils::PlacerException const & exp){
             std::cerr << exp.what() << std::endl;
+            exit(-1);
         }
     }
 

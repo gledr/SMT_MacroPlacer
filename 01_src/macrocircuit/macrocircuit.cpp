@@ -1552,7 +1552,6 @@ void MacroCircuit::encode_hpwl_length()
         } else if (from->has_macro()){
             Macro* m = from->get_macro();
             nullpointer_check(m);
-
             Pin* p = m->get_pin(edge->get_from_pin());
             nullpointer_check(p);
 

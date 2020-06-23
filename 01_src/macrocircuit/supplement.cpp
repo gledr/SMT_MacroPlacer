@@ -140,7 +140,7 @@ void Supplement::read_supplement_file()
  */
 void Supplement::write_supplement_file()
 {
-    std::cout << "Write Supplement" << std::endl;
+    m_logger->write_supplement("supplement.json");
     
     boost::filesystem::current_path(this->get_active_results_directory());
     Json::Value root;

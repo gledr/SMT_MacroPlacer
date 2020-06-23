@@ -1,12 +1,13 @@
-UCLA pl 1.0
-# Created      : Thu Nov 16 15:30:14 PST 2000
-# User         : huaizhi@olympus
-# Platform     : SunOS 5.6 sparc
+UCSC pl 1.0
+# Created Tue Jun 23 09:16:36 2020
+# User sebastian
+# Platform Linux 5.4.47-1-lts x86_64
+# Exported by SMT_MacroPlacer
 
-a    0      0
-b    0      0
-c    0      0
-d    0      0
+o0 0 0
+o1 0 0
+o2 0 0
+o3 0 0
 
-in   0      0
-out  0      0
+o4 0 0
+o5 0 0

@@ -493,8 +493,10 @@ void MacroCircuit::save_all()
      if(!this->get_def().empty() && !this->get_lef().empty()) {
         m_logger->save_all(eLEFDEF);
         for(size_t i = 0; i < m_solutions; ++i){
-            std::string name = "placed_" + std::to_string(i) + "_" + this->get_def();
-            this->write_def(name, i);
+            std::string def_name = "placed_" + std::to_string(i) + "_" + this->get_def();
+            std::string lef_name = "placed_" + std::to_string(i) + "_" + this->get_lef()[0];
+            this->write_def(def_name, i);
+            this->write_lef(lef_name);
         }
     } else if (!this->get_bookshelf_file().empty()){
         m_logger->save_all(eBookshelf);
@@ -744,6 +746,20 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
 ///}}}
     FILE* fp = fopen(name.c_str(), "w");
     m_circuit->WriteDef(fp);
+    fclose(fp);
+}
+
+/**
+ * @brief Export LEF File
+ * 
+ * @param name Filename
+ */
+void MacroCircuit::write_lef(std::string const & name)
+{
+    lefiMacro tmp;
+    
+    FILE* fp = fopen(name.c_str(), "w");
+    m_circuit->WriteLef(fp);
     fclose(fp);
 }
 

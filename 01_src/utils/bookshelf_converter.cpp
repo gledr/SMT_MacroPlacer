@@ -98,6 +98,10 @@ public:
             if (this->get_bookshelf_export() == ""){
                 throw Utils::PlacerException("No Output Basefilename has been Defined!");
             }
+
+            this->set_working_directory(boost::filesystem::current_path().string());
+            this->set_results_directory("results");
+
         } catch (Utils::PlacerException const & exp){
             std::cerr << exp.what() << std::endl;
         }

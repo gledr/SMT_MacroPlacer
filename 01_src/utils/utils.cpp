@@ -230,6 +230,28 @@ std::string Utils::get_bash_string_blue(const std::string& str)
 }
 
 /**
+ * @brief Strip Bash Color Token from given String
+ * 
+ * @param str String to Strip
+ * @return std::string
+ */
+std::string Utils::strip_bash_color_token(std::string const & str)
+{
+    if (str[0] == '\033'){
+        std::string inprogress = str;
+        size_t end = inprogress.find_last_of("\033");
+        inprogress = inprogress.substr(0, end);
+        size_t from = inprogress.find_first_of("m");
+        inprogress = inprogress.substr(from+1, inprogress.size() - from);
+
+        return inprogress;
+
+    } else {
+        return str;
+    }
+}
+
+/**
  * @brief Get the current time of execution
  * 
  * @return std::string

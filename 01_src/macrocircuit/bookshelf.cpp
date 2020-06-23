@@ -722,11 +722,14 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
  */
 void Bookshelf::write_placement(size_t const solution_id)
 {
+    if (!boost::filesystem::exists(this->get_active_results_directory())){
+        boost::filesystem::create_directories(this->get_active_results_directory());
+    }
     boost::filesystem::current_path(this->get_active_results_directory());
-    
+
     this->write_aux();
     this->write_blocks();
-    //this->write_nets();
+    this->write_nets();
     this->write_pl(solution_id);
 }
 
@@ -839,7 +842,7 @@ void Bookshelf::write_nets()
         assertion_check (token.size() == 2);
         // Terminal
         std::cout << token[0] << " " << token[1] << std::endl;
-        getchar();
+
         if (this->has_terminal(token[0])){
             Terminal* t = this->find_terminal(token[0]);
             nullpointer_check(t)
@@ -849,13 +852,14 @@ void Bookshelf::write_nets()
             } else {
                 feed << "p" <<  t->get_key() << " B" << std::endl;
             }
+            feed << "# The above terminal is a pad" << std::endl;
         } else {
             std::cout << token[0] << std::endl;
             std::vector<std::string> token2 = Utils::Utils::tokenize(token[1], "_");
             Macro* m = this->find_macro(token[0]);
             nullpointer_check(m);
-            size_t width = m->get_width().get_numeral_uint();
-            size_t height = m->get_height().get_numeral_uint();
+            size_t width = m->get_width_numeral();
+            size_t height = m->get_height_numeral();
             
             double factor_width = 0.0;
             double factor_height = 0.0;

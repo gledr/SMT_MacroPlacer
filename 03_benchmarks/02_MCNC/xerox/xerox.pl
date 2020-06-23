@@ -1,18 +1,19 @@
-UCLA pl 1.0
-# Created      : Thu Nov 16 15:30:16 PST 2000
-# User         : huaizhi@olympus
-# Platform     : SunOS 5.6 sparc
+UCSC pl 1.0
+# Created Tue Jun 23 08:50:58 2020
+# User sebastian
+# Platform Linux 5.4.47-1-lts x86_64
+# Exported by SMT_MacroPlacer
 
-BLKB    0   0
-BLKD    0   0
-BLKLL   0   0
-BLKLR   0   0
-BLKP    0   0
-BLKRC   0   0
-BLKRS   0   0
-BLKT    0   0
-BLKUL   0   0
-BLKUR   0   0
+o0 0 0
+o1 0 0
+o2 0 0
+o3 0 0
+o4 0 0
+o5 0 0
+o6 0 0
+o7 0 0
+o8 0 0
+o9 0 0
 
-VSS 2912    0
-VDD 2912    6412
+p10 2912 0
+p11 2912 6412

@@ -85,10 +85,14 @@ public:
 
     static e_pin_direction string2enum(std::string const & name);
     static std::string enum2string(e_pin_direction const direction);
+    
+    void set_bookshelf_pin_id(std::string const & id);
+    std::string get_bookshelf_pin_id() const;
 
 private:
     size_t m_bitwidht;
     size_t m_frequency;
+    std::string m_bookshelf_pin_id;
 
     EncodingUtils* m_encode;
     Utils::Logger* m_logger;

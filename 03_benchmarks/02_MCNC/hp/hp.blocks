@@ -1,66 +1,67 @@
 UCSC blocks 1.0
-# Created      : Thu Nov 16 02:11:52 PST 2000
-# User         : huaizhi@olympus
-# Platform     : SunOS 5.6 sparc
+# Created Tue Jun 23 08:40:21 2020
+# User sebastian
+# Platform Linux 5.4.47-1-lts x86_64
+# Exported by SMT_MacroPlacer
 
 NumSoftRectangularBlocks : 0
 NumHardRectilinearBlocks : 11
 NumTerminals : 45
 
-clkc hardrectilinear 4 (0, 0) (0, 462) (1036, 462) (1036, 0)
-clkd hardrectilinear 4 (0, 0) (0, 700) (378, 700) (378, 0)
-cmp1 hardrectilinear 4 (0, 0) (0, 210) (980, 210) (980, 0)
-cmp2 hardrectilinear 4 (0, 0) (0, 210) (980, 210) (980, 0)
-cmp3 hardrectilinear 4 (0, 0) (0, 210) (980, 210) (980, 0)
-cntd hardrectilinear 4 (0, 0) (0, 546) (3304, 546) (3304, 0)
-cntu hardrectilinear 4 (0, 0) (0, 546) (3304, 546) (3304, 0)
-npd hardrectilinear 4 (0, 0) (0, 252) (2016, 252) (2016, 0)
-nps hardrectilinear 4 (0, 0) (0, 462) (3080, 462) (3080, 0)
-ppd hardrectilinear 4 (0, 0) (0, 252) (2016, 252) (2016, 0)
-pps hardrectilinear 4 (0, 0) (0, 462) (3080, 462) (3080, 0)
+o0 hardrectilinear 4 (0, 0) (0, 462) (1036, 462) (1036,0) 
+o1 hardrectilinear 4 (0, 0) (0, 700) (378, 700) (378,0) 
+o2 hardrectilinear 4 (0, 0) (0, 210) (980, 210) (980,0) 
+o3 hardrectilinear 4 (0, 0) (0, 210) (980, 210) (980,0) 
+o4 hardrectilinear 4 (0, 0) (0, 210) (980, 210) (980,0) 
+o5 hardrectilinear 4 (0, 0) (0, 546) (3304, 546) (3304,0) 
+o6 hardrectilinear 4 (0, 0) (0, 546) (3304, 546) (3304,0) 
+o7 hardrectilinear 4 (0, 0) (0, 252) (2016, 252) (2016,0) 
+o8 hardrectilinear 4 (0, 0) (0, 462) (3080, 462) (3080,0) 
+o9 hardrectilinear 4 (0, 0) (0, 252) (2016, 252) (2016,0) 
+o10 hardrectilinear 4 (0, 0) (0, 462) (3080, 462) (3080,0) 
 
-bu7 terminal
-rs2 terminal
-mcu terminal
-bu0 terminal
-bu1 terminal
-bu2 terminal
-bu3 terminal
-bu4 terminal
-bu5 terminal
-bu6 terminal
-gnd1 terminal
-vin1 terminal
-mc1 terminal
-vin terminal
-vssa terminal
-vdda terminal
-busa8 terminal
-busa7 terminal
-busa6 terminal
-busa5 terminal
-busa4 terminal
-busa3 terminal
-busa2 terminal
-busa1 terminal
-mk1 terminal
-vdd terminal
-vss terminal
-mc2 terminal
-mk2 terminal
-mcd terminal
-rs1 terminal
-busb4 terminal
-busb3 terminal
-busb2 terminal
-busb1 terminal
-b0 terminal
-b1 terminal
-b2 terminal
-b3 terminal
-b4 terminal
-b5 terminal
-b6 terminal
-b7 terminal
-gnd2 terminal
-vin2 terminal
+p11 terminal
+p12 terminal
+p13 terminal
+p14 terminal
+p15 terminal
+p16 terminal
+p17 terminal
+p18 terminal
+p19 terminal
+p20 terminal
+p21 terminal
+p22 terminal
+p23 terminal
+p24 terminal
+p25 terminal
+p26 terminal
+p27 terminal
+p28 terminal
+p29 terminal
+p30 terminal
+p31 terminal
+p32 terminal
+p33 terminal
+p34 terminal
+p35 terminal
+p36 terminal
+p37 terminal
+p38 terminal
+p39 terminal
+p40 terminal
+p41 terminal
+p42 terminal
+p43 terminal
+p44 terminal
+p45 terminal
+p46 terminal
+p47 terminal
+p48 terminal
+p49 terminal
+p50 terminal
+p51 terminal
+p52 terminal
+p53 terminal
+p54 terminal
+p55 terminal

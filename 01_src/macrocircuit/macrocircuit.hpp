@@ -142,6 +142,7 @@ private:
     void create_macro_definitions();
 
     void write_def(std::string const & name, size_t const solution);
+    void write_lef(std::string const & name);
 
     Tree* get_tree();
     Layout* get_layout();

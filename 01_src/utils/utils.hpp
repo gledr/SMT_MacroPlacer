@@ -57,6 +57,8 @@ public:
 
     static std::string get_bash_string_blink_purple(std::string const & str);
 
+    static std::string strip_bash_color_token(std::string const & str);
+
     static std::string get_base_path();
 
     static std::string get_current_time();

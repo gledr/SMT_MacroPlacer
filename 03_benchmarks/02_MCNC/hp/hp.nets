@@ -1,445 +1,446 @@
 UCLA nets 1.0
-# Created      : Thu Nov 09 18:23:29 PST 2000
-# User         : huaizhi@olympus
-# Platform     : SunOS 5.6 sparc
+# Created Tue Jun 23 08:40:21 2020
+# User sebastian
+# Platform Linux 5.4.47-1-lts x86_64
+# Exported by SMT_MacroPlacer
 
 NumNets : 83
 NumPins : 309
 
 NetDegree : 2
-bu7 B
+p46 B
 # The above terminal is a pad
-cntu B  : %37.2 %50.0
+o5 B : 0 -1652
 NetDegree : 2
-rs2 B
+p47 B
 # The above terminal is a pad
-cntu B  : %20.3 %50.0
+o5 B : -38.22 -1652
 NetDegree : 2
-mcu B
+p48 B
 # The above terminal is a pad
-cntu B  : %-0.8 %50.0
+o5 B : -70.98 -1652
 NetDegree : 2
-bu0 B
+p49 B
 # The above terminal is a pad
-cntu B  : %-16.1 %50.0
+o5 B : -109.2 -1652
 NetDegree : 2
-bu1 B
+p50 B
 # The above terminal is a pad
-cntu B  : %-22.0 %50.0
+o5 B : -141.96 -1652
 NetDegree : 2
-bu2 B
+p51 B
 # The above terminal is a pad
-cntu B  : %-28.8 %50.0
+o5 B : -180.18 -1652
 NetDegree : 2
-bu3 B
+p52 B
 # The above terminal is a pad
-cntu B  : %-34.7 %50.0
+o5 B : -207.48 -1652
 NetDegree : 2
-bu4 B
+p53 B
 # The above terminal is a pad
-cntu B  : %-41.5 %50.0
+o5 B : -245.7 -1652
 NetDegree : 2
-bu5 B
+p14 B
 # The above terminal is a pad
-cntu B  : %-47.4 %50.0
+o6 B : -87.36 1652
 NetDegree : 2
-bu6 B
+p15 B
 # The above terminal is a pad
-cntu B  : %-49.5 %50.0
-NetDegree : 6
-busa8 B
+o6 B : -120.12 1652
+NetDegree : 2
+p16 B
 # The above terminal is a pad
-cntu B  : %22.8 %-50.0
-nps B   : %-1.3 %50.0
-npd B   : %-13.1 %50.0
-ppd B   : %-13.1 %-50.0
-clkc B  : %5.4 %50.0
-NetDegree : 6
-busa7 B
+o6 B : -152.88 1652
+NetDegree : 2
+p17 B
 # The above terminal is a pad
-cntu B  : %22.4 %-50.0
-nps B   : %-1.8 %50.0
-npd B   : %-13.8 %50.0
-ppd B   : %-13.8 %-50.0
-clkc B  : %4.0 %50.0
-NetDegree : 6
-busa6 B
+o6 B : -185.64 1652
+NetDegree : 2
+p18 B
 # The above terminal is a pad
-cntu B  : %22.0 %-50.0
-nps B   : %-2.2 %50.0
-npd B   : %-14.5 %50.0
-ppd B   : %-14.5 %-50.0
-clkc B  : %2.7 %50.0
-NetDegree : 6
-busa5 B
+o6 B : -223.86 1652
+NetDegree : 2
+p19 B
 # The above terminal is a pad
-cntu B  : %21.6 %-50.0
-nps B   : %-2.7 %50.0
-npd B   : %-15.2 %50.0
-ppd B   : %-15.2 %-50.0
-clkc B  : %1.3 %50.0
+o6 B : -256.62 1652
+NetDegree : 2
+p20 B
+# The above terminal is a pad
+o6 B : -267.54 1652
+NetDegree : 2
+p11 B
+# The above terminal is a pad
+o6 B : 202.02 1652
 NetDegree : 7
-busa4 B
+p34 B
 # The above terminal is a pad
-cntu B  : %21.1 %-50.0
-nps B   : %-3.1 %50.0
-clkc B  : %0.0 %50.0
-cmp1 B  : %-14.2 %-50.0
-cmp2 B  : %0.0 %-50.0
-cmp3 B  : %-1.4 %-50.0
+o0 B : -18.48 518
+o2 B : -37.8 -490
+o3 B : -8.4 -490
+o4 B : -10.5 -490
+o6 B : 103.74 -1652
+o8 B : -18.48 1540
 NetDegree : 7
-busa3 B
+p33 B
 # The above terminal is a pad
-cntu B  : %20.7 %-50.0
-nps B   : %-3.6 %50.0
-clkc B  : %-1.3 %50.0
-cmp1 B  : %-15.7 %-50.0
-cmp2 B  : %-1.4 %-50.0
-cmp3 B  : %-2.8 %-50.0
+o0 B : -9.24 518
+o2 B : -35.7 -490
+o3 B : -4.2 -490
+o4 B : -8.4 -490
+o6 B : 109.2 -1652
+o8 B : -18.48 1540
 NetDegree : 7
-busa2 B
+p32 B
 # The above terminal is a pad
-cntu B  : %20.3 %-50.0
-nps B   : %-4.0 %50.0
-clkc B  : %-2.7 %50.0
-cmp1 B  : %-17.1 %-50.0
-cmp2 B  : %-2.8 %-50.0
-cmp3 B  : %-4.2 %-50.0
+o0 B : -4.62 518
+o2 B : -31.5 -490
+o3 B : -2.1 -490
+o4 B : -4.2 -490
+o6 B : 109.2 -1652
+o8 B : -13.86 1540
 NetDegree : 7
-busa1 B
+p31 B
 # The above terminal is a pad
-cntu B  : %19.9 %-50.0
-nps B   : %-4.5 %50.0
-clkc B  : %-4.0 %50.0
-cmp1 B  : %-18.5 %-50.0
-cmp2 B  : %-4.2 %-50.0
-cmp3 B  : %-5.7 %-50.0
-NetDegree : 2
-cntu B  : %0.8 %-50.0
-nps B   : %50.0 %13.6
-NetDegree : 2
-cntu B  : %-9.3 %-50.0
-nps B   : %50.0 %4.5
-NetDegree : 2
-cntu B  : %-20.3 %-50.0
-nps B   : %50.0 %-4.5
-NetDegree : 2
-cntu B  : %-30.5 %-50.0
-nps B   : %50.0 %-13.6
-NetDegree : 2
-cntu B  : %-41.5 %-50.0
-nps B   : %50.0 %-22.7
-NetDegree : 14
-vdd B
+o0 B : 0 518
+o2 B : -29.4 -490
+o3 B : 0 -490
+o4 B : -2.1 -490
+o6 B : 114.66 -1652
+o8 B : -13.86 1540
+NetDegree : 6
+p30 B
 # The above terminal is a pad
-cntu B  : %50.0 %42.3
-cntu B  : %-50.0 %-3.8
-nps B   : %50.0 %-31.8
-nps B   : %-50.0 %-31.8
-npd B   : %50.0 %-16.6
-ppd B   : %50.0 %33.3
-ppd B   : %-50.0 %16.6
-pps B   : %50.0 %46.9
-pps B   : %-50.0 %16.6
-cntd B  : %50.0 %42.3
-cntd B  : %-50.0 %-3.8
-clkc B  : %-50.0 %40.9
-clkc B  : %-50.0 %-46.9
+o0 B : 4.62 518
+o6 B : 114.66 -1652
+o7 B : -37.8 1008
+o8 B : -9.24 1540
+o9 B : -37.8 -1008
+NetDegree : 6
+p29 B
+# The above terminal is a pad
+o0 B : 9.24 518
+o6 B : 120.12 -1652
+o7 B : -35.28 1008
+o8 B : -9.24 1540
+o9 B : -35.28 -1008
+NetDegree : 6
+p28 B
+# The above terminal is a pad
+o0 B : 18.48 518
+o6 B : 120.12 -1652
+o7 B : -32.76 1008
+o8 B : -4.62 1540
+o9 B : -32.76 -1008
+NetDegree : 6
+p27 B
+# The above terminal is a pad
+o0 B : 23.1 518
+o6 B : 120.12 -1652
+o7 B : -32.76 1008
+o8 B : -4.62 1540
+o9 B : -32.76 -1008
+NetDegree : 4
+p45 B
+# The above terminal is a pad
+o1 B : -350 -98.28
+o5 B : 103.74 -1652
+o10 B : 166.32 -1540
+NetDegree : 4
+p44 B
+# The above terminal is a pad
+o1 B : -350 -90.72
+o5 B : 109.2 -1652
+o10 B : 166.32 -1540
+NetDegree : 4
+p43 B
+# The above terminal is a pad
+o1 B : 350 -98.28
+o5 B : 109.2 -1652
+o10 B : 170.94 -1540
+NetDegree : 4
+p42 B
+# The above terminal is a pad
+o1 B : 350 -90.72
+o5 B : 114.66 -1652
+o10 B : 170.94 -1540
+NetDegree : 4
+o0 B : 143.22 -518
+o2 B : -92.4 490
+o3 B : 92.4 490
+o4 B : -92.4 490
+NetDegree : 4
+o0 B : 166.32 -518
+o2 B : -31.5 490
+o3 B : 31.5 490
+o4 B : -31.5 490
+NetDegree : 4
+o0 B : 18.48 -518
+o2 B : -63 490
+o3 B : 63 490
+o4 B : -63 490
+NetDegree : 4
+o0 B : 203.28 -518
+o2 B : -2.1 490
+o3 B : 2.1 490
+o4 B : -2.1 490
+NetDegree : 4
+o0 B : 231 227.92
+o2 B : 73.5 490
+o3 B : -73.5 490
+o4 B : 56.7 490
+NetDegree : 4
+o0 B : 231 41.44
+o2 B : 25.2 490
+o3 B : -25.2 490
+o4 B : 25.2 490
+NetDegree : 2
+o6 B : -109.2 -1652
+o8 B : 231 -123.2
+NetDegree : 2
+o6 B : -163.8 -1652
+o8 B : 231 -400.4
+NetDegree : 2
+o6 B : -223.86 -1652
+o8 B : 231 -677.6
+NetDegree : 2
+o6 B : -49.14 -1652
+o8 B : 231 123.2
+NetDegree : 2
+o6 B : 0 -1652
+o8 B : 231 400.4
+NetDegree : 2
+p21 B
+# The above terminal is a pad
+o8 B : -101.64 1540
+NetDegree : 2
+p54 B
+# The above terminal is a pad
+o10 B : -83.16 -1540
+NetDegree : 2
+p23 B
+# The above terminal is a pad
+o0 B : -231 -134.68
+NetDegree : 2
+p38 B
+# The above terminal is a pad
+o1 B : -112 -189
+NetDegree : 2
+p40 B
+# The above terminal is a pad
+o5 B : 70.98 -1652
+NetDegree : 2
+p13 B
+# The above terminal is a pad
+o6 B : 0 1652
 NetDegree : 8
-mk1 B
+p35 B
 # The above terminal is a pad
-cntu B  : %50.0 %11.5
-nps B   : %49.5 %-50.0
-nps B   : %-18.1 %-50.0
-nps B   : %-21.8 %-50.0
-nps B   : %-40.9 %-50.0
-npd B   : %36.1 %50.0
-npd B   : %22.2 %50.0
-NetDegree : 15
-vss B
+o6 B : 273 363.44
+o7 B : 55.44 1008
+o7 B : 90.72 1008
+o8 B : -83.16 -1540
+o8 B : -97.02 -1540
+o8 B : -184.8 -1540
+o8 B : 226.38 -1540
+NetDegree : 8
+p39 B
 # The above terminal is a pad
-cntu B  : %50.0 %-26.9
-cntu B  : %-50.0 %-47.4
-nps B   : %50.0 %46.9
-nps B   : %-50.0 %22.7
-npd B   : %50.0 %33.3
-npd B   : %-50.0 %16.6
-ppd B   : %50.0 %-16.6
-ppd B   : %-50.0 %-33.3
-pps B   : %50.0 %-31.8
-pps B   : %-50.0 %-31.8
-cntd B  : %50.0 %-26.9
-cntd B  : %-50.0 %-47.4
-clkc B  : %50.0 %-4.5
-clkc B  : %-50.0 %-4.5
-NetDegree : 15
-nps B   : %49.0 %-50.0
-nps B   : %21.8 %-50.0
-nps B   : %-10.9 %-50.0
-nps B   : %-38.1 %-50.0
-nps B   : %-49.0 %-50.0
-clkd B  : %-5.5 %50.0
-npd B   : %-22.2 %-50.0
-npd B   : %-43.0 %-50.0
-ppd B   : %-26.3 %50.0
-ppd B   : %-47.2 %50.0
-pps B   : %48.1 %50.0
-pps B   : %17.2 %50.0
-pps B   : %-16.3 %50.0
-pps B   : %-42.7 %50.0
-pps B   : %-49.0 %50.0
-NetDegree : 15
-nps B   : %48.1 %-50.0
-nps B   : %20.9 %-50.0
-nps B   : %-9.9 %-50.0
-nps B   : %-36.3 %-50.0
-nps B   : %-47.2 %-50.0
-clkd B  : %16.6 %50.0
-npd B   : %-15.2 %-50.0
-npd B   : %-29.1 %-50.0
-ppd B   : %-19.4 %50.0
-ppd B   : %-33.3 %50.0
-pps B   : %47.2 %50.0
-pps B   : %15.4 %50.0
-pps B   : %4.5 %50.0
-pps B   : %-17.2 %50.0
-pps B   : %-48.1 %50.0
-NetDegree : 2
-nps B   : %47.2 %-50.0
-nps B   : %26.3 %-50.0
-NetDegree : 2
-nps B   : %46.3 %-50.0
-nps B   : %28.1 %-50.0
+o5 B : 273 363.44
+o9 B : 65.52 -1008
+o9 B : 100.8 -1008
+o10 B : -101.64 1540
+o10 B : -120.12 1540
+o10 B : -207.9 1540
+o10 B : 226.38 1540
 NetDegree : 3
-nps B   : %45.4 %-50.0
-nps B   : %41.8 %-50.0
-nps B   : %29.0 %-50.0
-NetDegree : 3
-nps B   : %44.5 %-50.0
-nps B   : %40.9 %-50.0
-nps B   : %30.9 %-50.0
-NetDegree : 3
-nps B   : %-1.8 %-50.0
-nps B   : %-13.6 %-50.0
-nps B   : %-45.4 %-50.0
-NetDegree : 3
-nps B   : %-3.6 %-50.0
-nps B   : %-15.4 %-50.0
-nps B   : %-42.7 %-50.0
-NetDegree : 3
-nps B   : %-27.2 %-50.0
-npd B   : %50.0 %16.6
-ppd B   : %-40.2 %50.0
-NetDegree : 2
-gnd1 B
-# The above terminal is a pad
-nps B   : %-22.7 %50.0
-NetDegree : 2
-vin1 B
-# The above terminal is a pad
-nps B   : %-25.4 %50.0
-NetDegree : 2
-nps B   : %-27.2 %50.0
-cmp1 B  : %-50.0 %-9.9
-NetDegree : 2
-nps B   : %-50.0 %-4.5
-cmp1 B  : %50.0 %9.9
-NetDegree : 4
-busb4 B
-# The above terminal is a pad
-clkd B  : %50.0 %-24.0
-pps B   : %37.7 %-50.0
-cntd B  : %21.1 %-50.0
-NetDegree : 4
-busb3 B
-# The above terminal is a pad
-clkd B  : %50.0 %-26.0
-pps B   : %37.2 %-50.0
-cntd B  : %20.7 %-50.0
-NetDegree : 4
-busb2 B
-# The above terminal is a pad
-clkd B  : %-50.0 %-24.0
-pps B   : %36.8 %-50.0
-cntd B  : %20.3 %-50.0
-NetDegree : 4
-busb1 B
-# The above terminal is a pad
-clkd B  : %-50.0 %-26.0
-pps B   : %36.3 %-50.0
-cntd B  : %19.9 %-50.0
-NetDegree : 2
-mc2 B
-# The above terminal is a pad
-clkd B  : %-16.6 %-50.0
-NetDegree : 3
-npd B   : %2.7 %-50.0
-ppd B   : %50.0 %16.6
-pps B   : %-31.8 %50.0
-NetDegree : 3
-npd B   : %-1.3 %-50.0
-ppd B   : %-5.5 %50.0
-cmp2 B  : %-50.0 %-9.9
+o7 B : -2.52 -1008
+o3 B : -105 -88.2
+o9 B : -12.6 1008
 NetDegree : 5
-npd B   : %-8.3 %-50.0
-npd B   : %-50.0 %-44.4
-ppd B   : %-12.5 %50.0
-ppd B   : %-50.0 %-44.4
-cmp2 B  : %-50.0 %9.9
-NetDegree : 8
-mk2 B
-# The above terminal is a pad
-ppd B   : %40.2 %-50.0
-ppd B   : %26.3 %-50.0
-pps B   : %49.0 %50.0
-pps B   : %-22.7 %50.0
-pps B   : %-26.3 %50.0
-pps B   : %-45.4 %50.0
-cntd B  : %50.0 %11.5
-NetDegree : 2
-pps B   : %46.3 %50.0
-pps B   : %21.8 %50.0
-NetDegree : 2
-pps B   : %45.4 %50.0
-pps B   : %22.7 %50.0
+o7 B : -20.16 -1008
+o3 B : -105 88.2
+o7 B : -126 -887.04
+o9 B : -30.24 1008
+o9 B : -126 -887.04
 NetDegree : 3
-pps B   : %44.5 %50.0
-pps B   : %37.2 %50.0
-pps B   : %24.5 %50.0
+o7 B : 5.04 -1008
+o9 B : 126 322.56
+o10 B : -143.22 1540
 NetDegree : 3
-pps B   : %43.6 %50.0
-pps B   : %36.3 %50.0
-pps B   : %25.4 %50.0
+o8 B : -4.62 -1540
+o8 B : -60.06 -1540
+o8 B : -207.9 -1540
 NetDegree : 3
-pps B   : %-7.2 %50.0
-pps B   : %-18.1 %50.0
-pps B   : %-46.3 %50.0
+o8 B : -124.74 -1540
+o7 B : 126 322.56
+o9 B : -100.8 1008
+NetDegree : 2
+o8 B : -124.74 1540
+o2 B : -105 -88.2
 NetDegree : 3
-pps B   : %-8.1 %50.0
-pps B   : %-20.0 %50.0
-pps B   : %-43.6 %50.0
+o8 B : -13.86 -1540
+o8 B : -69.3 -1540
+o8 B : -194.04 -1540
 NetDegree : 2
-gnd2 B
+o8 B : -231 -123.2
+o2 B : 105 88.2
+NetDegree : 3
+o8 B : 203.28 -1540
+o8 B : 138.6 -1540
+o8 B : 184.8 -1540
+NetDegree : 3
+o8 B : 207.9 -1540
+o8 B : 133.98 -1540
+o8 B : 189.42 -1540
+NetDegree : 2
+o8 B : 212.52 -1540
+o8 B : 129.36 -1540
+NetDegree : 2
+o8 B : 217.14 -1540
+o8 B : 120.12 -1540
+NetDegree : 15
+o8 B : 221.76 -1540
+o1 B : 112 189
+o7 B : -37.8 -1008
+o7 B : -73.08 -1008
+o8 B : -166.32 -1540
+o8 B : -217.14 -1540
+o8 B : -41.58 -1540
+o8 B : 92.4 -1540
+o9 B : -47.88 1008
+o9 B : -83.16 1008
+o10 B : -78.54 1540
+o10 B : -221.76 1540
+o10 B : 69.3 1540
+o10 B : 18.48 1540
+o10 B : 217.14 1540
+NetDegree : 15
+o8 B : 226.38 -1540
+o1 B : -35 189
+o7 B : -55.44 -1008
+o7 B : -108.36 -1008
+o8 B : -46.2 -1540
+o8 B : -175.56 -1540
+o8 B : -226.38 -1540
+o8 B : 97.02 -1540
+o9 B : -65.52 1008
+o9 B : -118.44 1008
+o10 B : -73.92 1540
+o10 B : -194.04 1540
+o10 B : -226.38 1540
+o10 B : 78.54 1540
+o10 B : 221.76 1540
+NetDegree : 2
+o10 B : -101.64 -1540
+o4 B : -105 -88.2
+NetDegree : 2
+o10 B : -231 -123.2
+o4 B : 105 88.2
+NetDegree : 3
+o10 B : -32.34 1540
+o10 B : -83.16 1540
+o10 B : -212.52 1540
+NetDegree : 3
+o10 B : -36.96 1540
+o10 B : -92.4 1540
+o10 B : -198.66 1540
+NetDegree : 3
+o10 B : 198.66 1540
+o10 B : 115.5 1540
+o10 B : 166.32 1540
+NetDegree : 3
+o10 B : 203.28 1540
+o10 B : 110.88 1540
+o10 B : 170.94 1540
+NetDegree : 2
+o10 B : 207.9 1540
+o10 B : 101.64 1540
+NetDegree : 2
+o10 B : 212.52 1540
+o10 B : 97.02 1540
+NetDegree : 2
+o10 B : 231 -123.2
+o5 B : -70.98 1652
+NetDegree : 2
+o10 B : 231 400.4
+o5 B : -185.64 1652
+NetDegree : 2
+o10 B : 231 677.6
+o5 B : -245.7 1652
+NetDegree : 2
+o10 B : 231 954.8
+o5 B : -256.62 1652
+NetDegree : 2
+o10 B : 231 123.2
+o5 B : -131.04 1652
+NetDegree : 2
+p41 B
 # The above terminal is a pad
-pps B   : %-18.1 %-50.0
+o5 B : 185.64 -1652
 NetDegree : 2
-vin2 B
+p12 B
 # The above terminal is a pad
-pps B   : %-20.0 %-50.0
-NetDegree : 2
-pps B   : %-22.7 %-50.0
-cmp3 B  : %-50.0 %-9.9
-NetDegree : 2
-pps B   : %50.0 %31.8
-cntd B  : %-47.4 %50.0
-NetDegree : 2
-pps B   : %50.0 %22.7
-cntd B  : %-45.7 %50.0
-NetDegree : 2
-pps B   : %50.0 %13.6
-cntd B  : %-34.7 %50.0
-NetDegree : 2
-pps B   : %50.0 %4.5
-cntd B  : %-24.5 %50.0
-NetDegree : 2
-pps B   : %50.0 %-4.5
-cntd B  : %-13.5 %50.0
-NetDegree : 2
-pps B   : %-50.0 %-4.5
-cmp3 B  : %50.0 %9.9
-NetDegree : 2
-rs1 B
+o6 B : 109.2 1652
+NetDegree : 14
+p36 B
 # The above terminal is a pad
-cntd B  : %34.7 %-50.0
-NetDegree : 2
-mcd B
-# The above terminal is a pad
-cntd B  : %13.5 %-50.0
-NetDegree : 2
-b0 B
-# The above terminal is a pad
-cntd B  : %-0.8 %-50.0
-NetDegree : 2
-b1 B
-# The above terminal is a pad
-cntd B  : %-7.6 %-50.0
-NetDegree : 2
-b2 B
-# The above terminal is a pad
-cntd B  : %-13.5 %-50.0
-NetDegree : 2
-b3 B
-# The above terminal is a pad
-cntd B  : %-20.3 %-50.0
-NetDegree : 2
-b4 B
-# The above terminal is a pad
-cntd B  : %-26.2 %-50.0
-NetDegree : 2
-b5 B
-# The above terminal is a pad
-cntd B  : %-33.0 %-50.0
-NetDegree : 2
-b6 B
-# The above terminal is a pad
-cntd B  : %-38.9 %-50.0
-NetDegree : 2
-b7 B
-# The above terminal is a pad
-cntd B  : %-45.7 %-50.0
-NetDegree : 4
-clkc B  : %44.5 %-50.0
-cmp1 B  : %-1.4 %50.0
-cmp2 B  : %1.4 %50.0
-cmp3 B  : %-1.4 %50.0
-NetDegree : 4
-clkc B  : %36.4 %-50.0
-cmp1 B  : %-15.7 %50.0
-cmp2 B  : %15.7 %50.0
-cmp3 B  : %-15.7 %50.0
-NetDegree : 4
-clkc B  : %31.0 %-50.0
-cmp1 B  : %-44.2 %50.0
-cmp2 B  : %44.2 %50.0
-cmp3 B  : %-44.2 %50.0
-NetDegree : 4
-clkc B  : %4.0 %-50.0
-cmp1 B  : %-30.0 %50.0
-cmp2 B  : %30.0 %50.0
-cmp3 B  : %-30.0 %50.0
-NetDegree : 4
-clkc B  : %50.0 %22.7
-cmp1 B  : %35.7 %50.0
-cmp2 B  : %-35.7 %50.0
-cmp3 B  : %27.1 %50.0
-NetDegree : 4
-clkc B  : %50.0 %4.5
-cmp1 B  : %12.8 %50.0
-cmp2 B  : %-12.8 %50.0
-cmp3 B  : %12.8 %50.0
-NetDegree : 2
-mc1 B
-# The above terminal is a pad
-clkc B  : %-50.0 %-13.6
+o0 B : -231 -476.56
+o0 B : -231 414.4
+o5 B : -273 -99.12
+o5 B : 273 1387.68
+o6 B : -273 -99.12
+o6 B : 273 1387.68
+o7 B : 126 -322.56
+o8 B : -231 -954.8
+o8 B : 231 -954.8
+o9 B : -126 322.56
+o9 B : 126 665.28
+o10 B : -231 492.8
+o10 B : 231 1416.8
 NetDegree : 7
-vdda B
+p26 B
 # The above terminal is a pad
-cmp1 B  : %50.0 %30.0
-cmp1 B  : %-50.0 %30.0
-cmp2 B  : %50.0 %-30.0
-cmp2 B  : %-50.0 %-30.0
-cmp3 B  : %-50.0 %30.0
-cmp3 B  : %50.0 %30.0
-NetDegree : 7
-vssa B
-# The above terminal is a pad
-cmp1 B  : %50.0 %-30.0
-cmp1 B  : %-50.0 %-30.0
-cmp2 B  : %50.0 %30.0
-cmp2 B  : %-50.0 %30.0
-cmp3 B  : %-50.0 %-30.0
-cmp3 B  : %50.0 %-30.0
+o2 B : -105 294
+o2 B : 105 294
+o3 B : -105 -294
+o3 B : 105 -294
+o4 B : -105 294
+o4 B : 105 294
 NetDegree : 2
-vin B
+p22 B
 # The above terminal is a pad
-cmp2 B  : %50.0 %-9.9
+o8 B : -115.5 1540
+NetDegree : 2
+p55 B
+# The above terminal is a pad
+o10 B : -92.4 -1540
+NetDegree : 2
+p24 B
+# The above terminal is a pad
+o3 B : 105 -88.2
+NetDegree : 15
+p37 B
+# The above terminal is a pad
+o0 B : -231 -41.44
+o0 B : 231 -41.44
+o5 B : -273 -1552.88
+o5 B : 273 -859.04
+o6 B : -273 -1552.88
+o6 B : 273 -859.04
+o7 B : -126 322.56
+o7 B : 126 665.28
+o8 B : -231 677.6
+o8 B : 231 1416.8
+o9 B : -126 -665.28
+o9 B : 126 -322.56
+o10 B : -231 -954.8
+o10 B : 231 -954.8
+NetDegree : 7
+p25 B
+# The above terminal is a pad
+o2 B : -105 -294
+o2 B : 105 -294
+o3 B : -105 294
+o3 B : 105 294
+o4 B : -105 -294
+o4 B : 105 -294

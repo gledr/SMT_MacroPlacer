@@ -413,3 +413,23 @@ bool Pin::has_solution(size_t const solution_id)
     
     return m_solutions_x.size() > solution_id;
 }
+
+/**
+ * @brief ...
+ * 
+ * @return std::string
+ */
+std::string Pin::get_bookshelf_pin_id() const
+{
+    return m_bookshelf_pin_id;
+}
+
+/**
+ * @brief ...
+ * 
+ * @param id p_id:...
+ */
+void Pin::set_bookshelf_pin_id(std::string const & id)
+{
+    m_bookshelf_pin_id = id;
+}

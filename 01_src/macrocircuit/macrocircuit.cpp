@@ -201,6 +201,7 @@ void MacroCircuit::build_circuit_bookshelf()
             this->set_design_name(m_bookshelf->get_design_name());
 
             this->init_tree(eBookshelf);
+            m_tree->analyze_tree();
 }
 
 /**
@@ -484,7 +485,7 @@ void MacroCircuit::dump_best()
 }
 
 /**
- * @brief Save all Placed Solutions
+ * @brief Save all Placed Solutions as LEF/DEF files
  */
 void MacroCircuit::save_all()
 {
@@ -516,7 +517,7 @@ void MacroCircuit::save_all()
 }
 
 /**
- * @brief Save best solution as DEF file
+ * @brief Save best solution as LEF/DEF files
  */
 void MacroCircuit::save_best()
 {
@@ -525,13 +526,17 @@ void MacroCircuit::save_best()
     if(!this->get_def().empty() && !this->get_lef().empty()) {
         m_logger->save_best(eLEFDEF);
         if (this->get_minimize_die_mode()){
-        std::pair<size_t, size_t> best_area = m_eval->best_area();
-            std::string name = "best_" + this->get_def();
-            this->write_def(name, best_area.first);
+            std::pair<size_t, size_t> best_area = m_eval->best_area();
+            std::string def_name = "best_" + this->get_def();
+            std::string lef_name = "best_" + this->get_lef()[0];
+            this->write_def(def_name, best_area.first);
+            this->write_lef(lef_name);
         } else if (this->get_minimize_hpwl_mode()){
             std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
-            std::string name = "best_" + this->get_def();
-            this->write_def(name, best_hpwl.first);
+            std::string def_name = "best_" + this->get_def();
+            std::string lef_name = "best_" + this->get_lef()[0];
+            this->write_def(def_name, best_hpwl.first);
+            this->write_lef(lef_name);
         }
     } else if (!this->get_bookshelf_file().empty()){
         m_logger->save_best(eBookshelf);
@@ -679,6 +684,8 @@ void MacroCircuit::add_cell(LefDefParser::defiComponent const & cmp)
  */
 void MacroCircuit::write_def(std::string const & name, size_t const solution)
 {
+    m_logger->write_def(name);
+
     // Write Shape of Die
 ///{{{
     size_t lx = 0, ly = 0, ux = 0, uy = 0;
@@ -756,7 +763,7 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
  */
 void MacroCircuit::write_lef(std::string const & name)
 {
-    lefiMacro tmp;
+    m_logger->write_lef(name);
     
     FILE* fp = fopen(name.c_str(), "w");
     m_circuit->WriteLef(fp);
@@ -1405,11 +1412,11 @@ void MacroCircuit::solve()
 
                         m_logger->place_macro(component->get_id(), x ,y, o);
                         
-                        if (this->get_minimize_hpwl_mode()){
+                        //if (this->get_minimize_hpwl_mode()){
                             std::vector<Pin*> pins = component->get_pins();
                             
                             for (Pin* p: pins){
-                                if (p->is_free()){
+                                //if (p->is_free()){
                                     z3::expr x = p->get_pin_pos_x();
                                     z3::expr y = p->get_pin_pos_y();
                                     
@@ -1421,9 +1428,9 @@ void MacroCircuit::solve()
                                     
                                     p->add_solution_pin_pos_x(x_pos);
                                     p->add_solution_pin_pos_y(y_pos);
-                                }
+                                //}
                             }
-                        }
+                        //}
                     }
 
                 for (Terminal* terminal: m_terminals){
@@ -1531,8 +1538,14 @@ void MacroCircuit::encode_hpwl_length()
     z3::expr_vector clauses(m_z3_ctx);
 
     for (Edge* edge: m_tree->get_edges()){
-        nullpointer_check(edge);
         
+        if (edge->get_from() == edge->get_to()){
+            /* Edge Points to Itself */
+            continue;
+        }
+
+        nullpointer_check(edge);
+
         Node* from = edge->get_from();
         Node* to   = edge->get_to();
         nullpointer_check(from);

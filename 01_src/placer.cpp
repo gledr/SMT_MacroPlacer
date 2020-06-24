@@ -415,10 +415,16 @@ void MacroPlacer::store_configuration ()
     }
     config << std::endl;
     config << "bookshelf:" << this->get_bookshelf_file() << std::endl;
+    config << "timeout: " << this->get_timeout() << std::endl;
+    config << "partitioning:" << this->get_partitioning() << std::endl;
     config << "pareto:" << this->get_pareto_optimizer() << std::endl;
     config << "lex:" << this->get_lex_optimizer() << std::endl;
     config << "solutions:" << this->get_max_solutions() << std::endl;
     config << "min_die_mode:" << this->get_minimize_die_mode() << std::endl;
     config << "min_hpwl_mode:" << this->get_minimize_hpwl_mode() << std::endl;
+    config << "save_all:" << this->get_save_all() << std::endl;
+    config << "save_best:" << this->get_save_best() << std::endl;
+    config << "dump_all:" << this->get_dump_all() << std::endl;
+    config << "dump_best:" << this->get_dump_best() << std::endl;
     config.close();
 }

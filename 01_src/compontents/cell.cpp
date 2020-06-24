@@ -26,6 +26,11 @@ Cell::~Cell()
 {
 }
 
+bool Cell::operator==(Cell const & c)
+{
+    return (m_name == c.m_name) && (m_id == c.m_id);
+}
+
 void Cell::add_pin(Pin* _pin)
 {
     nullpointer_check (_pin);

@@ -45,6 +45,8 @@ public:
 
     virtual ~Macro();
 
+    bool operator== (Macro const & m);
+
     void set_supplement(Supplement* supplement);
 
     void add_pin(Pin* const pin);

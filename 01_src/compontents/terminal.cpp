@@ -95,6 +95,16 @@ Terminal::~Terminal()
     delete m_encode; m_encode = nullptr;
     m_logger = nullptr;
 }
+/**
+ * @brief Compare Operator
+ * 
+ * @param t Terminal to Compare to
+ * @return bool
+ */
+bool Terminal::operator==(Terminal const & t)
+{
+    return m_name == t.m_name;
+}
 
 /**
  * @brief Get Terminal Name
@@ -153,8 +163,6 @@ z3::expr& Terminal::get_pos_y()
  */
 void Terminal::add_solution_pos_x(size_t const val)
 {
-    m_logger->place_terminal_x(m_name, val);
-
     m_solutions_x.push_back(val);
 }
 
@@ -165,8 +173,6 @@ void Terminal::add_solution_pos_x(size_t const val)
  */
 void Terminal::add_solution_pos_y(size_t const val)
 {
-    m_logger->place_terminal_y(m_name, val);
-
     m_solutions_y.push_back(val);
 }
 

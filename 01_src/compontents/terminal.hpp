@@ -48,6 +48,8 @@ public:
 
     virtual ~Terminal();
 
+    bool operator== (Terminal const & t);
+
     bool is_free();
 
     void set_direction(e_pin_direction const direction);

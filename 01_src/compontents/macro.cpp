@@ -105,6 +105,17 @@ Macro::~Macro()
 }
 
 /**
+ * @brief Compare Operator
+ * 
+ * @param m Macro to Compare
+ * @return bool
+ */
+bool Macro::operator==(Macro const & m)
+{
+    return (m_id == m.m_id) && (m_name == m.m_name);
+}
+
+/**
  * @brief Set Global Supplement 
  * 
  * @param supplement Pointer to Supplement
@@ -139,7 +150,6 @@ Pin* Macro::get_pin(std::string const & id)
 {
     assertion_check (id != "");
     Pin* p = m_pins[id];
-    assert (p != nullptr);
     nullpointer_check(p);
 
     return p;

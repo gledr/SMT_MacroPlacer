@@ -73,6 +73,19 @@ Node::~Node()
 {
     m_macro = nullptr;
 }
+// 
+/**
+ * @brief Compare Operator
+ * 
+ * @param n Node to Compare to
+ * @return bool
+ */
+bool Node::operator==(Node const & n)
+{
+    return (m_cell == n.m_cell) &&
+           (m_terminal == n.m_terminal) &&
+           (m_macro == n.m_macro);
+}
 
 /**
  * @brief Check if Node is Macro or Cell

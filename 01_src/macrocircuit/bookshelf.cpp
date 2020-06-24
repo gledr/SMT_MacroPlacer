@@ -91,6 +91,7 @@ void Bookshelf::read_aux()
         } else if (parts[1] == "pl"){
             m_pl_file = file;
         } else {
+            std::cout << parts[1] << std::endl;
             throw PlacerException("Unknown Format used in Aux file!");
         }
     }
@@ -254,18 +255,20 @@ void Bookshelf::read_nets()
                 if (this->has_macro(id)){
                     std::string direction = sub_token[1];
                     // Pin has relative position
-                    if (sub_token.size() > 2) {
-                        assertion_check (sub_token[2] == ":");
-                        std::string rel_pos_x = sub_token[3];
-                        std::string rel_pos_y = sub_token[4];
-                        std::string pin = rel_pos_x + "_" + rel_pos_y;
-                        this->add_pin_to_macro(id, pin, direction, rel_pos_x, rel_pos_y);
-                        pins.push_back(pin);
-                    // Pin is free
-                    } else {
-                        std::string pin =  "%0.0_%0.0";
-                        this->add_pin_to_macro(id, pin, direction, "", "");
-                        pins.push_back(pin);
+                    if (!this->get_minimize_die_mode()){
+                        if (sub_token.size() > 2) {
+                            assertion_check (sub_token[2] == ":");
+                            std::string rel_pos_x = sub_token[3];
+                            std::string rel_pos_y = sub_token[4];
+                            std::string pin = rel_pos_x + "_" + rel_pos_y;
+                            this->add_pin_to_macro(id, pin, direction, rel_pos_x, rel_pos_y);
+                            pins.push_back(pin);
+                        // Pin is free
+                        } else {
+                            std::string pin =  "%0.0_%0.0";
+                            this->add_pin_to_macro(id, pin, direction, "", "");
+                            pins.push_back(pin);
+                        }
                     }
                     Node* n = new Node(this->find_macro(id));
                     nodes.push_back(n);
@@ -308,8 +311,13 @@ void Bookshelf::read_nets()
                 }
                 std::string from_pin;
                 std::string to_pin;
-                from_pin  = pins[0];
-                to_pin = pins[node_index];
+                if (this->get_minimize_die_mode()){
+                    from_pin  = "center";
+                    to_pin = "center";
+                } else {
+                    from_pin  = pins[0];
+                    to_pin = pins[node_index];
+                }
 
                 if (from_case == 'm' && to_case == 'm'){
                     Macro* from = nodes[0]->get_macro();
@@ -408,7 +416,6 @@ void Bookshelf::read_pl()
         if(macro != m_macro_definitions.end()){
             size_t x = std::stoi(token[1]);
             size_t y = std::stoi(token[2]);
-            std::string original_name = token[1] + " " + token[2];
             processed_macros.push_back(macro->name);
 
             // Placed Macro
@@ -420,7 +427,7 @@ void Bookshelf::read_pl()
                 nullpointer_check(m);
                 m_macros.push_back(m);
                 
-                Pin* p = new Pin(original_name, macro->name, eBidirectional);
+                Pin* p = new Pin("center", macro->name, eBidirectional);
                 nullpointer_check(p);
                 m->add_pin(p);
             } else if((x != 0) || (y != 0)){
@@ -436,7 +443,7 @@ void Bookshelf::read_pl()
                 m_macros.push_back(m);
 
                 if (this->get_minimize_die_mode()){
-                    Pin* p = new Pin(original_name, macro->name, eBidirectional);
+                    Pin* p = new Pin("center", macro->name, eBidirectional);
                     nullpointer_check(p);
                     m->add_pin(p);
                 }
@@ -640,6 +647,7 @@ Terminal* Bookshelf::find_terminal(std::string const & name)
 bool Bookshelf::has_terminal(std::string const & name)
 {
     Terminal* ret_val = nullptr;
+
     for (auto itor: m_terminals){
         if (itor->get_name() == name){
             ret_val = itor;
@@ -686,25 +694,16 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
             if (!m->has_pin(pin)){
                 p = new Pin(pin, macro, dir);
                 nullpointer_check (p);
+
                 if (!rel_pos_x.empty()){
-                    if (rel_pos_x.find("%") != std::string::npos){
-                        std::string x = rel_pos_x.substr(1 ,rel_pos_x.size());
-                        int x_i = std::stoi(x);
-                        p->set_x_offset_percentage(x_i);
-                    } else {
-                        int x_i = std::stoi(rel_pos_x);
-                        p->set_x_offset(x_i);
-                    }
+                    std::string x = rel_pos_x.substr(1 ,rel_pos_x.size());
+                    int x_i = std::stoi(x);
+                    p->set_x_offset_percentage(x_i);
                 }
                 if (!rel_pos_y.empty()){
-                    if (rel_pos_y.find("%") != std::string::npos){
-                        std::string y = rel_pos_x.substr(1 ,rel_pos_y.size());
-                        int y_i = std::stoi(y);
-                        p->set_y_offset_percentage(y_i);
-                    } else {
-                        int y_i = std::stoi(rel_pos_y);
-                        p->set_x_offset(y_i);
-                    }
+                    std::string y = rel_pos_x.substr(1 ,rel_pos_y.size());
+                    int y_i = std::stoi(y);
+                    p->set_y_offset_percentage(y_i);
                 }
 
                 m->add_pin(p);
@@ -770,15 +769,12 @@ void Bookshelf::write_blocks()
 
     for(auto& curMacro : m_macros) {
         //feed << "# " << curMacro->get_id() << std::endl;
-        std::string id = curMacro->get_id();
-        
-        if (id[0] == 'o' || id[0] == 'p'){
-            feed << id << " hardrectilinear 4 ";
+        if (this->check_name_dac2002(curMacro->get_id())){
+            feed << curMacro->get_id() << " hardrectilinear 4 ";
         } else {
             feed << "o" << curMacro->get_key() << " hardrectilinear 4 ";
         }
-        
-      
+       
         feed << "(0, 0) ";
         feed << "(0, " << curMacro->get_width().get_numeral_uint() << ") ";
         feed << "(" << curMacro->get_height().get_numeral_uint() << ", " << curMacro->get_width().get_numeral_uint() << ") ";
@@ -788,7 +784,11 @@ void Bookshelf::write_blocks()
 
     for(auto terminal: m_terminals){
         //feed << "# " << terminal->get_name() << std::endl;
-        feed << "o" << terminal->get_key()  << " terminal" << std::endl;
+        if (this->check_name_dac2002(terminal->get_name())){
+            feed << terminal->get_name()  << " terminal" << std::endl;
+        } else {
+            feed << "o" << terminal->get_key()  << " terminal" << std::endl;
+        }
     }
 
     blkFile << feed.str();
@@ -797,133 +797,125 @@ void Bookshelf::write_blocks()
 }
 
 /**
- * @brief Write Nets Filegg
+ * @brief Write Nets File
  */
 void Bookshelf::write_nets()
 {
     std::string filename = this->get_bookshelf_export() + ".nets";
-
     m_logger->bookshelf_write_nets(filename);
-    std::ofstream netsFile(filename);
+    
+    if (this->get_minimize_die_mode()){
+        boost::filesystem::copy(this->get_working_directory() + "/" + m_nets_file, filename);
+    } else {
+           std::ofstream netsFile(filename);
 
-    auto steiner_tree = m_tree->get_steiner_tree();
+        auto steiner_tree = m_tree->get_steiner_tree();
 
-    size_t pin_cnt = 0;
-    for (auto itor: steiner_tree){
-        pin_cnt += itor.second.size();
-        pin_cnt++;
-    }
-
-    std::stringstream feed;
-    feed << "UCLA nets 1.0" << std::endl;
-    feed << "# Created " << Utils::Utils::get_current_time();
-    feed << "# User " << Utils::Utils::get_current_user() << std::endl;
-    feed << "# Platform " << Utils::Utils::get_plattform() << std::endl;
-    feed << "# Exported by SMT_MacroPlacer" << std::endl;
-    feed << std::endl;
-    feed << "NumNets : " << steiner_tree.size() << std::endl;
-    feed << "NumPins : "  << pin_cnt << std::endl;
-    feed << std::endl;
-
-    for(auto itor: steiner_tree){
-        size_t netdegree = itor.second.size() + 1;
-        feed << "NetDegree : " << netdegree << std::endl;
-
-        std::vector<std::string> token = Utils::Utils::tokenize(itor.first, ":");
-        assertion_check (token.size() == 2);
-        // Terminal
-        if (this->has_terminal(token[0])){
-            Terminal* t = this->find_terminal(token[0]);
-            std::string name = t->get_name();
-            nullpointer_check(t)
-            
-            if (name[0] == 'p' || name[0] == 'o'){
-                feed << name << " B" << std::endl;
-            } else {
-                feed << "o" <<  t->get_key() << " B" << std::endl;
-            }
-         
-            //feed << "# The above terminal is a pad" << std::endl;
-        } else if (this->has_macro(token[0])){
-            std::vector<std::string> token2 = Utils::Utils::tokenize(token[1], "_");
-            Macro* m = this->find_macro(token[0]);
-            std::string id = m->get_id();
-            nullpointer_check(m);
-            size_t width = m->get_width_numeral();
-            size_t height = m->get_height_numeral();
-            
-          
-            if (this->get_minimize_die_mode()){
-                if (id[0] == 'p' || id[0] == 'o'){
-                    feed << id << " B : " << token2[0] << " " << token2[1] << std::endl;
-                } else {
-                    feed << "o" << m->get_key() << " B : " << token2[0] << " " << token2[1] << std::endl;
-                }
-            } else {
-                double factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
-                double factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
-                
-                //feed << "# " << m->get_id() << std::endl;
-                 if (id[0] == 'p' || id[0] == 'o'){
-                    feed << id << " B : " << width * factor_width << " " << height * factor_height << std::endl;
-                 } else {
-                    feed << "o" << m->get_key() << " B : " << width * factor_width << " " << height * factor_height << std::endl;
-                 }
-                
-            }
-        } else {
-            assert (0);
+        size_t pin_cnt = 0;
+        for (auto itor: steiner_tree){
+            pin_cnt += itor.second.size();
+            pin_cnt++;
         }
 
-        for(auto itor2: itor.second){
-            std::vector<std::string> token = Utils::Utils::tokenize(itor2, ":");
+        std::stringstream feed;
+        feed << "UCLA nets 1.0" << std::endl;
+        feed << "# Created " << Utils::Utils::get_current_time();
+        feed << "# User " << Utils::Utils::get_current_user() << std::endl;
+        feed << "# Platform " << Utils::Utils::get_plattform() << std::endl;
+        feed << "# Exported by SMT_MacroPlacer" << std::endl;
+        feed << std::endl;
+        feed << "NumNets : " << steiner_tree.size() << std::endl;
+        feed << "NumPins : "  << pin_cnt << std::endl;
+        feed << std::endl;
+
+        for(auto itor: steiner_tree){
+            size_t netdegree = itor.second.size() + 1;
+            feed << "NetDegree : " << netdegree << std::endl;
+
+            std::vector<std::string> token = Utils::Utils::tokenize(itor.first, ":");
             assertion_check (token.size() == 2);
             // Terminal
+            std::cout << token[0] << " " << token[1] << std::endl;
+
             if (this->has_terminal(token[0])){
                 Terminal* t = this->find_terminal(token[0]);
-                std::string name = t->get_name();
-                nullpointer_check(t);
+                nullpointer_check(t)
                 //feed << "# " << t->get_name() << std::endl;
-                if (name[0] == 'o' || name[0] == 'p'){
-                    feed << name << " B" << std::endl;
+                if (this->check_name_dac2002(t->get_name())){
+                    feed << t->get_name() << " B" << std::endl;
                 } else {
                     feed << "o" <<  t->get_key() << " B" << std::endl;
                 }
-               
-            } else if (this->has_macro(token[0])){
+                feed << "# The above terminal is a pad" << std::endl;
+            } else {
                 std::vector<std::string> token2 = Utils::Utils::tokenize(token[1], "_");
                 Macro* m = this->find_macro(token[0]);
-                std::string id = m->get_id();
                 nullpointer_check(m);
-                size_t width = m->get_width().get_numeral_uint();
-                size_t height = m->get_height().get_numeral_uint();
+                size_t width = m->get_width_numeral();
+                size_t height = m->get_height_numeral();
                 
+                double factor_width = 0.0;
+                double factor_height = 0.0;
                 if (this->get_minimize_die_mode()){
-                      if (id[0] == 'p' || id[0] == 'o'){
-                          feed << id << " B : " << token2[0] << " " << token2[1] << std::endl;
-                      } else {
-                        feed << "o" << m->get_key() << " B : " << token2[0] << " " << token2[1] << std::endl;
+                    factor_width = 0.5;
+                    factor_height = 0.5;
+                } else {
+                    factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
+                    factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+                }
+            
+                //feed << "# " << m->get_id() << std::endl;
+                if (this->check_name_dac2002(m->get_id())){
+                    feed << m->get_id() << " B : " << width * factor_width << " " << height * factor_height << std::endl;
+                } else {
+                    feed << "o" << m->get_key() << " B : " << width * factor_width << " " << height * factor_height << std::endl;
+                }
+            }
+
+            for(auto itor2: itor.second){
+                std::vector<std::string> token = Utils::Utils::tokenize(itor2, ":");
+                assertion_check (token.size() == 2);
+                // Terminal
+                std::cout << token[0] << " " << token[1] << std::endl;
+                if (token[0] == token[1]){
+                    Terminal* t = this->find_terminal(token[0]);
+                    nullpointer_check(t);
+                    //feed << "# " << t->get_name() << std::endl;
+                    if (this->check_name_dac2002(t->get_name())){
+                        feed << t->get_name() << " B" << std::endl;
+                    } else {
+                        feed << "o" <<  t->get_key() << " B" << std::endl;
                     }
                 } else {
-                    double factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
-                    double factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
-                     if (id[0] == 'p' || id[0] == 'o'){
-                        feed << id << " B : " << width * factor_width << " " << height * factor_height << std::endl;
-                     } else {
+                    std::vector<std::string> token2 = Utils::Utils::tokenize(token[1], "_");
+                    Macro* m = this->find_macro(token[0]);
+                    nullpointer_check(m);
+                    size_t width = m->get_width().get_numeral_uint();
+                    size_t height = m->get_height().get_numeral_uint();
+                    
+                    double factor_width = 0.0;
+                    double factor_height = 0.0;
+                    if (this->get_minimize_die_mode()){
+                        factor_width = 0.5;
+                        factor_height = 0.5;
+                    } else {
+                        factor_width = (std::stoi(token2[0].substr(1, token2[0].size()))/100.0);
+                        factor_height = (std::stoi(token2[1].substr(1, token2[1].size()))/100.0);
+                    }
+
+                    //feed << "# " << m->get_id() << std::endl;
+                    if (this->check_name_dac2002(m->get_id())){
+                        feed << m->get_id() << " B : " << width * factor_width << " " << height * factor_height << std::endl;
+                    } else {
                         feed << "o" << m->get_key() << " B : " << width * factor_width << " " << height * factor_height << std::endl;
-                     }
-
+                    }
                 }
-
-                //feed << "# " << m->get_id() << std::endl;
-            } else {
-                assert (0);
             }
         }
-    }
 
-    netsFile << feed.str();
-    netsFile.close();
+        netsFile << feed.str();
+        netsFile.close();
+    }
 }
 
 /**
@@ -954,22 +946,46 @@ void Bookshelf::write_pl(size_t const solution_id)
                 size_t h = macro->get_height_numeral();
                 size_t w = macro->get_width_numeral();
                 
-                if (o == eNorth){
-                    feed << "o" << macro->get_key() << " " << lx << " " << ly << std::endl;
-                } else if (o == eWest){
-                    feed << "o" << macro->get_key() << " " << lx -h << " " << ly << std::endl;
-                } else if (o == eSouth){
-                    feed << "o" << macro->get_key() << " " << lx - w << " " << ly - h << std::endl;
-                } else if (o == eEast){
-                    feed << "o" << macro->get_key() << " " << lx << " " <<  ly - h << std::endl;
+                if (this->check_name_dac2002(macro->get_id())){
+                    if (o == eNorth){
+                        feed << macro->get_id() << " " << lx << " " << ly << std::endl;
+                    } else if (o == eWest){
+                        feed << macro->get_id() << " " << lx -h << " " << ly << std::endl;
+                    } else if (o == eSouth){
+                        feed << macro->get_id() << " " << lx - w << " " << ly - h << std::endl;
+                    } else if (o == eEast){
+                        feed << macro->get_id() << " " << lx << " " <<  ly - h << std::endl;
+                    } else {
+                        notimplemented_check();
+                    }
                 } else {
-                    notimplemented_check();
+                    if (o == eNorth){
+                        feed << "o" << macro->get_key() << " " << lx << " " << ly << std::endl;
+                    } else if (o == eWest){
+                        feed << "o" << macro->get_key() << " " << lx -h << " " << ly << std::endl;
+                    } else if (o == eSouth){
+                        feed << "o" << macro->get_key() << " " << lx - w << " " << ly - h << std::endl;
+                    } else if (o == eEast){
+                        feed << "o" << macro->get_key() << " " << lx << " " <<  ly - h << std::endl;
+                    } else {
+                        notimplemented_check();
+                    }
                 }
             } else {
-            feed << "o" <<macro->get_key() << " " << "0" << " " << "0" << std::endl;   
+                if (this->check_name_dac2002(macro->get_id())){
+                     feed << macro->get_id() << " " << "0" << " " << "0" << std::endl;   
+                } else {
+                    feed << "o" <<macro->get_key() << " " << "0" << " " << "0" << std::endl;   
+                }
+            
             }
         } else {
-            feed << "o" << macro->get_key() << " " << macro->get_lx_numeral() << " " << macro->get_ly_numeral() << std::endl;
+            if (this->check_name_dac2002(macro->get_id())){
+                feed << macro->get_id() << " " << macro->get_lx_numeral() << " " << macro->get_ly_numeral() << std::endl;
+            } else {
+                feed << "o" << macro->get_key() << " " << macro->get_lx_numeral() << " " << macro->get_ly_numeral() << std::endl;
+            }
+           
         }
     }
     feed << std::endl;
@@ -978,12 +994,25 @@ void Bookshelf::write_pl(size_t const solution_id)
         //feed << "# " << terminal->get_name() << std::endl;
         if (terminal->is_free()){
             if (terminal->has_solution(solution_id)){
-                feed << "o" << terminal->get_key() << " " << terminal->get_solution_pos_x(solution_id) << " "<< terminal->get_solution_pos_y(solution_id) << std::endl;
+                if (this->check_name_dac2002(terminal->get_name())){
+                    feed << terminal->get_name() << " " << terminal->get_solution_pos_x(solution_id) << " "<< terminal->get_solution_pos_y(solution_id) << std::endl;
+                } else {
+                    feed << "o" << terminal->get_key() << " " << terminal->get_solution_pos_x(solution_id) << " "<< terminal->get_solution_pos_y(solution_id) << std::endl;
+                }
             } else {
-                feed << "o" << terminal->get_key() << " 0 0" << std::endl;
+                if (this->check_name_dac2002(terminal->get_name())){
+                    feed << terminal->get_name() << " 0 0" << std::endl;
+                } else {
+                    feed << "o" << terminal->get_key() << " 0 0" << std::endl;
+                }
             }
         } else {
-            feed << "o" << terminal->get_key() << " " << terminal->get_pox_x_numerical() << " " << terminal->get_pos_y_numerical() << std::endl;
+            if (this->check_name_dac2002(terminal->get_name())){
+                feed << terminal->get_name() << " " << terminal->get_pox_x_numerical() << " " << terminal->get_pos_y_numerical() << std::endl;
+            } else {
+                feed << "o" << terminal->get_key() << " " << terminal->get_pox_x_numerical() << " " << terminal->get_pos_y_numerical() << std::endl;
+            }
+          
         }
     }
 
@@ -1048,4 +1077,19 @@ void Bookshelf::strip_terminals()
     m_logger->strip_terminals();
 
     m_tree->strip_terminals();
+}
+
+/**
+ * @brief Check if DAC 2002 Naming is used 
+ * 
+ * @param name Name to check
+ * @return bool
+ */
+bool Bookshelf::check_name_dac2002(std::string const & name)
+{
+    if ((name[0] == 'p') || (name[0] == 'o')){
+        return true;
+    } else {
+        return false;
+    }
 }

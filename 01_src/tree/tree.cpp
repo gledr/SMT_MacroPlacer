@@ -472,3 +472,25 @@ void Tree::strip_terminals()
 
     std::copy(next_edges.begin(), next_edges.end(), std::back_inserter(m_edges));
 }
+
+void Tree::analyze_tree()
+{
+    return;
+    for (auto itor: m_edges){
+        if (itor->get_from()->get_id() == itor->get_to()->get_id()){
+            std::cout << itor->get_from()->get_id() << "<->" << itor->get_to()->get_id() << std::endl;
+        }
+    }
+}
+
+void Tree::merge_edges()
+{
+    for (size_t i = 0; i < m_edges.size(); ++i){
+        for (size_t j = 0; j < m_edges.size(); ++j){
+            if (i ==j){
+                continue;
+            }
+    
+        }
+    }
+}

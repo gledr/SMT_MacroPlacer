@@ -41,6 +41,8 @@ public:
 
     virtual ~Edge();
 
+    bool operator== (Edge const & e);
+
     std::string get_name();
 
     void dump(std::ostream & stream = std::cout);
@@ -68,9 +70,13 @@ public:
     bool is_power_edge();
     bool is_signal_edge();
 
+    void set_weight(size_t const w);
+    size_t get_weight() const;
+
 private:
     Node* m_to;
     Node* m_from;
+    size_t m_weight;
     std::string m_to_pin;
     std::string m_from_pin;
     eEdgeType m_edge_type;

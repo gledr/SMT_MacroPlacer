@@ -30,7 +30,8 @@ Edge::Edge(Node* from,
            std::string const & to_pin,
            std::string const & edge_name):
     m_edge_type(eUnknownEdge),
-    m_name(edge_name)
+    m_name(edge_name),
+    m_weight(0)
 {
     nullpointer_check (from);
     nullpointer_check (to);
@@ -80,6 +81,11 @@ Edge::~Edge()
 std::string Edge::get_name()
 {
     return m_name;
+}
+
+bool Edge::operator== (Edge const & e)
+{
+    assert (0);
 }
 
 /**
@@ -368,4 +374,24 @@ void Edge::resolve_edge_type()
     } else {
         m_edge_type = eEdgeType::eSignal;
     }
+}
+
+/**
+ * @brief Get Current Edge Weight
+ * 
+ * @return size_t
+ */
+size_t Edge::get_weight() const
+{
+    return m_weight;
+}
+
+/**
+ * @brief Set Edge Weight
+ * 
+ * @param w New Edge Weight
+ */
+void Edge::set_weight(size_t const w)
+{
+    m_weight = w;
 }

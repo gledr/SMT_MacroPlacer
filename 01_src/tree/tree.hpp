@@ -68,6 +68,9 @@ public:
     void export_hypergraph();
 
     std::map<std::string, std::set<std::string>> get_steiner_tree();
+    
+    void merge_edges();
+    void analyze_tree();
 
 private:
     Utils::Logger* m_logger;

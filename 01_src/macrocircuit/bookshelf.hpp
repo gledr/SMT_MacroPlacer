@@ -109,6 +109,7 @@ private:
     bool has_terminal(std::string const & name);
 
     void deduce_layout();
+    bool check_name_dac2002(std::string const & name);
 };
 
 } /* namespace Placer */

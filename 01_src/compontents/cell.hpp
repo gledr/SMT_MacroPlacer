@@ -28,7 +28,9 @@ public:
          std::string const & id);
 
     virtual ~Cell();
-    
+
+    bool operator== (Cell const & c);
+
     virtual void dump(std::ostream & stream = std::cout);
 
     void add_pin(Pin* _pin);

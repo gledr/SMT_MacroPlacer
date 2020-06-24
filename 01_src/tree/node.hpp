@@ -38,6 +38,8 @@ public:
 
     virtual ~Node();
 
+    bool operator== (Node const & n);
+
     bool is_terminal();
     bool is_node();
 

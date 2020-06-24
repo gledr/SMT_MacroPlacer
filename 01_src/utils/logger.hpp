@@ -114,14 +114,14 @@ public:
     void place_pin_x(std::string const & pin_name,
                      std::string const & parent_name,
                      size_t const pos);
-    
+
     void place_pin_y(std::string const & pin_name,
                      std::string const & parent_name,
                      size_t const pos);
-    
+
     void place_terminal_x(std::string const & terminal_name,
                           size_t const pos);
-    
+
     void place_terminal_y(std::string const & terminal_name,
                           size_t const pos);
 
@@ -136,10 +136,10 @@ public:
     void add_fixed_terminal(std::string const & name,
                            size_t const x,
                            size_t const y);
-    
+
     void add_free_pin(std::string const & pin_name,
                       std::string const & parent_name);
-    
+
     void add_fixed_pin(std::string const & pin_name,
                        std::string const & parent_name,
                        size_t const x,
@@ -167,6 +167,9 @@ public:
     void kahypar_finished();
 
     void strip_terminals();
+
+    void write_lef(std::string const & filename);
+    void write_def(std::string const & filename);
 
 private:
     Logger();

@@ -312,7 +312,7 @@ void Logger::dump_best()
 void Logger::save_all (eInputFormat const type)
 {
     if (type == eLEFDEF){
-        LOG(eInfo) << "Exporting all Placement Solutions as DEF";
+        LOG(eInfo) << "Exporting all Placement Solutions as LEF/DEF";
     } else if (type == eBookshelf){
         LOG(eInfo) << "Exporting all Placement Solutions as Bookshelf";
     } else {
@@ -323,7 +323,7 @@ void Logger::save_all (eInputFormat const type)
 void Logger::save_best(eInputFormat const type)
 {
     if (type == eLEFDEF){
-        LOG(eInfo) << "Exporting Best Placement Solutions as DEF";
+        LOG(eInfo) << "Exporting Best Placement Solutions as LEF/DEF";
     } else if (type == eBookshelf){
         LOG(eInfo) << "Exporting Best Placement Solutions as Bookshelf";
     } else {
@@ -521,7 +521,7 @@ void Logger::place_pin_x(std::string const & pin_name,
     
     LOG(eDebug) << msg.str();
 }
-    
+
 void Logger::place_pin_y(std::string const & pin_name,
                  std::string const & parent_name,
                  size_t const pos)
@@ -537,7 +537,7 @@ void Logger::place_terminal_x(std::string const & terminal_name,
 {
     std::stringstream msg;
     msg << "Place Terminal X " << terminal_name << " to " << pos;
-    
+
     LOG(eDebug) << msg.str();
 }
 
@@ -568,4 +568,14 @@ void Logger::add_free_pin(std::string const & pin_name,
     msg << "Adding Free Pin " << pin_name << " to " << parent_name;
 
     LOG(eDebug) << msg.str();
+}
+
+void Logger::write_lef(std::string const & filename)
+{
+    LOG(eInfo) << std::string("Writing LEF file " + filename);
+}
+
+void Logger::write_def(std::string const & filename)
+{
+    LOG(eInfo) << std::string("Writing DEF file " + filename);
 }

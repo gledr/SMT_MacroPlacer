@@ -348,7 +348,7 @@ void MacroCircuit::place()
         m_solutions = 1;
     } else {
         this->solve_no_api();
-        this->solve();
+        //this->solve();
     }
 
     m_timer->stop_timer("total");
@@ -926,7 +926,7 @@ void MacroCircuit::run_encoding()
         this->encode_terminals_non_overlapping();
         this->encode_terminals_on_frontier();
 
-        m_z3_opt->add(m_terminals_non_overlapping.simplify());
+        //m_z3_opt->add(m_terminals_non_overlapping.simplify());
         m_z3_opt->add(m_terminals_on_frontier.simplify());
     }
     
@@ -953,13 +953,10 @@ void MacroCircuit::run_encoding()
         }
         m_z3_opt->add(z3::mk_and(clauses));
     }
-    
-    m_z3_opt->check();
 
     if (this->get_minimize_die_mode()){
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
-        m_z3_opt->check();
     }
 
     this->encode_hpwl_length();
@@ -1427,9 +1424,33 @@ void MacroCircuit::dump_smt_instance()
     out_file << "(set-option :produce-models true)" << std::endl;
     out_file << "(set-logic UFNIA)" << std::endl;
     out_file << *m_z3_opt;
-    out_file << "(get-value(die_ux))" << std::endl;
-    out_file << "(get-value(die_uy))" << std::endl;
-    out_file << "(get-model)" << std::endl;
+
+    if (m_layout->is_free_ux()){
+        out_file << "(get-value (" << m_layout->get_ux() << "))" << std::endl;
+    }
+    if (m_layout->is_free_uy()){
+        out_file << "(get-value (" << m_layout->get_uy() << "))" << std::endl;
+    }
+    
+    for (Terminal* t: m_terminals){
+        if (t->is_free()){
+            out_file << "(get-value (" << t->get_pos_x() << "))" << std::endl;
+            out_file << "(get-value (" << t->get_pos_y() << "))" << std::endl;
+        }
+    }
+    for(Component* c: m_components){
+        if (c->is_free()){
+            out_file << "(get-value (" << c->get_lx() << "))" << std::endl;
+            out_file << "(get-value (" << c->get_ly() << "))" << std::endl;
+            out_file << "(get-value (" << c->get_orientation() << "))" << std::endl;
+            
+            for (Pin* p: c->get_pins()){
+                out_file << "(get-value (" << p->get_pin_pos_x() << "))" << std::endl;
+                out_file << "(get-value (" << p->get_pin_pos_y() << "))" << std::endl;
+            }
+        }
+    }
+    
     out_file.close();
 }
 
@@ -1598,6 +1619,11 @@ void MacroCircuit::create_statistics()
     }
 }
 
+/**
+ * @brief Process the results from a found model
+ * 
+ * @param m The model to process
+ */
 void MacroCircuit::process_results(z3::model const & m)
 {
      if (this->get_minimize_die_mode()){
@@ -1668,17 +1694,123 @@ void MacroCircuit::process_results(z3::model const & m)
 }
 
 /**
- * @brief 
+ * @brief Invoke Z3 Frontend for Problem Solving
+ * 
+ * Z3's Frontend shows much fast solving times than directly
+ * invoking the API for solving. 
+ * 
+ * TODO Figure out why the API seems to run slower
  */
 void MacroCircuit::solve_no_api()
 {
     this->dump_smt_instance();
     boost::filesystem::current_path(this->get_smt_directory());
     std::string smt_file = "top_" + this->get_design_name() + ".smt2";
-    std::string results_file = this->get_smt_directory() +  "/top_" + this->get_design_name() + "_results.txt";
+    std::string results_file = this->get_smt_directory() +  "/top_" 
+                                 + this->get_design_name() + "_results.txt";
 
     std::vector<std::string> args;
     args.push_back(smt_file);
     
     Utils::Utils::system_execute("z3", args, results_file, true);
+    
+    std::map<std::string, size_t> key_value_results;
+    std::vector<std::string> z3_results;
+    std::string line;
+    std::ifstream results(results_file);
+    while(std::getline(results, line)){
+        z3_results.push_back(line);
+    }
+    results.close();
+    
+    assert (this->get_max_solutions() == 1);
+    
+    if (z3_results[0] == "sat"){
+        
+    } else if (z3_results[0] == "unsat"){
+         m_logger->unsat_solution();
+        exit(0);
+    } else if (z3_results[0] == "unknown"){
+        m_logger->unknown_solution();
+        exit(0);
+    } else {
+        assert (0);
+    }
+    m_solutions = 1;
+    
+    for (size_t i = 1; i < z3_results.size(); ++i){
+        std::string line = z3_results[i];
+        
+        std::string opening = line.substr(0,2);
+        std::string closing = line.substr(line.size() -2, 2);
+        
+        if (opening == "((" && closing == "))"){
+            std::string content = line.substr(2, line.size() - 2);
+            content = content.substr(0, content.size() - 2);
+            std::vector<std::string> token = Utils::Utils::tokenize(content, " ");
+            std::string key = token[0];
+            size_t val = std::stoi(token[1]);
+            
+            key_value_results[key] = val;
+        }
+    }
+    
+    size_t ux = key_value_results[m_layout->get_ux().to_string()];
+    size_t uy = key_value_results[m_layout->get_uy().to_string()];
+        
+    double area_estimation = ux * uy;
+    double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
+    m_logger->result_die_area(area_estimation);
+    m_logger->white_space(white_space);
+
+    m_layout->set_solution_ux(ux);
+    m_layout->set_solution_uy(uy);
+    m_logger->add_solution_layout(ux, uy);
+    
+    for (Terminal* terminal: m_terminals){
+        z3::expr clause_x = terminal->get_pos_x();
+        z3::expr clause_y = terminal->get_pos_y();
+
+        if (this->get_free_terminals()){
+            size_t val_x = key_value_results[clause_x.to_string()];
+            size_t val_y = key_value_results[clause_y.to_string()];
+
+            terminal->add_solution_pos_x(val_x);
+            terminal->add_solution_pos_y(val_y);
+
+            m_logger->place_terminal(terminal->get_name(),
+                                     val_x,
+                                     val_y);
+        }
+    }
+    
+      for(Component* component: m_components){
+
+        size_t x = key_value_results[component->get_lx().to_string()];
+        size_t y = key_value_results[component->get_ly().to_string()];
+        eOrientation o = static_cast<eOrientation>(key_value_results[component->get_orientation().to_string()]);
+
+        component->add_solution_lx(x);
+        component->add_solution_ly(y);
+        component->add_solution_orientation(o);
+
+        m_logger->place_macro(component->get_id(), x ,y, o);
+
+        //if (this->get_minimize_hpwl_mode()){
+            std::vector<Pin*> pins = component->get_pins();
+
+            for (Pin* p: pins){
+                if (p->is_free()){
+                    z3::expr x = p->get_pin_pos_x();
+                    z3::expr y = p->get_pin_pos_y();
+
+                    size_t x_pos = key_value_results[x.to_string()];
+                    size_t y_pos = key_value_results[y.to_string()];
+
+                    p->add_solution_pin_pos_x(x_pos);
+                    p->add_solution_pin_pos_y(y_pos);
+                }
+            }
+        //}
+    }
 }

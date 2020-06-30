@@ -83,7 +83,6 @@ int Utils::system_execute(std::string const & binary,
                           bool wait_for_termination)
 {
     try {
-        std::cout << output << std::endl;
         boost::process::ipstream pipe_stream;
         boost::filesystem::path bin_url(binary);
         
@@ -103,7 +102,6 @@ int Utils::system_execute(std::string const & binary,
                 return 0;
             }
         } else {
-            std::cout << "hier" << std::endl;
             std::ofstream log(output);
             std::string line;
             boost::process::child bin(bin_url,

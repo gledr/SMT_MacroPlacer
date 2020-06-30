@@ -351,6 +351,7 @@ void MacroPlacer::run ()
     m_mckt->place();
 
     m_timer->stop_timer("total");
+    m_logger->timer_total(m_timer->read_timer_ms("total"));
     m_logger->execution_end();
 }
 

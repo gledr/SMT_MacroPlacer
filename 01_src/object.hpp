@@ -231,6 +231,8 @@ private:
     static size_t m_results_id;
     static eLogic m_logic;
     static z3::expr_vector m_stored_constraints;
+    
+    static z3::context init_context();
 };
 
 } /* namespace Placer */

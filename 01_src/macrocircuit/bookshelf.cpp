@@ -23,6 +23,7 @@ Bookshelf::Bookshelf():
     m_tree = new Tree();
     m_logger = Logger::getInstance();
     m_design_read = false;
+    m_could_duduce_layout = false;
 }
 
 /**
@@ -366,8 +367,6 @@ void Bookshelf::read_pl()
 {
     m_logger->bookshelf_read_place(m_pl_file);
 
-    bool force_free = true;
-
     if(!boost::filesystem::exists(m_pl_file)){
         throw PlacerException("Can not open place file (" + m_pl_file + ")");
     }
@@ -419,7 +418,7 @@ void Bookshelf::read_pl()
             processed_macros.push_back(macro->name);
 
             // Placed Macro
-            if(force_free) {
+            if(this->get_minimize_die_mode()) {
                 Macro* m = new Macro(macro->name,
                                      macro->name,
                                      macro->width,
@@ -430,9 +429,17 @@ void Bookshelf::read_pl()
                 Pin* p = new Pin("center", macro->name, eBidirectional);
                 nullpointer_check(p);
                 m->add_pin(p);
-            } else if((x != 0) || (y != 0)){
-                assert (0);
-               // m_macros.push_back(new Macro(name,name, width, heigth, x, y, 0));
+            } else if(this->get_minimize_hpwl_mode()){
+               
+               Macro* m =new Macro(macro->name,
+                                            macro->name, 
+                                            macro->width, 
+                                            macro->height, 
+                                            x,
+                                            y,
+                                            0);
+               m_macros.push_back(m);
+
             // Free Macro
             } else {
                Macro* m = new Macro(macro->name,
@@ -696,14 +703,24 @@ void Bookshelf::add_pin_to_macro(std::string const & macro,
                 nullpointer_check (p);
 
                 if (!rel_pos_x.empty()){
-                    std::string x = rel_pos_x.substr(1 ,rel_pos_x.size());
-                    int x_i = std::stoi(x);
-                    p->set_x_offset_percentage(x_i);
+                    if (rel_pos_x.find("%") != std::string::npos){
+                        std::string x = rel_pos_x.substr(1 ,rel_pos_x.size());
+                        int x_i = std::stoi(x);
+                        p->set_x_offset_percentage(x_i);
+                    } else {
+                        int x_i = std::stoi(rel_pos_x);
+                        p->set_x_offset_percentage(x_i);
+                    }
                 }
                 if (!rel_pos_y.empty()){
-                    std::string y = rel_pos_x.substr(1 ,rel_pos_y.size());
-                    int y_i = std::stoi(y);
-                    p->set_y_offset_percentage(y_i);
+                    if (rel_pos_y.find("%") != std::string::npos){
+                        std::string y = rel_pos_x.substr(1 ,rel_pos_y.size());
+                        int y_i = std::stoi(y);
+                        p->set_y_offset_percentage(y_i);
+                    } else {
+                        int y_i = std::stoi(rel_pos_y);
+                        p->set_y_offset_percentage(y_i);
+                    }
                 }
 
                 m->add_pin(p);

@@ -18,6 +18,7 @@
 #include <chrono>
 #include <unistd.h>
 #include <sys/utsname.h>
+#include <iostream>
 
 #include <boost/filesystem.hpp>
 #include <boost/process.hpp>

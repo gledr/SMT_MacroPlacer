@@ -59,7 +59,7 @@ void Logger::add_free_macro(std::string const & id,
     std::stringstream msg;
     msg << "Create Free Macro " << id << " (" << w << ":" << h << ")";
 
-    LOG(eInfo) << msg.str();
+    LOG(eDebug) << msg.str();
 }
 
 void Logger::add_fixed_macro(std::string const & id)
@@ -67,7 +67,7 @@ void Logger::add_fixed_macro(std::string const & id)
     std::stringstream msg;
     msg << "Create Fixed Macro: " << id;
 
-    LOG(eInfo) << msg.str();
+    LOG(eDebug) << msg.str();
 }
 
 void Logger::add_supplement_macro(std::string const & id)
@@ -117,11 +117,12 @@ void Logger::end_terminal_thread()
 
 void Logger::timer_total(size_t const ms)
 {
-    LOG(eInfo) << "SMT Solver Total Time Spent: " + std::to_string(ms) + " ms";
+    LOG(eInfo) << "SMT_MacroPlacer Total Time Spent: " + std::to_string(ms) + " ms";
 }
 
 void Logger::timer_single_solution(std::string const & id, size_t const ms)
 {
+    notimplemented_check();
 }
 
 void Logger::solve_allsat()

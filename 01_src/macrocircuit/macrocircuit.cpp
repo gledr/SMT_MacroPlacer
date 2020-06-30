@@ -175,6 +175,7 @@ void MacroCircuit::build_circuit_bookshelf()
             if (!this->get_parquet_fp()){
                 if (!this->get_minimize_die_mode()){
                     if (m_bookshelf->could_deduce_layout()){
+                        std::cout << "Could not deduce" << std::endl;
                         std::pair<size_t, size_t> upper_corner = m_bookshelf->get_deduced_layout();
                         m_layout->set_lx(0);
                         m_layout->set_ux(upper_corner.first);
@@ -201,7 +202,7 @@ void MacroCircuit::build_circuit_bookshelf()
             this->set_design_name(m_bookshelf->get_design_name());
 
             this->init_tree(eBookshelf);
-            m_tree->analyze_tree();
+            m_tree->merge_edges();
 }
 
 /**
@@ -346,6 +347,7 @@ void MacroCircuit::place()
         m_parquet->store_bookshelf_results();
         m_solutions = 1;
     } else {
+        this->solve_no_api();
         this->solve();
     }
 
@@ -878,28 +880,30 @@ size_t MacroCircuit::get_solutions()
  */
 void MacroCircuit::config_z3()
 {
-    if (this->get_logic() == eInt){
-        //m_z3_ctx.set("logic", "LIA");
-        m_logger->encode_int();
-    } else if (this->get_logic() == eBitVector) {
-        // http://smtlib.cs.uiowa.edu/logics-all.shtml
-        m_z3_ctx.set("logic", "QF_BV");
-        m_logger->encode_bv();
-    }
+    std::string solver_version = m_encode->get_version();
+    m_logger->solver_version(solver_version);
 
+    z3::set_param("verbose", 0);
+    z3::set_param("smt.auto_config", false);
+    z3::set_param("smt.arith.solver", 5);
+    z3::set_param("smt.threads", 3);
+    z3::set_param("parallel.enable", true);
+    
     z3::params param(m_z3_ctx);
     //param.set(":opt.solution_prefix", "intermediate_result");
-    //param.set(":opt.dump_models", true);
-    param.set(":opt.pb.compile_equality", true);
+    param.set("opt.dump_models", true);
+    param.set("opt.pb.compile_equality", true);
+    //param.set(":opt.optsmt_engine", "symba");
+  
     if(this->get_pareto_optimizer()){
         m_logger->use_pareto_optimizer();
-        param.set(":opt.priority", "pareto");
+        param.set("opt.priority", "pareto");
     } else if (this->get_lex_optimizer()){
         m_logger->use_lex_optimizer();
-        param.set(":opt.priority", "lex");
+        param.set("opt.priority", "lex");
     } else {
         m_logger->use_lex_optimizer();
-        param.set(":opt.priority", "lex");
+        param.set("opt.priority", "lex");
     }
 
     if(this->get_timeout() != 0){
@@ -922,13 +926,17 @@ void MacroCircuit::run_encoding()
         this->encode_terminals_non_overlapping();
         this->encode_terminals_on_frontier();
 
-        m_z3_opt->add(m_terminals_non_overlapping);
-        m_z3_opt->add(m_terminals_on_frontier);
+        m_z3_opt->add(m_terminals_non_overlapping.simplify());
+        m_z3_opt->add(m_terminals_on_frontier.simplify());
     }
-
-    m_z3_opt->add(m_components_inside_die);
-    m_z3_opt->add(m_components_non_overlapping);
-    m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
+    
+    if (this->get_minimize_die_mode()){
+        m_z3_opt->add(m_components_inside_die.simplify());
+        m_z3_opt->add(m_components_non_overlapping.simplify());
+    }
+    if (this->get_stored_constraints().size() > 0){
+        m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
+    }
 
     if (this->get_partitioning()){
         z3::expr_vector clauses(m_z3_ctx);
@@ -945,17 +953,19 @@ void MacroCircuit::run_encoding()
         }
         m_z3_opt->add(z3::mk_and(clauses));
     }
+    
+    m_z3_opt->check();
 
     if (this->get_minimize_die_mode()){
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
+        m_z3_opt->check();
     }
 
     this->encode_hpwl_length();
     for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
-        m_z3_opt->minimize(m_hpwl_edges[i]);
+        m_z3_opt->minimize(m_hpwl_edges[i].simplify());
     }
- 
 }
 
 /**
@@ -1367,7 +1377,6 @@ void MacroCircuit::solve()
         if(this->get_pareto_optimizer()){
             m_logger->pareto_solutions(this->get_max_solutions());
         }
-
         z3::check_result sat = m_z3_opt->check();
 
         if(sat == z3::check_result::unsat){
@@ -1376,6 +1385,7 @@ void MacroCircuit::solve()
 
         } else if (sat == z3::check_result::unknown){
             m_logger->unknown_solution();
+            //std::cout << m_z3_opt->get_model() << std::endl;
             exit(0);
             
         } else if (sat == z3::check_result::sat){
@@ -1383,72 +1393,7 @@ void MacroCircuit::solve()
 
             do {
                 z3::model m = m_z3_opt->get_model();
-
-                if (this->get_minimize_die_mode()){
-                    size_t ux =  m.eval(m_layout->get_ux()).get_numeral_uint();
-                    size_t uy =  m.eval(m_layout->get_uy()).get_numeral_uint();
-
-                    double area_estimation = ux * uy;
-                    double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
-                    m_logger->result_die_area(area_estimation);
-                    m_logger->white_space(white_space);
-
-                    m_layout->set_solution_ux(ux);
-                    m_layout->set_solution_uy(uy);
-                    m_logger->add_solution_layout(ux, uy);
-                }
-                m_solutions++;
-
-                for(Component* component: m_components){
-                        std::string name = component->get_name();
-
-                        size_t x = m.eval(component->get_lx()).get_numeral_int();
-                        size_t y = m.eval(component->get_ly()).get_numeral_int();
-                        eOrientation o = static_cast<eOrientation>(m.eval(component->get_orientation()).get_numeral_int());
-
-                        component->add_solution_lx(x);
-                        component->add_solution_ly(y);
-                        component->add_solution_orientation(o);
-
-                        m_logger->place_macro(component->get_id(), x ,y, o);
-                        
-                        //if (this->get_minimize_hpwl_mode()){
-                            std::vector<Pin*> pins = component->get_pins();
-                            
-                            for (Pin* p: pins){
-                                //if (p->is_free()){
-                                    z3::expr x = p->get_pin_pos_x();
-                                    z3::expr y = p->get_pin_pos_y();
-                                    
-                                    z3::expr x_val = m.eval(x);
-                                    z3::expr y_val = m.eval(y);
-
-                                    size_t x_pos = x_val.get_numeral_uint();
-                                    size_t y_pos = y_val.get_numeral_uint();
-                                    
-                                    p->add_solution_pin_pos_x(x_pos);
-                                    p->add_solution_pin_pos_y(y_pos);
-                                //}
-                            }
-                        //}
-                    }
-
-                for (Terminal* terminal: m_terminals){
-                    z3::expr clause_x = terminal->get_pos_x();
-                    z3::expr clause_y = terminal->get_pos_y();
-
-                    if (this->get_free_terminals()){
-                    size_t val_x = m.eval(clause_x).get_numeral_uint();
-                    size_t val_y = m.eval(clause_y).get_numeral_uint();
-
-                        terminal->add_solution_pos_x(val_x);
-                        terminal->add_solution_pos_y(val_y);
-
-                        m_logger->place_terminal(terminal->get_name(),
-                                                 val_x,
-                                                 val_y);
-                    }
-                }
+               this->process_results(m);
 
                 if(/*this->get_pareto_optimizer() &&*/  (m_solutions < this->get_max_solutions())){
                     m_logger->pareto_step();
@@ -1480,6 +1425,7 @@ void MacroCircuit::dump_smt_instance()
 
     std::ofstream out_file(smt_file);
     out_file << "(set-option :produce-models true)" << std::endl;
+    out_file << "(set-logic UFNIA)" << std::endl;
     out_file << *m_z3_opt;
     out_file << "(get-value(die_ux))" << std::endl;
     out_file << "(get-value(die_uy))" << std::endl;
@@ -1592,9 +1538,16 @@ void MacroCircuit::encode_hpwl_length()
         } else {
             notimplemented_check();
         }
-
+        
         z3::expr hpwl = this->euclidean_distance(from_x, from_y, to_x, to_y);
-        clauses.push_back(hpwl);
+        if (edge->get_weight() > 1){
+          
+            z3::expr cost = m_encode->get_value(edge->get_weight());
+            z3::expr smt = hpwl * cost;
+            clauses.push_back(smt);
+        } else {
+            clauses.push_back(hpwl);
+        }
     }
 
     for (size_t i = 0; i < clauses.size(); ++i){
@@ -1643,4 +1596,89 @@ void MacroCircuit::create_statistics()
             std::cout << itor.first << ": " << itor.second << std::endl;
         }
     }
+}
+
+void MacroCircuit::process_results(z3::model const & m)
+{
+     if (this->get_minimize_die_mode()){
+        size_t ux =  m.eval(m_layout->get_ux()).get_numeral_uint();
+        size_t uy =  m.eval(m_layout->get_uy()).get_numeral_uint();
+
+        double area_estimation = ux * uy;
+        double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
+        m_logger->result_die_area(area_estimation);
+        m_logger->white_space(white_space);
+
+        m_layout->set_solution_ux(ux);
+        m_layout->set_solution_uy(uy);
+        m_logger->add_solution_layout(ux, uy);
+    }
+    m_solutions++;
+
+    for(Component* component: m_components){
+        std::string name = component->get_name();
+
+        size_t x = m.eval(component->get_lx()).get_numeral_int();
+        size_t y = m.eval(component->get_ly()).get_numeral_int();
+        eOrientation o = static_cast<eOrientation>(m.eval(component->get_orientation()).get_numeral_int());
+
+        component->add_solution_lx(x);
+        component->add_solution_ly(y);
+        component->add_solution_orientation(o);
+
+        m_logger->place_macro(component->get_id(), x ,y, o);
+
+        //if (this->get_minimize_hpwl_mode()){
+            std::vector<Pin*> pins = component->get_pins();
+
+            for (Pin* p: pins){
+                //if (p->is_free()){
+                    z3::expr x = p->get_pin_pos_x();
+                    z3::expr y = p->get_pin_pos_y();
+
+                    z3::expr x_val = m.eval(x);
+                    z3::expr y_val = m.eval(y);
+
+                    size_t x_pos = x_val.get_numeral_uint();
+                    size_t y_pos = y_val.get_numeral_uint();
+
+                    p->add_solution_pin_pos_x(x_pos);
+                    p->add_solution_pin_pos_y(y_pos);
+                //}
+            }
+        //}
+    }
+
+    for (Terminal* terminal: m_terminals){
+        z3::expr clause_x = terminal->get_pos_x();
+        z3::expr clause_y = terminal->get_pos_y();
+
+        if (this->get_free_terminals()){
+            size_t val_x = m.eval(clause_x).get_numeral_uint();
+            size_t val_y = m.eval(clause_y).get_numeral_uint();
+
+            terminal->add_solution_pos_x(val_x);
+            terminal->add_solution_pos_y(val_y);
+
+            m_logger->place_terminal(terminal->get_name(),
+                                     val_x,
+                                     val_y);
+        }
+    }
+}
+
+/**
+ * @brief 
+ */
+void MacroCircuit::solve_no_api()
+{
+    this->dump_smt_instance();
+    boost::filesystem::current_path(this->get_smt_directory());
+    std::string smt_file = "top_" + this->get_design_name() + ".smt2";
+    std::string results_file = this->get_smt_directory() +  "/top_" + this->get_design_name() + "_results.txt";
+
+    std::vector<std::string> args;
+    args.push_back(smt_file);
+    
+    Utils::Utils::system_execute("z3", args, results_file, true);
 }

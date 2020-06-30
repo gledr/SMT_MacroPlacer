@@ -490,7 +490,32 @@ void Tree::merge_edges()
             if (i ==j){
                 continue;
             }
-    
+            Edge* a = m_edges[i];
+            Edge* b = m_edges[j];
+            
+            if (a == nullptr){
+                continue;
+            }
+            if (b == nullptr){
+                continue;
+            }
+            
+            if (*a == *b){
+                std::cout << "Merge " << a->get_from()->get_id() << " " << a->get_from_pin() << " " << b->get_from()->get_id() << " " <<  b->get_from_pin() << " "
+                                      << a->get_to()->get_id() << " " << a->get_to_pin() << " " << b->get_to()->get_id() << " " <<  b->get_to_pin() << std::endl;
+                a->set_weight(a->get_weight() + b->get_weight());
+                delete b; m_edges[j] = nullptr;
+            }
         }
     }
+    
+    std::vector<Edge*> next_edges;
+    for (auto itor: m_edges){
+        if (itor){
+            next_edges.push_back(itor);
+        }
+    }
+    
+    m_edges.clear();
+    std::copy(next_edges.begin(), next_edges.end(), std::back_inserter(m_edges));
 }

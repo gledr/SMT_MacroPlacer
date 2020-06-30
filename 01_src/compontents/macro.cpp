@@ -269,10 +269,10 @@ void Macro::encode_pins()
     
     if (this->get_minimize_die_mode()){
         this->encode_pins_center_of_macro(e2D);
-        clauses.push_back(m_encode_pins_center_of_macro);
+        clauses.push_back(m_encode_pins_center_of_macro.simplify());
     } else if (this->get_minimize_hpwl_mode()){
         this->encode_pins_on_macro_frontier(e2D);
-        clauses.push_back(m_encode_pin_macro_frontier);
+        clauses.push_back(m_encode_pin_macro_frontier.simplify());
     } else {
         assert (0);
     }

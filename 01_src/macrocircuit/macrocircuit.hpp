@@ -179,6 +179,8 @@ private:
      * SMT Solving
      */ 
     void solve();
+    void solve_no_api();
+    void process_results(z3::model const & m);
     void dump_smt_instance();
 
 };

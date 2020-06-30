@@ -57,16 +57,25 @@ size_t Object::m_partition_size = 1;
 size_t Object::m_num_partitions = 1;
 size_t Object::m_key_counter = 0;
 eLogic Object::m_logic = eInt;
-z3::context Object::m_z3_ctx;
+
+z3::context Object::m_z3_ctx(init_context());
 z3::expr_vector Object::m_stored_constraints(m_z3_ctx);
 
 
 Object::Object()
 {
+
 }
 
 Object::~Object()
 {
+}
+
+z3::context Object::init_context()
+{
+    z3::config cfg;
+   
+    return z3::context(cfg);
 }
 
 void Object::add_def(std::string const & def)

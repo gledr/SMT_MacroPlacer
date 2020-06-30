@@ -31,7 +31,7 @@ Edge::Edge(Node* from,
            std::string const & edge_name):
     m_edge_type(eUnknownEdge),
     m_name(edge_name),
-    m_weight(0)
+    m_weight(1)
 {
     nullpointer_check (from);
     nullpointer_check (to);
@@ -83,9 +83,18 @@ std::string Edge::get_name()
     return m_name;
 }
 
+/**
+ * @brief Compare Operator
+ * 
+ * @param e Edge to Compare
+ * @return bool
+ */
 bool Edge::operator== (Edge const & e)
 {
-    assert (0);
+    return (m_from == e.m_from) &&
+           (m_from_pin == e.m_from_pin) &&
+           (m_to == e.m_to) &&
+           (m_to_pin == e.m_to_pin);
 }
 
 /**

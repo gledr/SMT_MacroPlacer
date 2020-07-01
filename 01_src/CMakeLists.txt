@@ -1,6 +1,8 @@
-find_package(Boost REQUIRED COMPONENTS program_options filesystem)
+find_package(Boost 1.69 REQUIRED COMPONENTS program_options filesystem)
 find_package(Python2 COMPONENTS Development NumPy)
 find_package(PkgConfig REQUIRED)
+
+find_library(Z3_LIBRARIES NAMES z3 libz3)
 
 pkg_check_modules(JSONCPP jsoncpp)
 
@@ -142,8 +144,8 @@ target_link_libraries(smt_placer PUBLIC
     dl
     placer_utils
     jsoncpp
-    z3
-)
+    ${Z3_LIBRARIES}
+    )
 
 target_include_directories(smt_placer PRIVATE 
     ${Python2_INCLUDE_DIRS} 
@@ -155,7 +157,7 @@ target_link_libraries(bookshelf_converter
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
     pthread
-    z3
+    ${Z3_LIBRARIES}
     jsoncpp
     dl
     placer_utils

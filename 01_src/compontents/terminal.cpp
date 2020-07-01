@@ -23,7 +23,11 @@ std::vector<std::string> Terminal::m_terminal_keywords({
     "vin1",
     "vin2",
     "vssa",
-    "vdda"
+    "vdda",
+    "pow@0",
+    "pow@1",
+    "gnd@0",
+    "gnd@1"
 });
 
 

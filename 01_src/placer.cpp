@@ -86,7 +86,7 @@ void MacroPlacer::read_configuration()
         // Second Level Priority: Local Ini File
         // Commandline Overwrites Config File Arguments
         po::command_line_parser parser(m_argc, m_argv);
-        parser.options(*m_options_functions).allow_unregistered().style(
+        parser.options(*m_options_functions).style(
                 po::command_line_style::default_style | 
                 po::command_line_style::allow_slash_for_short);
 

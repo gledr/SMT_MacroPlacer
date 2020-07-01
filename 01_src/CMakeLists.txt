@@ -133,6 +133,7 @@ target_link_libraries(smt_placer PUBLIC
     ${Boost_LIBRARIES}
     ${Python2_LIBRARIES}
     ${JSONCPP_LIBRARIES}
+    ${Z3_LIBRARIES}
     def
     defzlib
     lef
@@ -143,8 +144,6 @@ target_link_libraries(smt_placer PUBLIC
     pthread
     dl
     placer_utils
-    jsoncpp
-    ${Z3_LIBRARIES}
     )
 
 target_include_directories(smt_placer PRIVATE 
@@ -156,9 +155,8 @@ target_include_directories(smt_placer PRIVATE
 target_link_libraries(bookshelf_converter
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
-    pthread
     ${Z3_LIBRARIES}
-    jsoncpp
+    pthread
     dl
     placer_utils
 )

@@ -24,6 +24,7 @@ MacroCircuit::MacroCircuit():
     m_components_inside_die(m_encode->get_value(0)),
     m_terminals_on_frontier(m_encode->get_value(0)),
     m_terminals_non_overlapping(m_encode->get_value(0)),
+    m_terminals_center_edge(m_encode->get_value(0)),
     m_hpwl_cost_function(m_encode->get_value(0)),
     m_hpwl_edges(m_z3_ctx)
 {
@@ -925,9 +926,11 @@ void MacroCircuit::run_encoding()
     if (this->get_free_terminals()){
         this->encode_terminals_non_overlapping();
         this->encode_terminals_on_frontier();
+        this->encode_terminals_center_edge();
 
         //m_z3_opt->add(m_terminals_non_overlapping.simplify());
-        m_z3_opt->add(m_terminals_on_frontier.simplify());
+        //m_z3_opt->add(m_terminals_on_frontier.simplify());
+        m_z3_opt->add(m_terminals_center_edge.simplify());
     }
     
     if (this->get_minimize_die_mode()){
@@ -1312,6 +1315,57 @@ void MacroCircuit::encode_terminals_on_frontier()
     }
 
     m_terminals_on_frontier = z3::mk_and(clauses);
+}
+
+/**
+ * @brief ...
+ */
+void MacroCircuit::encode_terminals_center_edge()
+{
+    z3::expr_vector clauses(m_z3_ctx);
+    
+    z3::expr n_x = m_layout->get_ux() / 2;
+    z3::expr n_y = m_layout->get_uy();
+    
+    z3::expr w_x = m_layout->get_lx();
+    z3::expr w_y = m_layout->get_uy() / 2;
+    
+    z3::expr s_x = m_layout->get_ly();
+    z3::expr s_y = m_layout->get_ux() / 2;
+    
+    z3::expr e_x = m_layout->get_ux();
+    z3::expr e_y = m_layout->get_uy() / 2;
+    
+    for (Terminal* t: m_terminals){
+        z3::expr_vector clause(m_z3_ctx);
+        z3::expr x = t->get_pos_x();
+        z3::expr y = t->get_pos_y();
+
+        z3::expr_vector n(m_z3_ctx);
+        z3::expr_vector w(m_z3_ctx);
+        z3::expr_vector s(m_z3_ctx);
+        z3::expr_vector e(m_z3_ctx);
+
+        n.push_back(x == n_x);
+        n.push_back(y == n_y);
+
+        w.push_back(x == w_x);
+        w.push_back(y == w_y);
+
+        s.push_back(x == s_x);
+        s.push_back(y == s_y);
+
+        e.push_back(x == e_x);
+        e.push_back(y == e_y);
+
+        clause.push_back(z3::mk_and(n));
+        clause.push_back(z3::mk_and(w));
+        clause.push_back(z3::mk_and(s));
+        clause.push_back(z3::mk_and(e));
+
+        clauses.push_back(z3::mk_or(clause));
+    }
+    m_terminals_center_edge = z3::mk_and(clauses);
 }
 
 /**

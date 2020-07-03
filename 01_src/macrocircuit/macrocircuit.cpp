@@ -1799,7 +1799,7 @@ void MacroCircuit::solve_no_api()
         assert (0);
     }
     m_solutions = 1;
-    
+
     for (size_t i = 1; i < z3_results.size(); ++i){
         std::string line = z3_results[i];
         

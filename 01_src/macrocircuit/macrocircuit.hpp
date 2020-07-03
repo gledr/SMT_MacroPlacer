@@ -172,7 +172,7 @@ private:
     z3::expr m_hpwl_cost_function;
     z3::expr_vector m_hpwl_edges;
 
-    z3::expr euclidean_distance(z3::expr const & from_x,
+    z3::expr manhattan_distance(z3::expr const & from_x,
                                 z3::expr const & from_y,
                                 z3::expr const & to_x,
                                 z3::expr const & to_y);
@@ -184,6 +184,7 @@ private:
     void solve_no_api();
     void process_results(z3::model const & m);
     void dump_smt_instance();
+    void process_key_value_results(std::map<std::string, std::vector<size_t>> & solution, size_t const id);
 
 };
 

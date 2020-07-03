@@ -924,8 +924,8 @@ void MacroCircuit::run_encoding()
     this->encode_components_non_overlapping(e2D);
 
     if (this->get_free_terminals()){
-        this->encode_terminals_non_overlapping();
-        this->encode_terminals_on_frontier();
+        //this->encode_terminals_non_overlapping();
+        //this->encode_terminals_on_frontier();
         this->encode_terminals_center_edge();
 
         //m_z3_opt->add(m_terminals_non_overlapping.simplify());
@@ -1318,24 +1318,24 @@ void MacroCircuit::encode_terminals_on_frontier()
 }
 
 /**
- * @brief ...
+ * @brief Make Total a Number of 4 Terminals to be placed for Connectivity
  */
 void MacroCircuit::encode_terminals_center_edge()
 {
     z3::expr_vector clauses(m_z3_ctx);
-    
+
     z3::expr n_x = m_layout->get_ux() / 2;
     z3::expr n_y = m_layout->get_uy();
-    
+
     z3::expr w_x = m_layout->get_lx();
     z3::expr w_y = m_layout->get_uy() / 2;
-    
-    z3::expr s_x = m_layout->get_ly();
-    z3::expr s_y = m_layout->get_ux() / 2;
-    
+
+    z3::expr s_x = m_layout->get_lx();
+    z3::expr s_y = m_layout->get_uy() / 2;
+
     z3::expr e_x = m_layout->get_ux();
     z3::expr e_y = m_layout->get_uy() / 2;
-    
+
     for (Terminal* t: m_terminals){
         z3::expr_vector clause(m_z3_ctx);
         z3::expr x = t->get_pos_x();
@@ -1420,7 +1420,7 @@ void MacroCircuit::solve()
 {
     try {
         m_logger->solve_optimize();
-        
+
         if(this->get_store_smt()){
             this->dump_smt_instance();
         }
@@ -1478,32 +1478,40 @@ void MacroCircuit::dump_smt_instance()
     out_file << "(set-option :produce-models true)" << std::endl;
     out_file << "(set-logic UFNIA)" << std::endl;
     out_file << *m_z3_opt;
+    size_t sol = 1;
 
-    if (m_layout->is_free_ux()){
-        out_file << "(get-value (" << m_layout->get_ux() << "))" << std::endl;
-    }
-    if (m_layout->is_free_uy()){
-        out_file << "(get-value (" << m_layout->get_uy() << "))" << std::endl;
-    }
+    do {
     
-    for (Terminal* t: m_terminals){
-        if (t->is_free()){
-            out_file << "(get-value (" << t->get_pos_x() << "))" << std::endl;
-            out_file << "(get-value (" << t->get_pos_y() << "))" << std::endl;
+        if (m_layout->is_free_ux()){
+            out_file << "(get-value (" << m_layout->get_ux() << "))" << std::endl;
         }
-    }
-    for(Component* c: m_components){
-        if (c->is_free()){
-            out_file << "(get-value (" << c->get_lx() << "))" << std::endl;
-            out_file << "(get-value (" << c->get_ly() << "))" << std::endl;
-            out_file << "(get-value (" << c->get_orientation() << "))" << std::endl;
-            
-            for (Pin* p: c->get_pins()){
-                out_file << "(get-value (" << p->get_pin_pos_x() << "))" << std::endl;
-                out_file << "(get-value (" << p->get_pin_pos_y() << "))" << std::endl;
+        if (m_layout->is_free_uy()){
+            out_file << "(get-value (" << m_layout->get_uy() << "))" << std::endl;
+        }
+        
+        for (Terminal* t: m_terminals){
+            if (t->is_free()){
+                out_file << "(get-value (" << t->get_pos_x() << "))" << std::endl;
+                out_file << "(get-value (" << t->get_pos_y() << "))" << std::endl;
             }
         }
-    }
+        for(Component* c: m_components){
+            if (c->is_free()){
+                out_file << "(get-value (" << c->get_lx() << "))" << std::endl;
+                out_file << "(get-value (" << c->get_ly() << "))" << std::endl;
+                out_file << "(get-value (" << c->get_orientation() << "))" << std::endl;
+                
+                for (Pin* p: c->get_pins()){
+                    out_file << "(get-value (" << p->get_pin_pos_x() << "))" << std::endl;
+                    out_file << "(get-value (" << p->get_pin_pos_y() << "))" << std::endl;
+                }
+            }
+        }
+        sol++;
+        if (sol <= this->get_max_solutions()){
+            out_file << "(check-sat)" << std::endl;
+        }
+    } while(sol <= this->get_max_solutions());
     
     out_file.close();
 }
@@ -1614,9 +1622,8 @@ void MacroCircuit::encode_hpwl_length()
             notimplemented_check();
         }
         
-        z3::expr hpwl = this->euclidean_distance(from_x, from_y, to_x, to_y);
+        z3::expr hpwl = this->manhattan_distance(from_x, from_y, to_x, to_y);
         if (edge->get_weight() > 1){
-          
             z3::expr cost = m_encode->get_value(edge->get_weight());
             z3::expr smt = hpwl * cost;
             clauses.push_back(smt);
@@ -1632,21 +1639,24 @@ void MacroCircuit::encode_hpwl_length()
     m_hpwl_cost_function = m_encode->mk_sum(clauses);
 }
 
-z3::expr MacroCircuit::euclidean_distance(z3::expr const & from_x,
-                                z3::expr const & from_y,
-                                z3::expr const & to_x,
-                                z3::expr const & to_y)
+/**
+ * @brief Calculate the Manhattan Distance between 2 Points in 2D System
+ * 
+ * @param from_x X Coordinate Point 1
+ * @param from_y Y Coordinate Point 1
+ * @param to_x X Coordinate Point 2
+ * @param to_y Y Coordinate Point 2
+ * @return z3::expr
+ */
+z3::expr MacroCircuit::manhattan_distance(z3::expr const & from_x,
+                                          z3::expr const & from_y,
+                                          z3::expr const & to_x,
+                                          z3::expr const & to_y)
 {
-    try {
-        // TODO Sqrt Function of Z3 seems to be over complicated for this job
-        z3::expr a = z3::abs(from_x - to_x);
-        z3::expr b = z3::abs(from_y - to_y);
-        
-        return a+b;
-    } catch (z3::exception const & exp){
-        std::cout << exp.msg() << std::endl;
-        assert (0);
-    }
+    z3::expr a = z3::abs(to_x - from_x);
+    z3::expr b = z3::abs(to_y - from_y);
+
+    return a+b;
 }
 
 /**
@@ -1768,7 +1778,7 @@ void MacroCircuit::solve_no_api()
     
     Utils::Utils::system_execute("z3", args, results_file, true);
     
-    std::map<std::string, size_t> key_value_results;
+    std::map<std::string, std::vector<size_t>> key_value_results;
     std::vector<std::string> z3_results;
     std::string line;
     std::ifstream results(results_file);
@@ -1776,9 +1786,7 @@ void MacroCircuit::solve_no_api()
         z3_results.push_back(line);
     }
     results.close();
-    
-    assert (this->get_max_solutions() == 1);
-    
+
     if (z3_results[0] == "sat"){
         
     } else if (z3_results[0] == "unsat"){
@@ -1795,9 +1803,19 @@ void MacroCircuit::solve_no_api()
     for (size_t i = 1; i < z3_results.size(); ++i){
         std::string line = z3_results[i];
         
+        if (line == "sat"){
+            m_solutions++;
+        } else if (line == "unsat"){
+            m_logger->unsat_solution();
+            break;
+        } else if (line == "unknown"){
+            m_logger->unknown_solution();
+            break;
+        }
+
         std::string opening = line.substr(0,2);
         std::string closing = line.substr(line.size() -2, 2);
-        
+
         if (opening == "((" && closing == "))"){
             std::string content = line.substr(2, line.size() - 2);
             content = content.substr(0, content.size() - 2);
@@ -1805,13 +1823,26 @@ void MacroCircuit::solve_no_api()
             std::string key = token[0];
             size_t val = std::stoi(token[1]);
             
-            key_value_results[key] = val;
+            key_value_results[key].push_back(val);
         }
     }
-    
-    size_t ux = key_value_results[m_layout->get_ux().to_string()];
-    size_t uy = key_value_results[m_layout->get_uy().to_string()];
-        
+
+    for (size_t i = 0; i < m_solutions; ++i){
+        this->process_key_value_results(key_value_results, i);
+    }
+}
+
+/**
+ * @brief Process a generated result
+ * 
+ * @param solution Results
+ * @param id ID to Process
+ */
+void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<size_t>> & solution, size_t const id)
+{
+    size_t ux = solution[m_layout->get_ux().to_string()][id];
+    size_t uy = solution[m_layout->get_uy().to_string()][id];
+
     double area_estimation = ux * uy;
     double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
     m_logger->result_die_area(area_estimation);
@@ -1826,8 +1857,8 @@ void MacroCircuit::solve_no_api()
         z3::expr clause_y = terminal->get_pos_y();
 
         if (this->get_free_terminals()){
-            size_t val_x = key_value_results[clause_x.to_string()];
-            size_t val_y = key_value_results[clause_y.to_string()];
+            size_t val_x = solution[clause_x.to_string()][id];
+            size_t val_y = solution[clause_y.to_string()][id];
 
             terminal->add_solution_pos_x(val_x);
             terminal->add_solution_pos_y(val_y);
@@ -1837,12 +1868,12 @@ void MacroCircuit::solve_no_api()
                                      val_y);
         }
     }
-    
-      for(Component* component: m_components){
 
-        size_t x = key_value_results[component->get_lx().to_string()];
-        size_t y = key_value_results[component->get_ly().to_string()];
-        eOrientation o = static_cast<eOrientation>(key_value_results[component->get_orientation().to_string()]);
+    for(Component* component: m_components){
+
+        size_t x = solution[component->get_lx().to_string()][id];
+        size_t y = solution[component->get_ly().to_string()][id];
+        eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
 
         component->add_solution_lx(x);
         component->add_solution_ly(y);
@@ -1858,8 +1889,8 @@ void MacroCircuit::solve_no_api()
                     z3::expr x = p->get_pin_pos_x();
                     z3::expr y = p->get_pin_pos_y();
 
-                    size_t x_pos = key_value_results[x.to_string()];
-                    size_t y_pos = key_value_results[y.to_string()];
+                    size_t x_pos = solution[x.to_string()][id];
+                    size_t y_pos = solution[y.to_string()][id];
 
                     p->add_solution_pin_pos_x(x_pos);
                     p->add_solution_pin_pos_y(y_pos);

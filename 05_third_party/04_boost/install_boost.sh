@@ -5,5 +5,5 @@ if [ ! -d boost_1_73_0 ]; then
     unzip boost_1_73_0.zip
     cd boost_1_73_0
     ./bootstrap.sh
-    ./b2 --prefix=../../../
+    ./b2 install --prefix=../..
 fi

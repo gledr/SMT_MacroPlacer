@@ -1776,8 +1776,9 @@ void MacroCircuit::solve_no_api()
     std::vector<std::string> args;
     args.push_back(smt_file);
     
+    std::cout << this->get_third_party_bin() << std::endl;
     Utils::Utils::system_execute("z3", args, results_file, true);
-    
+
     std::map<std::string, std::vector<size_t>> key_value_results;
     std::vector<std::string> z3_results;
     std::string line;

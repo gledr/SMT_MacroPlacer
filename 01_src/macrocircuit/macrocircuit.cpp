@@ -958,14 +958,18 @@ void MacroCircuit::run_encoding()
     }
 
     if (this->get_minimize_die_mode()){
+        //m_z3_opt->minimize(m_layout->get_ux() * m_layout->get_uy());
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
     }
 
     this->encode_hpwl_length();
     for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
-        m_z3_opt->minimize(m_hpwl_edges[i].simplify());
+    //    m_z3_opt->minimize(m_hpwl_edges[i].simplify());
     }
+    
+    m_z3_opt->minimize(m_hpwl_cost_function);
+    
 }
 
 /**

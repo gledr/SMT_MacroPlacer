@@ -156,6 +156,7 @@ private:
 
     void config_z3();
     void run_encoding();
+    void dump_minizinc();
 
     void encode_components_inside_die(eRotation const type);
     void encode_components_non_overlapping(eRotation const type);
@@ -165,7 +166,9 @@ private:
     void encode_hpwl_length();
 
     z3::expr m_components_non_overlapping;
+    std::vector<std::string> m_components_non_overlapping_constraints;
     z3::expr m_components_inside_die;
+    std::vector<std::string> m_components_inside_die_constraints;
     z3::expr m_terminals_on_frontier;
     z3::expr m_terminals_non_overlapping;
     z3::expr m_terminals_center_edge;

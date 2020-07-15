@@ -178,6 +178,24 @@ z3::expr Component::get_lx(eOrientation const orientation)
     }
 }
 
+std::stringstream Component::_get_lx(eOrientation const orientation)
+{
+    std::stringstream ret_val;
+    
+    if (orientation == eNorth){
+        ret_val << m_lx;
+    } else if (orientation == eWest){
+        ret_val << "(" << m_lx << " - " << m_height << ")";
+    } else if (orientation == eSouth){
+       ret_val << "(" << m_lx << " -" << m_width << ")";
+    } else if (orientation == eEast){
+       ret_val << m_lx;
+    } else {
+        notimplemented_check();
+    }
+    
+    return ret_val;
+}
 /**
  * @brief Get lxy coordinate depdending on component rotation
  * 
@@ -197,6 +215,24 @@ z3::expr Component::get_ly(eOrientation const orientation)
     } else {
         notimplemented_check();
     }
+}
+
+std::stringstream Component::_get_ly(eOrientation const orientation)
+{
+    std::stringstream ret_val;
+
+    if (orientation == eNorth){
+        ret_val << m_ly;
+    } else if (orientation == eWest){
+        ret_val << m_ly;
+    } else if (orientation == eSouth){
+        ret_val << "(" << m_ly << "-" << m_height << ")";
+    } else if (orientation == eEast){
+        ret_val << "(" << m_ly << "-" << m_width << ")";
+    } else {
+        notimplemented_check();
+    }
+    return ret_val;
 }
 
 /**
@@ -220,6 +256,25 @@ z3::expr Component::get_ux(eOrientation const orientation)
     }
 }
 
+std::stringstream Component::_get_ux(eOrientation const orientation)
+{
+    std::stringstream ret_val;
+    
+    if (orientation == eNorth){
+        ret_val << "(" << m_lx << "+" << m_width << ")";
+    } else if (orientation == eWest){
+        ret_val << m_lx;
+    } else if (orientation == eSouth){
+        ret_val << m_lx;
+    } else if (orientation == eEast){
+        ret_val << "(" << m_lx << "+" << m_height << ")";
+    } else {
+        notimplemented_check();
+    }
+    
+    return ret_val;
+}
+
 /**
  * @brief Get uy coordinate depdending on component rotation
  * 
@@ -239,6 +294,24 @@ z3::expr Component::get_uy(eOrientation const orientation)
     } else {
         notimplemented_check();
     }
+}
+
+std::stringstream Component::_get_uy(eOrientation const orientation)
+{
+    std::stringstream ret_val;
+
+    if (orientation == eNorth){
+        ret_val << "(" << m_ly << "+" << m_height << ")";
+    } else if (orientation == eWest){
+        ret_val << "(" << m_ly << "+" << m_width << ")";
+    } else if (orientation == eSouth){
+        ret_val << m_ly;
+    } else if (orientation == eEast){
+        ret_val << m_ly;
+    } else {
+        notimplemented_check();
+    }
+    return ret_val;
 }
 
 /**

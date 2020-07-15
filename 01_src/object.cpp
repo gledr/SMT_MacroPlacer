@@ -550,3 +550,8 @@ void Object::set_ini_file(std::string const & file)
 {
     m_ini_file = file;
 }
+
+std::string Object::get_third_party_bin()
+{
+    return this->get_base_path() + "/05_third_party/bin/";
+}

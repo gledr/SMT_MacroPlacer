@@ -175,6 +175,8 @@ protected:
     void set_base_path(std::string const & path);
     std::string get_base_path() const;
 
+    std::string get_third_party_bin();
+
     std::string orientation_to_string(eOrientation const orientation);
 
     void set_skip_power_network(bool const val);

@@ -21,6 +21,15 @@ if(DOXYGEN_FOUND)
         COMMENT "Generating API documentation with Doxygen" VERBATIM)
 endif(DOXYGEN_FOUND)
 
+option(PLACER_BUILD_Z3 
+    "Download and Build Z3 or use System wide installed Z3 version" ON)
+option(PLACER_BUILD_BOOST 
+    "Download and Build Boost or use System wide installed Boost version" ON)
+option(PLACER_BUILD_JSONCPP 
+    "Download and Build Jsoncpp or use System wide installed Jsoncpp version" ON)  
+option(PLACER_BUILD_SQLITE3
+    "Download and Build Sqlite3 or use System wide installed Sqlite3 version" ON)  
+    
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)

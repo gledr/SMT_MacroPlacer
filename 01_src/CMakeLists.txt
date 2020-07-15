@@ -1,10 +1,31 @@
-find_package(Boost 1.69 REQUIRED COMPONENTS program_options filesystem)
+
 find_package(Python2 COMPONENTS Development NumPy)
-find_package(PkgConfig REQUIRED)
 
-find_library(Z3_LIBRARIES NAMES z3 libz3)
 
-pkg_check_modules(JSONCPP jsoncpp)
+if(PLACER_BUILD_Z3)
+    set(Z3_LIBRARIES ${THIRD_PARTY_LIB}/libz3.so)
+else(PLACER_BUILD_Z3)
+    find_library(Z3_LIBRARIES NAMES z3 libz3)
+endif(PLACER_BUILD_Z3)
+
+if (PLACER_BUILD_BOOST)
+    set (Boost_LIBRARIES
+        ${THIRD_PARTY_LIB}/liboost_system.so
+        ${THIRD_PARTY_LIB}/liboost_filesystem.so
+        ${THIRD_PARTY_LIB}/liboost_program_options.so
+    )
+    set (Boost_INCLUDE_DIRS ${THIRD_PARTY_INCLUDE})
+else (PLACER_BUILD_BOOST)
+    find_package(Boost 1.69 REQUIRED COMPONENTS program_options filesystem)
+endif(PLACER_BUILD_BOOST)
+
+if (PLACER_BUILD_JSONCPP)
+    set (JSONCPP_INCLUDE_DIRS ${THIRD_PARTY_INCLUDE})
+    set (JSONCPP_LIBRARIES ${THIRD_PARTY_LIB}/libjsoncpp.so)
+else (PLACER_BUILD_JSONCPP)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(JSONCPP jsoncpp)
+endif(PLACER_BUILD_JSONCPP)
 
 add_definitions(-D_CPPUNWIND)
 
@@ -129,6 +150,21 @@ add_dependencies(smt_placer
     placer_utils
 )
 
+if(PLACER_BUILD_Z3)
+    add_dependencies(smt_placer build_z3)
+    add_dependencies(bookshelf_converter build_z3)
+endif(PLACER_BUILD_Z3)
+
+if (PLACER_BUILD_BOOST)
+    add_dependencies(smt_placer build_boost)
+    add_dependencies(bookshelf_converter build_boost)
+endif(PLACER_BUILD_BOOST)
+
+if (PLACER_BUILD_JSONCPP)
+    add_dependencies(smt_placer build_jsoncpp)
+    add_dependencies(bookshelf_converter build_jsoncpp)
+endif(PLACER_BUILD_JSONCPP)
+
 target_link_libraries(smt_placer PUBLIC
     ${Boost_LIBRARIES}
     Python2::Python
@@ -145,7 +181,7 @@ target_link_libraries(smt_placer PUBLIC
     pthread
     dl
     placer_utils
-    )
+)
 
 target_include_directories(smt_placer PRIVATE 
     ${Python2_INCLUDE_DIRS} 

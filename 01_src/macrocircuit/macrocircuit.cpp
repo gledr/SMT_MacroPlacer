@@ -958,14 +958,18 @@ void MacroCircuit::run_encoding()
     }
 
     if (this->get_minimize_die_mode()){
+        //m_z3_opt->minimize(m_layout->get_ux() * m_layout->get_uy());
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
     }
 
     this->encode_hpwl_length();
     for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
-        m_z3_opt->minimize(m_hpwl_edges[i].simplify());
+    //    m_z3_opt->minimize(m_hpwl_edges[i].simplify());
     }
+    
+    m_z3_opt->minimize(m_hpwl_cost_function);
+    
 }
 
 /**
@@ -1776,8 +1780,9 @@ void MacroCircuit::solve_no_api()
     std::vector<std::string> args;
     args.push_back(smt_file);
     
+    std::cout << this->get_third_party_bin() << std::endl;
     Utils::Utils::system_execute("z3", args, results_file, true);
-    
+
     std::map<std::string, std::vector<size_t>> key_value_results;
     std::vector<std::string> z3_results;
     std::string line;
@@ -1799,7 +1804,7 @@ void MacroCircuit::solve_no_api()
         assert (0);
     }
     m_solutions = 1;
-    
+
     for (size_t i = 1; i < z3_results.size(); ++i){
         std::string line = z3_results[i];
         

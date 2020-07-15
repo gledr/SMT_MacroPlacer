@@ -59,9 +59,10 @@ void Plotter::run()
         boost::filesystem::create_directories(this->get_image_directory());
     }
 
-    boost::filesystem::current_path(this->get_image_directory());
+    matplotlibcpp::backend("Agg"); // Set Agg backend for the case running
+                                   // on a workstation without X support
+                                   // http://antigrain.com/
 
-    matplotlibcpp::backend("Agg");
     matplotlibcpp::figure_size(800, 600);
 
     size_t die_lx = m_layout->get_lx().get_numeral_uint();

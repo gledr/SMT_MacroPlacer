@@ -2037,12 +2037,12 @@ void MacroCircuit::dump_minizinc()
 {
     std::ofstream file("file.mzn");
     
-    file << "var 0..4000: " << m_layout->get_ux() << ";" << std::endl;
-    file << "var 0..4000: " << m_layout->get_uy() << ";" << std::endl;
+    file << "var int: " << m_layout->get_ux() << ";" << std::endl;
+    file << "var int: " << m_layout->get_uy() << ";" << std::endl;
     
     for(Macro* m: m_macros){
-        file << "var 0..4000: " << m->get_lx() << ";" << std::endl;
-        file << "var 0..4000: " << m->get_ly() << ";" << std::endl;
+        file << "var int: " << m->get_lx() << ";" << std::endl;
+        file << "var int: " << m->get_ly() << ";" << std::endl;
         file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
     }
     
@@ -2052,6 +2052,8 @@ void MacroCircuit::dump_minizinc()
     for (auto itor: m_components_non_overlapping_constraints){
         file << itor << std::endl;
     }
-    
+    file << std::endl;
+    file << "var int: area = die_uy*die_ux;" << std::endl;
+    file << "solve minimize area;" << std::endl;
     file.close();
 }

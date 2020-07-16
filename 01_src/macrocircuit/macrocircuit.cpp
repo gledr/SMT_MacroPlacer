@@ -2035,14 +2035,19 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
 
 void MacroCircuit::dump_minizinc()
 {
+    size_t area = m_estimated_area;
+    double root = std::sqrt(area);
+    size_t up = static_cast<size_t>(std::ceil(root));
+    std::string range = "var 0.." + std::to_string(up) + ": ";
+    
     std::ofstream file("file.mzn");
     
-    file << "var int: " << m_layout->get_ux() << ";" << std::endl;
-    file << "var int: " << m_layout->get_uy() << ";" << std::endl;
+    file << range << m_layout->get_ux() << ";" << std::endl;
+    file << range << m_layout->get_uy() << ";" << std::endl;
     
     for(Macro* m: m_macros){
-        file << "var int: " << m->get_lx() << ";" << std::endl;
-        file << "var int: " << m->get_ly() << ";" << std::endl;
+        file << range << m->get_lx() << ";" << std::endl;
+        file << range << m->get_ly() << ";" << std::endl;
         file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
     }
     

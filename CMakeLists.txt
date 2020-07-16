@@ -22,13 +22,13 @@ if(DOXYGEN_FOUND)
 endif(DOXYGEN_FOUND)
 
 option(PLACER_BUILD_Z3 
-    "Download and Build Z3 or use System wide installed Z3 version" ON)
+    "Download and Build Z3 or use System wide installed Z3 version" OFF)
 option(PLACER_BUILD_BOOST 
-    "Download and Build Boost or use System wide installed Boost version" ON)
+    "Download and Build Boost or use System wide installed Boost version" OFF)
 option(PLACER_BUILD_JSONCPP 
-    "Download and Build Jsoncpp or use System wide installed Jsoncpp version" ON)  
+    "Download and Build Jsoncpp or use System wide installed Jsoncpp version" OFF)  
 option(PLACER_BUILD_SQLITE3
-    "Download and Build Sqlite3 or use System wide installed Sqlite3 version" ON)  
+    "Download and Build Sqlite3 or use System wide installed Sqlite3 version" OFF)  
     
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

@@ -86,7 +86,7 @@ add_library(placer_utils
 )
 
 target_link_libraries (placer_utils 
-    sqlite3
+    ${THIRD_PARTY_LIB}/libsqlite3.a
 )
 
 add_executable(smt_placer

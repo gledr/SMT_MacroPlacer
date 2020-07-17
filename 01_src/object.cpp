@@ -20,6 +20,7 @@ std::string Object::m_working_directory;
 std::string Object::m_results_directory;
 std::string Object::m_image_directory;
 std::string Object::m_smt_directory;
+std::string Object::m_mzn_directory;
 std::string Object::m_log_name;
 std::string Object::m_parquet_directory;
 std::string Object::m_bookshelf_file;
@@ -181,6 +182,16 @@ std::string Object::get_smt_directory() const
 void Object::set_smt_directory(std::string const & name)
 {
     m_smt_directory = m_results_directory + "/" + std::to_string(m_results_id) + "/" + name;
+}
+
+std::string Object::get_mzn_directory() const
+{
+    return m_mzn_directory;
+}
+
+void Object::set_mzn_directory(std::string const & name)
+{
+    m_mzn_directory = m_results_directory + "/" + std::to_string(m_results_id) + "/" + name;
 }
 
 std::string Object::get_log_name() const
@@ -554,4 +565,23 @@ void Object::set_ini_file(std::string const & file)
 std::string Object::get_third_party_bin()
 {
     return this->get_base_path() + "/05_third_party/bin/";
+}
+
+std::string Object::get_z3_bin()
+{
+#ifdef BUILD_Z3
+    return this->get_third_party_bin() + "/z3";
+# else 
+    return "z3";
+#endif
+}
+
+std::string Object::get_minizinc_bin()
+{
+    return this->get_third_party_bin() + "/minizinc";
+}
+
+std::string Object::get_or_tools_bin()
+{
+    return this->get_third_party_bin() + "/fzn-or-tools";
 }

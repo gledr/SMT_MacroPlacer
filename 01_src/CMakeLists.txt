@@ -4,6 +4,7 @@ find_package(Python2 COMPONENTS Development NumPy)
 
 if(PLACER_BUILD_Z3)
     set(Z3_LIBRARIES ${THIRD_PARTY_LIB}/libz3.so)
+    add_definitions(-DBUILD_Z3)   
 else(PLACER_BUILD_Z3)
     find_library(Z3_LIBRARIES NAMES z3 libz3)
 endif(PLACER_BUILD_Z3)
@@ -144,6 +145,7 @@ add_dependencies(smt_placer
     def
     lef
     build_kahypar
+    build_minizinc
     placer_config
     ABKCommon
     ParquetFP

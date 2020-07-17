@@ -989,8 +989,8 @@ void MacroCircuit::encode_components_inside_die(eRotation const type)
         z3::expr die_ly = m_layout->get_ly();
         z3::expr die_uy = m_layout->get_uy();
         
-        std::stringstream _die_lx; _die_lx << "0";
-        std::stringstream _die_ly; _die_ly << "0";
+        std::stringstream _die_lx; _die_lx << m_layout->get_lx();
+        std::stringstream _die_ly; _die_ly << m_layout->get_ly();
         std::stringstream _die_ux; _die_ux << m_layout->get_ux();
         std::stringstream _die_uy; _die_uy << m_layout->get_uy();
     
@@ -1359,6 +1359,7 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
                              z3::ite(is_WN, z3::mk_or(case_wn),
                              z3::ite(is_WW, z3::mk_or(case_ww), m_z3_ctx.bool_val(false)))));
                 } else if (type == eRotation::e4D){
+                    assert (0 && "Minizinc Not Implemented");
                     clause = z3::ite(is_NN, z3::mk_or(case_nn),
                              z3::ite(is_NW, z3::mk_or(case_nw),
                              z3::ite(is_NS, z3::mk_or(case_ns),

@@ -143,6 +143,7 @@ void MacroPlacer::read_configuration()
         this->set_results_id(this->existing_results() + 1);
         this->set_image_directory("images");
         this->set_smt_directory("smt");
+        this->set_mzn_directory("mzn");
         this->set_parquet_directory("parquet");
         this->set_log_name("placer.log");
         this->set_database_file("results.db");

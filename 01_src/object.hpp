@@ -72,6 +72,9 @@ protected:
     void set_smt_directory(std::string const & name);
     std::string get_smt_directory() const;
 
+    void set_mzn_directory(std::string const & name);
+    std::string get_mzn_directory() const;
+
     void set_verbose(bool const val);
     bool get_verbose() const;
 
@@ -185,6 +188,10 @@ protected:
     void set_ini_file(std::string const & file);
     std::string get_ini_file() const;
 
+    std::string get_z3_bin();
+    std::string get_minizinc_bin();
+    std::string get_or_tools_bin();
+
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
 
@@ -198,6 +205,7 @@ private:
     static std::string m_results_directory;
     static std::string m_image_directory;
     static std::string m_smt_directory;
+    static std::string m_mzn_directory;
     static std::string m_parquet_directory;
     static std::string m_log_name;
     static std::string m_bookshelf_file;

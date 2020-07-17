@@ -156,7 +156,7 @@ private:
 
     void config_z3();
     void run_encoding();
-    void dump_minizinc();
+
 
     void encode_components_inside_die(eRotation const type);
     void encode_components_non_overlapping(eRotation const type);
@@ -187,7 +187,16 @@ private:
     void solve_no_api();
     void process_results(z3::model const & m);
     void dump_smt_instance();
-    void process_key_value_results(std::map<std::string, std::vector<size_t>> & solution, size_t const id);
+    void process_key_value_results(std::map<std::string,
+                                   std::vector<size_t>> & solution,
+                                   size_t const id);
+    
+    /**
+     * Minizinc Solving
+     */
+    void dump_minizinc_instance();
+    void solve_minizinc();
+    
 
 };
 

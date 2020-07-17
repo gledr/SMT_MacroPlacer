@@ -300,12 +300,23 @@ void MacroCircuit::encode()
         std::copy(m_macros.begin(), m_macros.end(), std::back_inserter(m_components));
     }
     
+     if (this->get_minimize_die_mode()){
+        m_layout->set_lx(0);
+        m_layout->set_ly(0);
+        m_layout->free_uy();
+        m_layout->free_ux();
+    }
+
+    
     if (this->get_parquet_fp()){
         this->encode_parquet();
+    } else if (this->get_minizinc_mode()){
+         m_logger->use_minizinc();
+         this->run_encoding();
     } else {
         this->encode_smt();
+        this->run_encoding();
     }
-    this->dump_minizinc();
 }
 
 /**
@@ -325,15 +336,7 @@ void MacroCircuit::encode_parquet()
  */
 void MacroCircuit::encode_smt()
 {
-    if (this->get_minimize_die_mode()){
-        m_layout->set_lx(0);
-        m_layout->set_ly(0);
-        m_layout->free_uy();
-        m_layout->free_ux();
-    }
-
     this->config_z3();
-    this->run_encoding();
 }
 
 /**
@@ -342,15 +345,20 @@ void MacroCircuit::encode_smt()
 void MacroCircuit::place()
 {
     m_timer->start_timer("total");
-    
+
     if (this->get_parquet_fp()){
         m_parquet->run_parquet();
         m_parquet->data_from_parquet();
         m_parquet->store_bookshelf_results();
         m_solutions = 1;
+    } else if (this->get_minizinc_mode()){
+        this->solve_minizinc();
     } else {
-        this->solve_no_api();
-        //this->solve();
+        if (this->get_z3_api_mode()){
+            this->solve();
+        } else {
+            this->solve_no_api();
+        }
     }
 
     m_timer->stop_timer("total");
@@ -1908,9 +1916,9 @@ void MacroCircuit::solve_no_api()
 
     std::vector<std::string> args;
     args.push_back(smt_file);
-    
-    std::cout << this->get_third_party_bin() << std::endl;
-    Utils::Utils::system_execute("z3", args, results_file, true);
+
+    std::string z3_bin = this->get_z3_bin();
+    Utils::Utils::system_execute(z3_bin, args, results_file, true);
 
     std::map<std::string, std::vector<size_t>> key_value_results;
     std::vector<std::string> z3_results;
@@ -1924,7 +1932,7 @@ void MacroCircuit::solve_no_api()
     if (z3_results[0] == "sat"){
         
     } else if (z3_results[0] == "unsat"){
-         m_logger->unsat_solution();
+        m_logger->unsat_solution();
         exit(0);
     } else if (z3_results[0] == "unknown"){
         m_logger->unknown_solution();
@@ -1972,7 +1980,9 @@ void MacroCircuit::solve_no_api()
  * @param solution Results
  * @param id ID to Process
  */
-void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<size_t>> & solution, size_t const id)
+void MacroCircuit::process_key_value_results(std::map<std::string,
+                                             std::vector<size_t>> & solution,
+                                             size_t const id)
 {
     size_t ux = solution[m_layout->get_ux().to_string()][id];
     size_t uy = solution[m_layout->get_uy().to_string()][id];
@@ -1986,20 +1996,22 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
     m_layout->set_solution_uy(uy);
     m_logger->add_solution_layout(ux, uy);
     
-    for (Terminal* terminal: m_terminals){
-        z3::expr clause_x = terminal->get_pos_x();
-        z3::expr clause_y = terminal->get_pos_y();
+    if (!this->get_minizinc_mode()){ // Not Implemented
+        for (Terminal* terminal: m_terminals){
+            z3::expr clause_x = terminal->get_pos_x();
+            z3::expr clause_y = terminal->get_pos_y();
 
-        if (this->get_free_terminals()){
-            size_t val_x = solution[clause_x.to_string()][id];
-            size_t val_y = solution[clause_y.to_string()][id];
+            if (this->get_free_terminals()){
+                size_t val_x = solution[clause_x.to_string()][id];
+                size_t val_y = solution[clause_y.to_string()][id];
 
-            terminal->add_solution_pos_x(val_x);
-            terminal->add_solution_pos_y(val_y);
+                terminal->add_solution_pos_x(val_x);
+                terminal->add_solution_pos_y(val_y);
 
-            m_logger->place_terminal(terminal->get_name(),
-                                     val_x,
-                                     val_y);
+                m_logger->place_terminal(terminal->get_name(),
+                                        val_x,
+                                        val_y);
+            }
         }
     }
 
@@ -2015,43 +2027,54 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
 
         m_logger->place_macro(component->get_id(), x ,y, o);
 
-        //if (this->get_minimize_hpwl_mode()){
-            std::vector<Pin*> pins = component->get_pins();
+        if (!this->get_minizinc_mode()){
+            //if (this->get_minimize_hpwl_mode()){
+                std::vector<Pin*> pins = component->get_pins();
 
-            for (Pin* p: pins){
-                if (p->is_free()){
-                    z3::expr x = p->get_pin_pos_x();
-                    z3::expr y = p->get_pin_pos_y();
+                for (Pin* p: pins){
+                    if (p->is_free()){
+                        z3::expr x = p->get_pin_pos_x();
+                        z3::expr y = p->get_pin_pos_y();
 
-                    size_t x_pos = solution[x.to_string()][id];
-                    size_t y_pos = solution[y.to_string()][id];
+                        size_t x_pos = solution[x.to_string()][id];
+                        size_t y_pos = solution[y.to_string()][id];
 
-                    p->add_solution_pin_pos_x(x_pos);
-                    p->add_solution_pin_pos_y(y_pos);
+                        p->add_solution_pin_pos_x(x_pos);
+                        p->add_solution_pin_pos_y(y_pos);
+                    }
                 }
-            }
-        //}
+            //}
+        }
     }
 }
 
-void MacroCircuit::dump_minizinc()
+/**
+ * @brief Export Minizinc Constraints to Filesystem
+ */
+void MacroCircuit::dump_minizinc_instance()
 {
+    if(!boost::filesystem::exists(this->get_mzn_directory())){
+        boost::filesystem::create_directories(this->get_mzn_directory());
+    }
+    boost::filesystem::current_path(this->get_mzn_directory());
+
     size_t area = m_estimated_area;
     double root = std::sqrt(area);
-    size_t up = static_cast<size_t>(std::ceil(root));
+    size_t up = 2 * static_cast<size_t>(std::ceil(root));
     std::string range = "var 0.." + std::to_string(up) + ": ";
-    
-    std::ofstream file("file.mzn");
-    
+
+    std::string mzn_file = "top_" + this->get_design_name() + ".mzn";
+    std::ofstream file(mzn_file);
+
     file << range << m_layout->get_ux() << ";" << std::endl;
     file << range << m_layout->get_uy() << ";" << std::endl;
-    
+
     for(Macro* m: m_macros){
         file << range << m->get_lx() << ";" << std::endl;
         file << range << m->get_ly() << ";" << std::endl;
         file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
     }
-    
+
     for (auto itor: m_components_inside_die_constraints){
         file << itor << std::endl;
     }
@@ -2062,4 +2085,84 @@ void MacroCircuit::dump_minizinc()
     file << "var int: area = die_uy*die_ux;" << std::endl;
     file << "solve minimize area;" << std::endl;
     file.close();
+}
+
+/**
+ * @brief Solve Minizinc Problem using an Flatzinc Backend
+ */
+void MacroCircuit::solve_minizinc()
+{
+    if(!boost::filesystem::exists(this->get_mzn_directory())){
+        boost::filesystem::create_directories(this->get_mzn_directory());
+    }
+    boost::filesystem::current_path(this->get_mzn_directory());
+
+    this->dump_minizinc_instance();
+    std::string mzn_file = "top_" + this->get_design_name() + ".mzn";
+    std::string fzn_file = "top_" + this->get_design_name() + ".fzn";
+    std::string results_file = "results_top" + this->get_design_name() + ".txt";
+
+    // Step 1 Flatten Minizinc File
+    std::vector<std::string> cmd_args;
+    cmd_args.push_back("-c");
+    cmd_args.push_back(mzn_file);
+
+    Utils::Utils::system_execute(this->get_minizinc_bin(), cmd_args, "", true);
+
+    if (!boost::filesystem::exists(fzn_file)){
+        throw PlacerException("Can not find *.fzn file!");
+    }
+    size_t threads = std::thread::hardware_concurrency();
+    m_logger->detected_cores(threads);
+
+    assertion_check(threads > 0);
+
+    /* Keep One Thread Alive for Operation System */
+    if (threads > 1){
+        threads -= 1;
+    }
+
+    cmd_args.clear();
+    cmd_args.push_back("-threads");
+    cmd_args.push_back(std::to_string(threads));
+    cmd_args.push_back("-time_limit");
+    cmd_args.push_back(std::to_string(this->get_timeout()));
+    cmd_args.push_back(fzn_file);
+
+    Utils::Utils::system_execute(this->get_or_tools_bin(),
+                                 cmd_args,
+                                 results_file,
+                                 true);
+
+    if (!boost::filesystem::exists(results_file)){
+        throw PlacerException("Can not find minizinc results file!");
+    }
+
+    std::string line;
+    std::vector<std::string> results_content;
+    std::ifstream results(results_file);
+
+    while(std::getline(results, line)){
+        results_content.push_back(line);
+    }
+    results.close();
+
+    if (results_content[0] == "%% TIMEOUT"){
+        std::cout << "timeout" << std::endl;
+        exit(0);
+    } else if (results_content[0] == "=====UNSATISFIABLE====="){
+        m_logger->unsat_solution();
+        exit(0);
+    } else {
+        std::map<std::string, std::vector<size_t>> key_value_results;
+
+        for (auto itor: results_content){
+            std::string remove_semicolon = itor.substr(0, itor.size() -1);
+            std::vector<std::string> token = Utils::Utils::tokenize(remove_semicolon, " = ");
+
+            key_value_results[token[0]].push_back(std::stoi(token[1]));
+        }
+        m_solutions = 1;
+        this->process_key_value_results(key_value_results, 0);
+    }
 }

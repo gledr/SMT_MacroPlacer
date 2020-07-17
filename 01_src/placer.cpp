@@ -65,6 +65,7 @@ void MacroPlacer::read_configuration()
             (CMD_STORE_SMT,       CMD_STORE_SMT_TEXT)
             (CMD_PARETO,          CMD_PARETO_TEXT)
             (CMD_LEX,             CMD_LEX_TEXT)
+            (CMD_MINIZINC,        CMD_MINIZINC_TEXT)
             (CMD_PARQUET,         CMD_PARQUET_TEXT)
             (CMD_PARTITION,       CMD_PARTITION_TEXT)
             (CMD_MIN_AREA,        CMD_MIN_AREA_TEXT)
@@ -79,6 +80,7 @@ void MacroPlacer::read_configuration()
             (CMD_SUPPLEMENT,      po::value<std::string>(),                              CMD_SUPPLEMENT_TEXT)
             (CMD_SITE,            po::value<std::string>(),                              CMD_SITE_TEXT)
             (CMD_TIMEOUT,         po::value<size_t>()->default_value(60),                CMD_TIMEOUT_TEXT)
+            (CMD_Z3_API,          po::value<bool>()->default_value(false),               CMD_Z3_API_TEXT)
             (CMD_SOLUTIONS,       po::value<size_t>()->default_value(1),                 CMD_SOLUTIONS_TEXT)
             (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT);
 
@@ -220,11 +222,17 @@ void MacroPlacer::handle_configuration()
     if(m_vm.count(CMD_SUPPLEMENT)){
         this->set_supplement(m_vm[CMD_SUPPLEMENT].as<std::string>());
     }
+    if (m_vm.count(CMD_Z3_API)){
+        this->set_z3_api_mode(m_vm[CMD_Z3_API].as<bool>());
+    }
     if(m_vm.count(CMD_PARETO)){
         this->set_pareto_optimizer(true);
     }
     if(m_vm.count(CMD_LEX)){
         this->set_lex_optimizer(true);
+    }
+    if(m_vm.count(CMD_MINIZINC)){
+        this->set_minizinc_mode(true);
     }
     if(m_vm.count(CMD_PARTITION)){
         this->set_partitioning(true);

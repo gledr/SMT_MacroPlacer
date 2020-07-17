@@ -210,9 +210,9 @@ void Logger::use_lex_optimizer ()
     LOG(eInfo) << "Using Lex Optimization";
 }
 
-void Logger::use_box_optimizer ()
+void Logger::use_minizinc()
 {
-    LOG(eInfo) << "Using Box Optimization";
+    LOG(eInfo) << "Using Minizinc Backend";
 }
 
 void Logger::pareto_step()
@@ -579,4 +579,12 @@ void Logger::write_lef(std::string const & filename)
 void Logger::write_def(std::string const & filename)
 {
     LOG(eInfo) << std::string("Writing DEF file " + filename);
+}
+
+void Logger::detected_cores(size_t const val)
+{
+    std::stringstream msg;
+    msg << "Detected " << std::to_string(val) << " CPU Threads";
+    
+    LOG(eInfo) << msg.str();
 }

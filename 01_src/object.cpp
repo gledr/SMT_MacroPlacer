@@ -42,8 +42,10 @@ bool Object::m_save_best = false;
 bool Object::m_dump_all = false;
 bool Object::m_dump_best = false;
 bool Object::m_store_smt = false;
+bool Object::m_z3_api_mode = false;
 bool Object::m_pareto_optimizer = false;
 bool Object::m_lex_optimizer = false;
+bool Object::m_minizinc_mode = false;
 bool Object::m_partitioning = false;
 bool Object::m_parquet_fp = false;
 bool Object::m_free_terminals = false;
@@ -364,6 +366,16 @@ void Object::set_bitwidth_orientation(size_t const bitwidth)
     m_bitwidth_orientation = bitwidth;
 }
 
+bool Object::get_z3_api_mode() const
+{
+    return m_z3_api_mode;
+}
+
+void Object::set_z3_api_mode(bool const val)
+{
+    m_z3_api_mode = val;
+}
+
 bool Object::get_pareto_optimizer() const
 {
     return m_pareto_optimizer;
@@ -392,6 +404,16 @@ bool Object::get_parquet_fp() const
 void Object::set_parquet_fp(bool const val)
 {
     m_parquet_fp = val;
+}
+
+bool Object::get_minizinc_mode() const
+{
+    return m_minizinc_mode;
+}
+
+void Object::set_minizinc_mode(bool const val)
+{
+    m_minizinc_mode = val;
 }
 
 size_t Object::get_results_id() const

@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 # Generted File! Do not modify!
-# Tue Jun 16 09:57:15 2020
+# Fri Jul 17 10:13:59 2020
 #
 
 #
@@ -33,6 +33,7 @@ local cur
 			--store-smt \
 			--pareto \
 			--lex \
+			--minizinc \
 			--parquet \
 			--partition \
 			--minimize-area \
@@ -47,6 +48,7 @@ local cur
 			--supplement \
 			--site \
 			--timeout \
+			--Z3_API \
 			--solutions \
 			--ini \
 			' -- $cur ) );;

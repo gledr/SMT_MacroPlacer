@@ -64,6 +64,11 @@ namespace Placer {
     constexpr const char CMD_SUPPLEMENT_TEXT[] 
         = "JSON File holding additional information";
 
+    constexpr const char CMD_Z3_API[] 
+        = "Z3_API";
+    constexpr const char CMD_Z3_API_TEXT[] 
+        = "Use Z3 based on API";
+        
     constexpr const char CMD_PARETO[] 
         = "pareto";
     constexpr const char CMD_PARETO_TEXT[] 
@@ -73,6 +78,11 @@ namespace Placer {
         = "lex";
     constexpr const char CMD_LEX_TEXT[] 
         = "Utilize Z3s Lex Optimizer";
+
+    constexpr const char CMD_MINIZINC[] 
+        = "minizinc";
+    constexpr const char CMD_MINIZINC_TEXT[] 
+        = "Utilize Minizinc Encoding";
 
     constexpr const char CMD_PARQUET[] 
         = "parquet";

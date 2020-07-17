@@ -133,6 +133,9 @@ protected:
     void set_bitwidth_orientation(size_t const bitwidth);
     size_t get_bitwidth_orientation() const;
 
+    void set_z3_api_mode(bool const val);
+    bool get_z3_api_mode() const;
+
     void set_pareto_optimizer(bool const val);
     bool get_pareto_optimizer() const;
 
@@ -141,6 +144,9 @@ protected:
 
     void set_parquet_fp(bool const val);
     bool get_parquet_fp() const;
+
+    void set_minizinc_mode(bool const val);
+    bool get_minizinc_mode() const;
 
     void set_results_id(size_t const id);
     size_t get_results_id() const;
@@ -228,9 +234,11 @@ private:
     static bool m_dump_all;
     static bool m_dump_best;
     static bool m_store_smt;
+    static bool m_z3_api_mode;
     static bool m_pareto_optimizer;
     static bool m_lex_optimizer;
     static bool m_parquet_fp;
+    static bool m_minizinc_mode;
     static bool m_partitioning;
     static bool m_free_terminals;
     static bool m_strip_terminals;

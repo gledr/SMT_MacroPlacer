@@ -90,7 +90,7 @@ public:
 
     void use_pareto_optimizer();
     void use_lex_optimizer();
-    void use_box_optimizer();
+    void use_minizinc();
 
     void encode_int();
     void encode_bv();
@@ -170,6 +170,8 @@ public:
 
     void write_lef(std::string const & filename);
     void write_def(std::string const & filename);
+
+    void detected_cores(size_t const val);
 
 private:
     Logger();

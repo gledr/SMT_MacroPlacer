@@ -407,13 +407,68 @@ z3::expr Component::is_E()
     return m_orientation == m_encode->get_value(eEast);
 }
 
+/**
+ * @brief 
+ * 
+ * @return std::string
+ */
+std::string Component::_is_N()
+{
+    std::stringstream builder;
+    builder << m_orientation << " == " << std::to_string(eNorth);
+    
+    return builder.str();
+}
+
+/**
+ * @brief 
+ * 
+ * @return std::string
+ */
+std::string Component::_is_W()
+{
+    std::stringstream builder;
+    builder << m_orientation << " == " << std::to_string(eWest);
+    
+    return builder.str();
+}
+
+/**
+ * @brief 
+ * 
+ * @return std::string
+ */
+std::string Component::_is_S()
+{
+    assert (0);
+}
+
+/**
+ * @brief 
+ * 
+ * @return std::string
+ */
+std::string Component::_is_E()
+{
+    assert (0);
+}
+
+/**
+ * @brief 
+ * 
+ * @return size_t
+ */
 size_t Component::get_lx_numeral()
 {
     return m_lx.get_numeral_uint();
 }
 
+/**
+ * @brief 
+ * 
+ * @return size_t
+ */
 size_t Component::get_ly_numeral()
 {
     return m_ly.get_numeral_uint();
 }
-

@@ -11,9 +11,9 @@ endif(PLACER_BUILD_Z3)
 
 if (PLACER_BUILD_BOOST)
     set (Boost_LIBRARIES
-        ${THIRD_PARTY_LIB}/liboost_system.so
-        ${THIRD_PARTY_LIB}/liboost_filesystem.so
-        ${THIRD_PARTY_LIB}/liboost_program_options.so
+        ${THIRD_PARTY_LIB}/libboost_system.so
+        ${THIRD_PARTY_LIB}/libboost_filesystem.so
+        ${THIRD_PARTY_LIB}/libboost_program_options.so
     )
     set (Boost_INCLUDE_DIRS ${THIRD_PARTY_INCLUDE})
 else (PLACER_BUILD_BOOST)
@@ -155,6 +155,7 @@ add_dependencies(smt_placer
 if(PLACER_BUILD_Z3)
     add_dependencies(smt_placer build_z3)
     add_dependencies(bookshelf_converter build_z3)
+    add_dependencies(placer_utils build_z3)
 endif(PLACER_BUILD_Z3)
 
 if (PLACER_BUILD_BOOST)

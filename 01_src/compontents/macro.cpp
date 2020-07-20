@@ -491,6 +491,7 @@ void Macro::encode_pins_non_overlapping()
 void Macro::encode_pins_center_of_macro(eRotation const rotation)
 {
     z3::expr_vector clauses(m_z3_ctx);
+    std::vector<std::string> _clauses;
 
     for(auto _pin: m_pins){
         Pin* pin = _pin.second;
@@ -499,11 +500,25 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
         z3::expr_vector case_n(m_z3_ctx);
         case_n.push_back(pin->get_pin_pos_x() == (m_lx + (m_width/2)));
         case_n.push_back(pin->get_pin_pos_y() == (m_ly + (m_height/2)));
+        
+        std::vector<std::string> _case_n;
+        std::stringstream c; c << "( " << pin->get_pin_pos_x() << " == ( " << m_lx << " + ( " << m_width << "/2)))";
+        std::stringstream d; d << "( " << pin->get_pin_pos_y() << " == ( " << m_ly << " + ( " << m_height << "/2)))";
+        
+        _case_n.push_back(c.str());
+        _case_n.push_back(d.str());
 ///}}}
 ///{{{  Case W
         z3::expr_vector case_w(m_z3_ctx);
         case_w.push_back(pin->get_pin_pos_x() == (m_lx - (m_height/2)));
         case_w.push_back(pin->get_pin_pos_y() == (m_ly + (m_width/2)));
+        
+        std::vector<std::string> _case_w;
+        std::stringstream a; a << "(" << pin->get_pin_pos_x() << " == (" << m_lx << " -(" << m_height << "/2)))";
+        std::stringstream b; a << "(" << pin->get_pin_pos_y() << " == (" << m_lx << " -(" << m_width << "/2)))";
+        
+        _case_w.push_back(a.str());
+        _case_w.push_back(b.str());
 ///}}}
 ///{{{  Case S
         z3::expr_vector case_s(m_z3_ctx);
@@ -516,7 +531,7 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
         case_e.push_back(pin->get_pin_pos_y() == (m_ly - (m_width/2)));
 ///}}}
         if (rotation == e4D){
-
+            assert (0 && "Not Implemented");
             z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
                             z3::ite(this->is_W(), z3::mk_and(case_w),
                             z3::ite(this->is_S(), z3::mk_and(case_s),
@@ -524,14 +539,29 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
                                     m_z3_ctx.bool_val(false)))));
             clauses.push_back(clause);
         } else if (rotation == e2D){
-              z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
+            z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
                             z3::ite(this->is_W(), z3::mk_and(case_w), m_z3_ctx.bool_val(false)));
             clauses.push_back(clause);
+            
+            std::stringstream _case_N_and;
+            std::stringstream _case_W_and;
+            _case_N_and << "(" << _case_n[0] << " /\\ " << _case_n[1] << ")";
+                            
+            _case_W_and << "(" << _case_w[0] << " /\\ " << _case_w[1] << ")";
+            
+            std::stringstream _ite;
+            _ite << "if " << this->is_N() << " then " << _case_N_and.str() << " else " << _case_W_and.str() << " endif";
+            _clauses.push_back(_ite.str());
         } else {
             assert (0);
         }
     }
     m_encode_pins_center_of_macro = z3::mk_and(clauses);
+    
+    for (auto itor: clauses){
+        m_encode_pins_center_of_macro_clauses += itor;
+        m_encode_pins_center_of_macro_clauses += ":";
+    }
 }
 
 /**

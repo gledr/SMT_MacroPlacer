@@ -292,7 +292,7 @@ void MacroCircuit::encode()
     if (this->get_minimize_hpwl_mode()){
         std::cout << Utils::Utils::get_bash_string_blink_red("Minimize HPWL Mode") << std::endl;
     }
-    
+
     // TODO Mixture of Macros, Partitions and Cells
     if (this->get_partitioning()){
         std::copy(m_partitons.begin(), m_partitons.end(), std::back_inserter(m_components));
@@ -300,14 +300,13 @@ void MacroCircuit::encode()
         std::copy(m_macros.begin(), m_macros.end(), std::back_inserter(m_components));
     }
     
-     if (this->get_minimize_die_mode()){
+    if (this->get_minimize_die_mode()){
         m_layout->set_lx(0);
         m_layout->set_ly(0);
         m_layout->free_uy();
         m_layout->free_ux();
     }
 
-    
     if (this->get_parquet_fp()){
         this->encode_parquet();
     } else if (this->get_minizinc_mode()){

@@ -60,6 +60,11 @@ public:
     z3::expr is_S();
     z3::expr is_E();
 
+    std::string _is_N();
+    std::string _is_W();
+    std::string _is_S();
+    std::string _is_E();
+
     bool has_solution(size_t const id);
 
     void add_solution_lx(size_t const lx);

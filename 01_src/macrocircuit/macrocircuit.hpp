@@ -172,13 +172,21 @@ private:
     z3::expr m_terminals_on_frontier;
     z3::expr m_terminals_non_overlapping;
     z3::expr m_terminals_center_edge;
+    std::string m_terminals_center_edge_constraints;
     z3::expr m_hpwl_cost_function;
+    std::string m_hpwl_cost_function_constraints;
     z3::expr_vector m_hpwl_edges;
 
     z3::expr manhattan_distance(z3::expr const & from_x,
                                 z3::expr const & from_y,
                                 z3::expr const & to_x,
                                 z3::expr const & to_y);
+    
+    std::string _manhattan_distance(std::string const & from_x,
+                                    std::string const & from_y,
+                                    std::string const & to_x,
+                                    std::string const & to_y);
+
 
     /**
      * SMT Solving

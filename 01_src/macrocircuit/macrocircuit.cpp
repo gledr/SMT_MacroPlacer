@@ -1463,49 +1463,108 @@ void MacroCircuit::encode_terminals_on_frontier()
 void MacroCircuit::encode_terminals_center_edge()
 {
     z3::expr_vector clauses(m_z3_ctx);
+    std::vector<std::string> _clauses;
 
     z3::expr n_x = m_layout->get_ux() / 2;
     z3::expr n_y = m_layout->get_uy();
 
+    std::stringstream _n_x; _n_x << m_layout->get_ux() << "/2";
+    std::stringstream _n_y; _n_y << m_layout->get_uy();
+
     z3::expr w_x = m_layout->get_lx();
     z3::expr w_y = m_layout->get_uy() / 2;
 
-    z3::expr s_x = m_layout->get_lx();
-    z3::expr s_y = m_layout->get_uy() / 2;
+    std::stringstream _w_x; _w_x << m_layout->get_lx();
+    std::stringstream _w_y; _w_y << m_layout->get_uy() << "/2";
+
+    z3::expr s_x = m_layout->get_ux() / 2;
+    z3::expr s_y = m_layout->get_ly();
+
+    std::stringstream _s_x; _s_x << m_layout->get_ux() << "/2/";
+    std::stringstream _s_y; _s_y << m_layout->get_ly();
 
     z3::expr e_x = m_layout->get_ux();
     z3::expr e_y = m_layout->get_uy() / 2;
 
+    std::stringstream _e_x; _s_x << m_layout->get_ux();
+    std::stringstream _e_y; _s_y << m_layout->get_uy() << "/2";
+
     for (Terminal* t: m_terminals){
         z3::expr_vector clause(m_z3_ctx);
+        std::vector<std::string> _clause;
         z3::expr x = t->get_pos_x();
         z3::expr y = t->get_pos_y();
+        std::stringstream _x; _x << t->get_pos_x();
+        std::stringstream _y; _y << t->get_pos_y();
 
         z3::expr_vector n(m_z3_ctx);
         z3::expr_vector w(m_z3_ctx);
         z3::expr_vector s(m_z3_ctx);
         z3::expr_vector e(m_z3_ctx);
+        
+        std::vector<std::string> _n;
+        std::vector<std::string> _w;
+        std::vector<std::string> _s;
+        std::vector<std::string> _e;
 
         n.push_back(x == n_x);
         n.push_back(y == n_y);
 
+        _n.push_back(_x.str() + " == " + _n_x.str());
+        _n.push_back(_y.str() + " == " + _n_y.str());
+
         w.push_back(x == w_x);
         w.push_back(y == w_y);
 
+        _w.push_back(_x.str() + " == " + _w_x.str());
+        _w.push_back(_y.str() + " == " + _w_y.str());
+
         s.push_back(x == s_x);
         s.push_back(y == s_y);
+        
+        _s.push_back(_x.str() + " == " + _s_x.str());
+        _s.push_back(_y.str() + " == " + _s_y.str());
 
         e.push_back(x == e_x);
         e.push_back(y == e_y);
 
+        _e.push_back(_x.str() + " == " + _e_x.str());
+        _e.push_back(_y.str() + " == " + _e_y.str());
+
+        std::stringstream and_n; and_n << "(" << _n[0] << " /\\ " << _n[1] << ")";
+        std::stringstream and_w; and_w << "(" << _w[0] << " /\\ " << _w[1] << ")";
+        std::stringstream and_s; and_s << "(" << _s[0] << " /\\ " << _s[1] << ")";
+        std::stringstream and_e; and_e << "(" << _e[0] << " /\\ " << _e[1] << ")";
+        
         clause.push_back(z3::mk_and(n));
         clause.push_back(z3::mk_and(w));
         clause.push_back(z3::mk_and(s));
         clause.push_back(z3::mk_and(e));
 
         clauses.push_back(z3::mk_or(clause));
+        
+        std::stringstream cases;
+        cases << "( " << and_n.str() << " \/ "
+                      << and_w.str() << " \/ "
+                      << and_s.str() << " \/ "
+                      << and_e.str() << " )";
+                      
+        _clauses.push_back(cases.str());
     }
+    std::stringstream builder;
+    if (_clauses.size() == 1){
+        assert (0);
+    } else {
+       
+        builder << "(";
+        for (size_t i = 0; i < _clauses.size()-1; ++i){
+            builder << _clauses[i] << " /\\ ";
+        }
+        builder << clauses[clauses.size()] << ")";
+    }
+    
     m_terminals_center_edge = z3::mk_and(clauses);
+    m_terminals_center_edge_constraints = builder.str();
 }
 
 /**
@@ -1705,6 +1764,7 @@ void MacroCircuit::results_to_db()
 void MacroCircuit::encode_hpwl_length()
 {
     z3::expr_vector clauses(m_z3_ctx);
+    std::vector<std::string> _clauses;
 
     for (Edge* edge: m_tree->get_edges()){
         
@@ -1722,15 +1782,22 @@ void MacroCircuit::encode_hpwl_length()
 
         z3::expr from_x = m_encode->get_value(0);
         z3::expr from_y = m_encode->get_value(0);
+        std::stringstream _from_x;
+        std::stringstream _from_y;
 
         z3::expr to_x = m_encode->get_value(0);
         z3::expr to_y = m_encode->get_value(0);
+        std::stringstream _to_x;
+        std::stringstream _to_y;
 
         if (from->is_terminal()){
             Terminal* t = from->get_terminal();
             nullpointer_check(t);
             from_x = t->get_pos_x();
             from_y = t->get_pos_y();
+            
+            _from_x << t->get_pos_x();
+            _from_y << t->get_pos_y();
         } else if (from->has_macro()){
             Macro* m = from->get_macro();
             nullpointer_check(m);
@@ -1739,6 +1806,8 @@ void MacroCircuit::encode_hpwl_length()
 
             from_x = p->get_pin_pos_x();
             from_y = p->get_pin_pos_y();
+            _from_x << p->get_pin_pos_x();
+            _from_y << p->get_pin_pos_y();
         } else {
             notimplemented_check();
         }
@@ -1749,6 +1818,9 @@ void MacroCircuit::encode_hpwl_length()
 
             to_x = t->get_pos_x();
             to_y = t->get_pos_y();
+            
+            _to_x << t->get_pos_x();
+            _to_y << t->get_pos_y();
         } else if (to->has_macro()){
             Macro* m = to->get_macro();
             nullpointer_check(m);
@@ -1758,17 +1830,25 @@ void MacroCircuit::encode_hpwl_length()
 
             to_x = p->get_pin_pos_x();
             to_y = p->get_pin_pos_y();
+            
+            _to_x << p->get_pin_pos_x();
+            _to_y << p->get_pin_pos_y();
         } else {
             notimplemented_check();
         }
         
         z3::expr hpwl = this->manhattan_distance(from_x, from_y, to_x, to_y);
+        std::string _hpwl = this->_manhattan_distance(_from_x.str(), _from_y.str(), _to_x.str(), _to_y.str());
         if (edge->get_weight() > 1){
             z3::expr cost = m_encode->get_value(edge->get_weight());
+            std::string _cost = std::to_string(edge->get_weight());
+            std::string zinc = _hpwl + "*" + _cost;
             z3::expr smt = hpwl * cost;
             clauses.push_back(smt);
+            _clauses.push_back(zinc);
         } else {
             clauses.push_back(hpwl);
+            _clauses.push_back(_hpwl);
         }
     }
 
@@ -1777,6 +1857,19 @@ void MacroCircuit::encode_hpwl_length()
     }
 
     m_hpwl_cost_function = m_encode->mk_sum(clauses);
+
+    if (_clauses.size() == 1){
+        assert (0);
+    } else {
+        std::stringstream builder;
+        builder << "(";
+        
+        for(size_t i = 0; i < _clauses.size() -1; ++i){
+            builder << _clauses[i] << "+ ";
+        }
+        builder << _clauses[_clauses.size()] << ")";
+        m_hpwl_cost_function_constraints = builder.str();
+    }
 }
 
 /**
@@ -1796,6 +1889,26 @@ z3::expr MacroCircuit::manhattan_distance(z3::expr const & from_x,
     z3::expr a = z3::abs(to_x - from_x);
     z3::expr b = z3::abs(to_y - from_y);
 
+    return a+b;
+}
+
+/**
+ * @brief ...
+ * 
+ * @param from_x p_from_x:...
+ * @param from_y p_from_y:...
+ * @param to_x p_to_x:...
+ * @param to_y p_to_y:...
+ * @return std::string
+ */
+std::string MacroCircuit::_manhattan_distance(std::string const & from_x,
+                                              std::string const & from_y,
+                                              std::string const & to_x,
+                                              std::string const & to_y)
+{
+    std::string a = "abs(" + to_x + "-" + from_x + ")";
+    std::string b = "abs(" + to_y + "-" + from_y + ")";
+    
     return a+b;
 }
 

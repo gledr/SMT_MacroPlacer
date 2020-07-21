@@ -1462,109 +1462,114 @@ void MacroCircuit::encode_terminals_on_frontier()
  */
 void MacroCircuit::encode_terminals_center_edge()
 {
-    z3::expr_vector clauses(m_z3_ctx);
-    std::vector<std::string> _clauses;
+    try {
+        z3::expr_vector clauses(m_z3_ctx);
+        std::vector<std::string> _clauses;
 
-    z3::expr n_x = m_layout->get_ux() / 2;
-    z3::expr n_y = m_layout->get_uy();
+        z3::expr n_x = m_layout->get_ux() / 2;
+        z3::expr n_y = m_layout->get_uy();
 
-    std::stringstream _n_x; _n_x << m_layout->get_ux() << "/2";
-    std::stringstream _n_y; _n_y << m_layout->get_uy();
+        std::stringstream _n_x; _n_x << m_layout->get_ux() << "/2";
+        std::stringstream _n_y; _n_y << m_layout->get_uy();
 
-    z3::expr w_x = m_layout->get_lx();
-    z3::expr w_y = m_layout->get_uy() / 2;
+        z3::expr w_x = m_layout->get_lx();
+        z3::expr w_y = m_layout->get_uy() / 2;
 
-    std::stringstream _w_x; _w_x << m_layout->get_lx();
-    std::stringstream _w_y; _w_y << m_layout->get_uy() << "/2";
+        std::stringstream _w_x; _w_x << m_layout->get_lx();
+        std::stringstream _w_y; _w_y << m_layout->get_uy() << "/2";
 
-    z3::expr s_x = m_layout->get_ux() / 2;
-    z3::expr s_y = m_layout->get_ly();
+        z3::expr s_x = m_layout->get_ux() / 2;
+        z3::expr s_y = m_layout->get_ly();
 
-    std::stringstream _s_x; _s_x << m_layout->get_ux() << "/2/";
-    std::stringstream _s_y; _s_y << m_layout->get_ly();
+        std::stringstream _s_x; _s_x << m_layout->get_ux() << "/2/";
+        std::stringstream _s_y; _s_y << m_layout->get_ly();
 
-    z3::expr e_x = m_layout->get_ux();
-    z3::expr e_y = m_layout->get_uy() / 2;
+        z3::expr e_x = m_layout->get_ux();
+        z3::expr e_y = m_layout->get_uy() / 2;
 
-    std::stringstream _e_x; _s_x << m_layout->get_ux();
-    std::stringstream _e_y; _s_y << m_layout->get_uy() << "/2";
+        std::stringstream _e_x; _s_x << m_layout->get_ux();
+        std::stringstream _e_y; _s_y << m_layout->get_uy() << "/2";
 
-    for (Terminal* t: m_terminals){
-        z3::expr_vector clause(m_z3_ctx);
-        std::vector<std::string> _clause;
-        z3::expr x = t->get_pos_x();
-        z3::expr y = t->get_pos_y();
-        std::stringstream _x; _x << t->get_pos_x();
-        std::stringstream _y; _y << t->get_pos_y();
+        for (Terminal* t: m_terminals){
+            z3::expr_vector clause(m_z3_ctx);
+            std::vector<std::string> _clause;
+            z3::expr x = t->get_pos_x();
+            z3::expr y = t->get_pos_y();
+            std::stringstream _x; _x << t->get_pos_x();
+            std::stringstream _y; _y << t->get_pos_y();
 
-        z3::expr_vector n(m_z3_ctx);
-        z3::expr_vector w(m_z3_ctx);
-        z3::expr_vector s(m_z3_ctx);
-        z3::expr_vector e(m_z3_ctx);
-        
-        std::vector<std::string> _n;
-        std::vector<std::string> _w;
-        std::vector<std::string> _s;
-        std::vector<std::string> _e;
+            z3::expr_vector n(m_z3_ctx);
+            z3::expr_vector w(m_z3_ctx);
+            z3::expr_vector s(m_z3_ctx);
+            z3::expr_vector e(m_z3_ctx);
+            
+            std::vector<std::string> _n;
+            std::vector<std::string> _w;
+            std::vector<std::string> _s;
+            std::vector<std::string> _e;
 
-        n.push_back(x == n_x);
-        n.push_back(y == n_y);
+            n.push_back(x == n_x);
+            n.push_back(y == n_y);
 
-        _n.push_back(_x.str() + " == " + _n_x.str());
-        _n.push_back(_y.str() + " == " + _n_y.str());
+            _n.push_back(_x.str() + " == " + _n_x.str());
+            _n.push_back(_y.str() + " == " + _n_y.str());
 
-        w.push_back(x == w_x);
-        w.push_back(y == w_y);
+            w.push_back(x == w_x);
+            w.push_back(y == w_y);
 
-        _w.push_back(_x.str() + " == " + _w_x.str());
-        _w.push_back(_y.str() + " == " + _w_y.str());
+            _w.push_back(_x.str() + " == " + _w_x.str());
+            _w.push_back(_y.str() + " == " + _w_y.str());
 
-        s.push_back(x == s_x);
-        s.push_back(y == s_y);
-        
-        _s.push_back(_x.str() + " == " + _s_x.str());
-        _s.push_back(_y.str() + " == " + _s_y.str());
+            s.push_back(x == s_x);
+            s.push_back(y == s_y);
+            
+            _s.push_back(_x.str() + " == " + _s_x.str());
+            _s.push_back(_y.str() + " == " + _s_y.str());
 
-        e.push_back(x == e_x);
-        e.push_back(y == e_y);
+            e.push_back(x == e_x);
+            e.push_back(y == e_y);
 
-        _e.push_back(_x.str() + " == " + _e_x.str());
-        _e.push_back(_y.str() + " == " + _e_y.str());
+            _e.push_back(_x.str() + " == " + _e_x.str());
+            _e.push_back(_y.str() + " == " + _e_y.str());
 
-        std::stringstream and_n; and_n << "(" << _n[0] << " /\\ " << _n[1] << ")";
-        std::stringstream and_w; and_w << "(" << _w[0] << " /\\ " << _w[1] << ")";
-        std::stringstream and_s; and_s << "(" << _s[0] << " /\\ " << _s[1] << ")";
-        std::stringstream and_e; and_e << "(" << _e[0] << " /\\ " << _e[1] << ")";
-        
-        clause.push_back(z3::mk_and(n));
-        clause.push_back(z3::mk_and(w));
-        clause.push_back(z3::mk_and(s));
-        clause.push_back(z3::mk_and(e));
+            std::stringstream and_n; and_n << "(" << _n[0] << " /\\ " << _n[1] << ")";
+            std::stringstream and_w; and_w << "(" << _w[0] << " /\\ " << _w[1] << ")";
+            std::stringstream and_s; and_s << "(" << _s[0] << " /\\ " << _s[1] << ")";
+            std::stringstream and_e; and_e << "(" << _e[0] << " /\\ " << _e[1] << ")";
+            
+            clause.push_back(z3::mk_and(n));
+            clause.push_back(z3::mk_and(w));
+            clause.push_back(z3::mk_and(s));
+            clause.push_back(z3::mk_and(e));
 
-        clauses.push_back(z3::mk_or(clause));
-        
-        std::stringstream cases;
-        cases << "( " << and_n.str() << " \/ "
-                      << and_w.str() << " \/ "
-                      << and_s.str() << " \/ "
-                      << and_e.str() << " )";
-                      
-        _clauses.push_back(cases.str());
-    }
-    std::stringstream builder;
-    if (_clauses.size() == 1){
-        assert (0);
-    } else {
-       
-        builder << "(";
-        for (size_t i = 0; i < _clauses.size()-1; ++i){
-            builder << _clauses[i] << " /\\ ";
+            clauses.push_back(z3::mk_or(clause));
+            
+            std::stringstream cases;
+            cases << "( " << and_n.str() << " \/ "
+                        << and_w.str() << " \/ "
+                        << and_s.str() << " \/ "
+                        << and_e.str() << " )";
+                        
+            _clauses.push_back(cases.str());
         }
-        builder << clauses[clauses.size()] << ")";
+        std::stringstream builder;
+        if (_clauses.size() == 1){
+            assert (0);
+        } else {
+        
+            builder << "(";
+            for (size_t i = 0; i < _clauses.size()-1; ++i){
+                builder << _clauses[i] << " /\\ ";
+            }
+            builder << _clauses[_clauses.size()-1] << ")";
+        }
+        
+        m_terminals_center_edge = z3::mk_and(clauses);
+        m_terminals_center_edge_constraints = builder.str();
+    } catch (z3::exception const & exp){
+        std::cout << exp.msg() << std::endl;
+        assert (0);
     }
-    
-    m_terminals_center_edge = z3::mk_and(clauses);
-    m_terminals_center_edge_constraints = builder.str();
 }
 
 /**
@@ -1862,12 +1867,12 @@ void MacroCircuit::encode_hpwl_length()
         assert (0);
     } else {
         std::stringstream builder;
-        builder << "(";
+        builder << " ( ";
         
         for(size_t i = 0; i < _clauses.size() -1; ++i){
-            builder << _clauses[i] << "+ ";
+            builder << _clauses[i] << " + ";
         }
-        builder << _clauses[_clauses.size()] << ")";
+        builder << _clauses[_clauses.size()-1] << " ) ";
         m_hpwl_cost_function_constraints = builder.str();
     }
 }
@@ -1906,10 +1911,10 @@ std::string MacroCircuit::_manhattan_distance(std::string const & from_x,
                                               std::string const & to_x,
                                               std::string const & to_y)
 {
-    std::string a = "abs(" + to_x + "-" + from_x + ")";
-    std::string b = "abs(" + to_y + "-" + from_y + ")";
+    std::string a = "abs( " + to_x + " - " + from_x + " )";
+    std::string b = "abs( " + to_y + " - " + from_y + " )";
     
-    return a+b;
+    return a + " + " + b;
 }
 
 /**
@@ -2177,14 +2182,27 @@ void MacroCircuit::dump_minizinc_instance()
 
     std::string mzn_file = "top_" + this->get_design_name() + ".mzn";
     std::ofstream file(mzn_file);
-
+    
+    file << "% File has been exported by SMT_MacroPlacer" << std::endl;
+    file << "% Do not modify!" << std::endl;
+    file << "% " << Utils::Utils::get_current_time() << std::endl;
+    file << std::endl;
     file << range << m_layout->get_ux() << ";" << std::endl;
     file << range << m_layout->get_uy() << ";" << std::endl;
-
+    
     for(Macro* m: m_macros){
         file << range << m->get_lx() << ";" << std::endl;
         file << range << m->get_ly() << ";" << std::endl;
         file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
+        
+        for (Pin* p: m->get_pins()){
+            file << range << p->get_pin_pos_x() << ";" << std::endl;
+            file << range << p->get_pin_pos_y() << ";" << std::endl;
+        }
+    }
+    for(Terminal* t: m_terminals){
+        file << range << t->get_pos_x() << ";" << std::endl;
+        file << range << t->get_pos_y() << ";" << std::endl;
     }
 
     for (auto itor: m_components_inside_die_constraints){
@@ -2193,9 +2211,9 @@ void MacroCircuit::dump_minizinc_instance()
     for (auto itor: m_components_non_overlapping_constraints){
         file << itor << std::endl;
     }
-    file << std::endl;
+    file << "var int: hpwl = " << m_hpwl_cost_function_constraints << ";" << std::endl;
     file << "var int: area = die_uy*die_ux;" << std::endl;
-    file << "solve minimize area;" << std::endl;
+    file << "solve minimize area+hpwl;" << std::endl;
     file.close();
 }
 

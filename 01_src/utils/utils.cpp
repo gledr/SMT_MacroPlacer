@@ -83,7 +83,8 @@ int Utils::system_execute(std::string const & binary,
                           bool wait_for_termination)
 {
     try {
-        boost::process::ipstream pipe_stream;
+        boost::process::ipstream cout_stream;
+        boost::process::ipstream cerr_stream;
         boost::filesystem::path bin_url(binary);
         
         if(binary.find("/") == std::string::npos){
@@ -106,10 +107,11 @@ int Utils::system_execute(std::string const & binary,
             std::string line;
             boost::process::child bin(bin_url,
                                       boost::process::args(args),
-                                      boost::process::std_out > pipe_stream);
+                                      boost::process::std_out > cout_stream,
+                                      boost::process::std_err > cerr_stream);
             pid = bin.id();
 
-            while (pipe_stream && std::getline(pipe_stream, line) && !line.empty()){
+            while (cout_stream && std::getline(cout_stream, line) && !line.empty()){
                 log << line << std::endl;
             }
 

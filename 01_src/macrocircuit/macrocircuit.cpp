@@ -1922,23 +1922,10 @@ std::string MacroCircuit::_manhattan_distance(std::string const & from_x,
  */
 void MacroCircuit::create_statistics()
 {
-    return;
-    if (this->get_minimize_die_mode()){
-        auto all_area = m_eval->all_area();
-        
-        for (auto itor: all_area){
-            std::cout << "Statistics Area: " << std::endl;
-            std::cout << itor.first << ": " << itor.second << std::endl;
-        }
-    }
-    if (this->get_minimize_hpwl_mode()){
-        auto all_hpwl = m_eval->all_hpwl();
-        
-        for (auto itor: all_hpwl){
-            std::cout << "Statistics HPWL: " << std::endl;
-            std::cout << itor.first << ": " << itor.second << std::endl;
-        }
-    }
+    auto best_area = m_eval->best_area();
+    auto best_hpwl = m_eval->best_hpwl();
+
+    std::cout << "HPWL: " << best_hpwl.first << " " << best_hpwl.second << std::endl;
 }
 
 /**
@@ -2211,9 +2198,13 @@ void MacroCircuit::dump_minizinc_instance()
     for (auto itor: m_components_non_overlapping_constraints){
         file << itor << std::endl;
     }
+    for (Macro* m: m_macros){
+        file << m->_get_pin_constraints() << std::endl;
+    }
     file << "var int: hpwl = " << m_hpwl_cost_function_constraints << ";" << std::endl;
     file << "var int: area = die_uy*die_ux;" << std::endl;
-    file << "solve minimize area+hpwl;" << std::endl;
+    file << "var int: costfunction = area+hpwl;";
+    file << "solve minimize costfunction;" << std::endl;
     file.close();
 }
 
@@ -2255,8 +2246,10 @@ void MacroCircuit::solve_minizinc()
     cmd_args.clear();
     cmd_args.push_back("-threads");
     cmd_args.push_back(std::to_string(threads));
-    cmd_args.push_back("-time_limit");
-    cmd_args.push_back(std::to_string(this->get_timeout()));
+    if (this->get_timeout() != 0){
+        cmd_args.push_back("-time_limit");
+        cmd_args.push_back(std::to_string(this->get_timeout()));
+    }
     cmd_args.push_back(fzn_file);
 
     Utils::Utils::system_execute(this->get_or_tools_bin(),

@@ -416,7 +416,7 @@ std::string Component::_is_N()
 {
     std::stringstream builder;
     builder << m_orientation << " == " << std::to_string(eNorth);
-    
+
     return builder.str();
 }
 

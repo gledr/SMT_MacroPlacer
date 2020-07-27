@@ -270,6 +270,7 @@ void Macro::encode_pins()
     if (this->get_minimize_die_mode()){
         this->encode_pins_center_of_macro(e2D);
         clauses.push_back(m_encode_pins_center_of_macro.simplify());
+        
     } else if (this->get_minimize_hpwl_mode()){
         this->encode_pins_on_macro_frontier(e2D);
         clauses.push_back(m_encode_pin_macro_frontier.simplify());
@@ -293,6 +294,7 @@ void Macro::encode_pins()
     } else {
         m_pin_constraints =  z3::mk_and(clauses);
     }
+    m_pin_constraints_clauses = "constraint " + m_encode_pins_center_of_macro_clauses + ";";
 }
 
 /**
@@ -514,8 +516,8 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
         case_w.push_back(pin->get_pin_pos_y() == (m_ly + (m_width/2)));
         
         std::vector<std::string> _case_w;
-        std::stringstream a; a << "(" << pin->get_pin_pos_x() << " == (" << m_lx << " -(" << m_height << "/2)))";
-        std::stringstream b; a << "(" << pin->get_pin_pos_y() << " == (" << m_lx << " -(" << m_width << "/2)))";
+        std::stringstream a; a << "(" << pin->get_pin_pos_x() << " == (" << m_lx << " - (" << m_height << "/2)))";
+        std::stringstream b; b << "(" << pin->get_pin_pos_y() << " == (" << m_lx << " - (" << m_width << "/2)))";
         
         _case_w.push_back(a.str());
         _case_w.push_back(b.str());
@@ -550,7 +552,7 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
             _case_W_and << "(" << _case_w[0] << " /\\ " << _case_w[1] << ")";
             
             std::stringstream _ite;
-            _ite << "if " << this->is_N() << " then " << _case_N_and.str() << " else " << _case_W_and.str() << " endif";
+            _ite << "if " << this->_is_N() << " then " << _case_N_and.str() << " else " << _case_W_and.str() << " endif";
             _clauses.push_back(_ite.str());
         } else {
             assert (0);
@@ -558,9 +560,9 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
     }
     m_encode_pins_center_of_macro = z3::mk_and(clauses);
     
-    for (auto itor: clauses){
+    for (auto itor: _clauses){
         m_encode_pins_center_of_macro_clauses += itor;
-        m_encode_pins_center_of_macro_clauses += ":";
+        //m_encode_pins_center_of_macro_clauses += ":"; // FIXME Was ist der doppelpunkt?
     }
 }
 
@@ -572,6 +574,11 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
 z3::expr Macro::get_pin_constraints()
 {
     return m_pin_constraints;
+}
+
+std::string Macro::_get_pin_constraints()
+{
+    return m_pin_constraints_clauses;
 }
 
 /**

@@ -71,6 +71,7 @@ public:
 
     void encode_pins();
     z3::expr get_pin_constraints();
+    std::string _get_pin_constraints();
 
 private:
     std::map<std::string, Pin*> m_pins;

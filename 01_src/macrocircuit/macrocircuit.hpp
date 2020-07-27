@@ -157,7 +157,6 @@ private:
     void config_z3();
     void run_encoding();
 
-
     void encode_components_inside_die(eRotation const type);
     void encode_components_non_overlapping(eRotation const type);
     void encode_terminals_on_frontier();
@@ -181,12 +180,10 @@ private:
                                 z3::expr const & from_y,
                                 z3::expr const & to_x,
                                 z3::expr const & to_y);
-    
     std::string _manhattan_distance(std::string const & from_x,
                                     std::string const & from_y,
                                     std::string const & to_x,
                                     std::string const & to_y);
-
 
     /**
      * SMT Solving

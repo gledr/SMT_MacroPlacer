@@ -93,7 +93,14 @@ void Plotter::run()
         size_t width = cmp->get_width().get_numeral_uint();
         size_t height = cmp->get_height().get_numeral_uint();
 
-        size_t o  = cmp->get_solution_orientation(m_solution_id);
+        size_t o = 0;
+        z3::expr tmp = cmp->get_orientation();
+
+        if (!tmp.is_arith()){
+            o = tmp.get_numeral_uint();
+        } else {
+            o  = cmp->get_solution_orientation(m_solution_id);
+        }
         size_t lx = cmp->get_solution_lx(m_solution_id);
         size_t ly = cmp->get_solution_ly(m_solution_id);
         std::string id = cmp->get_id();
@@ -213,9 +220,10 @@ void Plotter::draw_terminal(Terminal* t)
  */
 void Plotter::draw_pin(Component* parent, Pin* pin)
 {
+    try {
     nullpointer_check(pin);
     nullpointer_check(parent);
-    
+
     size_t x_pos = 0;
     size_t y_pos = 0;
     size_t lx = 0;
@@ -234,8 +242,14 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
             return;
         }
     }
-
-    eOrientation o = parent->get_solution_orientation(m_solution_id);
+    
+    eOrientation o = eNorth;
+    if (!parent->get_orientation().is_numeral()){
+        o = parent->get_solution_orientation(m_solution_id);
+    } else {
+        o = static_cast<eOrientation>(parent->get_orientation().get_numeral_uint());
+    }
+   
     if (o == eNorth){
         lx = parent->get_solution_lx(m_solution_id);
         ly = parent->get_solution_ly(m_solution_id);
@@ -295,6 +309,11 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
     }
 
     matplotlibcpp::scatter(x,y,50);
+
+    } catch (z3::exception const & exp){
+        std::cout << exp.msg() << std::endl;
+        exit(0);
+    }
 }
 
 /**

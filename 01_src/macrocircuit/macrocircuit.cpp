@@ -1898,12 +1898,12 @@ z3::expr MacroCircuit::manhattan_distance(z3::expr const & from_x,
 }
 
 /**
- * @brief ...
+ * @brief Calculate Manhattan Distance for Minizinc
  * 
- * @param from_x p_from_x:...
- * @param from_y p_from_y:...
- * @param to_x p_to_x:...
- * @param to_y p_to_y:...
+ * @param from_x X Coordinate Point 1
+ * @param from_y Y Coordinate Point 1
+ * @param to_x X Coordinate Point 2
+ * @param to_y Y Coordinate Point 2
  * @return std::string
  */
 std::string MacroCircuit::_manhattan_distance(std::string const & from_x,
@@ -1922,10 +1922,10 @@ std::string MacroCircuit::_manhattan_distance(std::string const & from_x,
  */
 void MacroCircuit::create_statistics()
 {
-    std::cout << "create statistics" << std::endl;
     auto best_area = m_eval->best_area();
     auto best_hpwl = m_eval->best_hpwl();
     std::cout << "HPWL: " << best_hpwl.first << " " << best_hpwl.second << std::endl;
+    std::cout << "Area: " << best_area.first << " " << best_area.second << std::endl;
 }
 
 /**
@@ -1963,25 +1963,21 @@ void MacroCircuit::process_results(z3::model const & m)
 
         m_logger->place_macro(component->get_id(), x ,y, o);
 
-        //if (this->get_minimize_hpwl_mode()){
-            std::vector<Pin*> pins = component->get_pins();
+        std::vector<Pin*> pins = component->get_pins();
 
-            for (Pin* p: pins){
-                //if (p->is_free()){
-                    z3::expr x = p->get_pin_pos_x();
-                    z3::expr y = p->get_pin_pos_y();
+        for (Pin* p: pins){
+            z3::expr x = p->get_pin_pos_x();
+            z3::expr y = p->get_pin_pos_y();
 
-                    z3::expr x_val = m.eval(x);
-                    z3::expr y_val = m.eval(y);
+            z3::expr x_val = m.eval(x);
+            z3::expr y_val = m.eval(y);
 
-                    size_t x_pos = x_val.get_numeral_uint();
-                    size_t y_pos = y_val.get_numeral_uint();
+            size_t x_pos = x_val.get_numeral_uint();
+            size_t y_pos = y_val.get_numeral_uint();
 
-                    p->add_solution_pin_pos_x(x_pos);
-                    p->add_solution_pin_pos_y(y_pos);
-                //}
-            }
-        //}
+            p->add_solution_pin_pos_x(x_pos);
+            p->add_solution_pin_pos_y(y_pos);
+        }
     }
 
     for (Terminal* terminal: m_terminals){
@@ -2099,36 +2095,36 @@ void MacroCircuit::process_key_value_results(std::map<std::string,
     m_layout->set_solution_ux(ux);
     m_layout->set_solution_uy(uy);
     m_logger->add_solution_layout(ux, uy);
-    
-    if (!this->get_minizinc_mode()){ // Not Implemented
-        for (Terminal* terminal: m_terminals){
-            z3::expr clause_x = terminal->get_pos_x();
-            z3::expr clause_y = terminal->get_pos_y();
 
-            if (this->get_free_terminals()){
-                size_t val_x = solution[clause_x.to_string()][id];
-                size_t val_y = solution[clause_y.to_string()][id];
+    for (Terminal* terminal: m_terminals){
+        z3::expr clause_x = terminal->get_pos_x();
+        z3::expr clause_y = terminal->get_pos_y();
 
-                terminal->add_solution_pos_x(val_x);
-                terminal->add_solution_pos_y(val_y);
+        if (this->get_free_terminals()){
+            size_t val_x = solution[clause_x.to_string()][id];
+            size_t val_y = solution[clause_y.to_string()][id];
 
-                m_logger->place_terminal(terminal->get_name(),
-                                        val_x,
-                                        val_y);
-            }
+            terminal->add_solution_pos_x(val_x);
+            terminal->add_solution_pos_y(val_y);
+
+            m_logger->place_terminal(terminal->get_name(),
+                                    val_x,
+                                    val_y);
         }
     }
 
     for(Component* component: m_components){
         size_t x = solution[component->get_lx().to_string()][id];
         size_t y = solution[component->get_ly().to_string()][id];
-        eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
-
+        
+        if (!component->get_orientation().is_numeral()){
+            eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
+            component->add_solution_orientation(o);
+        }
         component->add_solution_lx(x);
         component->add_solution_ly(y);
-        component->add_solution_orientation(o);
 
-        m_logger->place_macro(component->get_id(), x ,y, o);
+        m_logger->place_macro(component->get_id(), x ,y, eNorth);
 
         std::vector<Pin*> pins = component->get_pins();
 
@@ -2175,7 +2171,9 @@ void MacroCircuit::dump_minizinc_instance()
     for(Macro* m: m_macros){
         file << range << m->get_lx() << ";" << std::endl;
         file << range << m->get_ly() << ";" << std::endl;
-        file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
+        if (!m->get_orientation().is_numeral()){
+            file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
+        }
         
         for (Pin* p: m->get_pins()){
             file << range << p->get_pin_pos_x() << ";" << std::endl;

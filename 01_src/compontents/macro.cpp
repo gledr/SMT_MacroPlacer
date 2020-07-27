@@ -43,7 +43,7 @@ Macro::Macro(std::string const & name,
     m_ly = m_encode->get_constant(id + "_ly");
     m_width = m_encode->get_value(width);
     m_height = m_encode->get_value(height);
-    //m_orientation = m_encode->get_value(eWest);
+    //m_orientation = m_encode->get_value(eNorth);
     m_orientation = m_encode->get_constant(id + "_orientation");
     m_logger = Logger::getInstance();
 

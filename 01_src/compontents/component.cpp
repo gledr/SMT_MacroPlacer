@@ -348,9 +348,13 @@ size_t Component::get_solution_lx(size_t const id)
  */
 eOrientation Component::get_solution_orientation(size_t const id)
 {
-    assertion_check (id < m_sol_orientation.size());
+    if (!m_orientation.is_arith()){
+        return static_cast<eOrientation>(m_orientation.get_numeral_uint());
+    } else {
+        assertion_check (id < m_sol_orientation.size());
 
-    return m_sol_orientation[id];
+        return m_sol_orientation[id];
+    }
 }
 
 /**
@@ -362,7 +366,9 @@ eOrientation Component::get_solution_orientation(size_t const id)
 bool Component::has_solution(size_t const id)
 {
     assertion_check (m_sol_lx.size() == m_sol_ly.size());
-    assertion_check (m_sol_ly.size() == m_sol_orientation.size());
+    if (!m_orientation.is_const()){
+        assertion_check (m_sol_ly.size() == m_sol_orientation.size());
+    }
 
     return (m_sol_lx.size()) > id;
 }

@@ -497,15 +497,18 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
 
     for(auto _pin: m_pins){
         Pin* pin = _pin.second;
-            
+        
+        std::size_t _width = m_width.get_numeral_uint()/2;
+        std::size_t _height = m_height.get_numeral_uint()/2;
+        
 ///{{{  Case N
         z3::expr_vector case_n(m_z3_ctx);
         case_n.push_back(pin->get_pin_pos_x() == (m_lx + (m_width/2)));
         case_n.push_back(pin->get_pin_pos_y() == (m_ly + (m_height/2)));
         
         std::vector<std::string> _case_n;
-        std::stringstream c; c << "( " << pin->get_pin_pos_x() << " == ( " << m_lx << " + ( " << m_width << "/2)))";
-        std::stringstream d; d << "( " << pin->get_pin_pos_y() << " == ( " << m_ly << " + ( " << m_height << "/2)))";
+        std::stringstream c; c << "( " << pin->get_pin_pos_x() << " == ( " << m_lx << " + " << _width << "))";
+        std::stringstream d; d << "( " << pin->get_pin_pos_y() << " == ( " << m_ly << " + " << _height << "))";
         
         _case_n.push_back(c.str());
         _case_n.push_back(d.str());
@@ -516,8 +519,8 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
         case_w.push_back(pin->get_pin_pos_y() == (m_ly + (m_width/2)));
         
         std::vector<std::string> _case_w;
-        std::stringstream a; a << "(" << pin->get_pin_pos_x() << " == (" << m_lx << " - (" << m_height << "/2)))";
-        std::stringstream b; b << "(" << pin->get_pin_pos_y() << " == (" << m_lx << " - (" << m_width << "/2)))";
+        std::stringstream a; a << "(" << pin->get_pin_pos_x() << " == (" << m_lx << " - " << _height << "))";
+        std::stringstream b; b << "(" << pin->get_pin_pos_y() << " == (" << m_lx << " - " << _width << "))";
         
         _case_w.push_back(a.str());
         _case_w.push_back(b.str());

@@ -21,16 +21,16 @@ TRACKS X 190 DO 527 STEP 380 LAYER metal1 ;
 TRACKS Y 140 DO 720 STEP 280 LAYER metal1 ;
 
 COMPONENTS 10 ;
-- square01_ typeA ;
-- square02_ typeA ;
-- square03_ typeA ;
-- square04_ typeA ;
-- square05_ typeA ;
-- square06_ typeA ;
-- square07_ typeA ;
-- square08_ typeA ;
-- square09_ typeA ;
-- square10_ typeA ;
+- square01 typeA ;
+- square02 typeA ;
+- square03 typeA ;
+- square04 typeA ;
+- square05 typeA ;
+- square06 typeA ;
+- square07 typeA ;
+- square08 typeA ;
+- square09 typeA ;
+- square10 typeA ;
 END COMPONENTS
 
 PINS 2 ;
@@ -44,17 +44,17 @@ PINS 2 ;
 END PINS
 
 NETS 11 ;
-- in1_i ( PIN in1_i ) ( square01_ a ) ;
-- connect_0 ( square01_ o ) ( square02_ a ) ;
-- connect_1 ( square02_ o ) ( square03_ a ) ;
-- connect_2 ( square03_ o ) ( square04_ a ) ;
-- connect_3 ( square04_ o ) ( square05_ a ) ;
-- connect_4 ( square05_ o ) ( square06_ a ) ;
-- connect_5 ( square06_ o ) ( square07_ a ) ;
-- connect_6 ( square07_ o ) ( square08_ a ) ;
-- connect_7 ( square08_ o ) ( square09_ a ) ;
-- connect_8 ( square09_ o ) ( square10_ a ) ;
-- out_o ( PIN out_o ) ( square10_ o ) ;
+- in1_i ( PIN in1_i ) ( square01 a ) ;
+- connect_0 ( square01 o ) ( square02 a ) ;
+- connect_1 ( square02 o ) ( square03 a ) ;
+- connect_2 ( square03 o ) ( square04 a ) ;
+- connect_3 ( square04 o ) ( square05 a ) ;
+- connect_4 ( square05 o ) ( square06 a ) ;
+- connect_5 ( square06 o ) ( square07 a ) ;
+- connect_6 ( square07 o ) ( square08 a ) ;
+- connect_7 ( square08 o ) ( square09 a ) ;
+- connect_8 ( square09 o ) ( square10 a ) ;
+- out_o ( PIN out_o ) ( square10 o ) ;
 END NETS
 
 END DESIGN

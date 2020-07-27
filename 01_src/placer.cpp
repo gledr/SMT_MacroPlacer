@@ -46,125 +46,93 @@ MacroPlacer::~MacroPlacer()
  */
 void MacroPlacer::read_configuration()
 {
-    try {
-        namespace po = boost::program_options;
-        namespace fs = boost::filesystem;
+    namespace po = boost::program_options;
+    namespace fs = boost::filesystem;
 
-        std::string desc = "Usage: " + this->get_binary_name() + " [options]";
-        m_options_functions  = new po::options_description(desc);
+    std::string desc = "Usage: " + this->get_binary_name() + " [options]";
+    m_options_functions  = new po::options_description(desc);
 
-        m_options_functions->add_options()
-            (CMD_HELP,            CMD_HELP_TEXT)
-            (CMD_BASH_COMPLETION, CMD_BASH_COMPLETION)
-            (CMD_SAVE_BEST,       CMD_SAVE_BEST_TEXT)
-            (CMD_DUMP_BEST,       CMD_DUMP_BEST_TEXT)
-            (CMD_DUMP_ALL,        CMD_DUMP_ALL_TEXT)
-            (CMD_SAVE_ALL,        CMD_SAVE_ALL_TEXT)
-            (CMD_VERBOSE,         CMD_VERBOSE_TEXT)
-            (CMD_STORE_LOG,       CMD_STORE_LOG_TEXT)
-            (CMD_STORE_SMT,       CMD_STORE_SMT_TEXT)
-            (CMD_PARETO,          CMD_PARETO_TEXT)
-            (CMD_LEX,             CMD_LEX_TEXT)
-            (CMD_MINIZINC,        CMD_MINIZINC_TEXT)
-            (CMD_PARQUET,         CMD_PARQUET_TEXT)
-            (CMD_PARTITION,       CMD_PARTITION_TEXT)
-            (CMD_MIN_AREA,        CMD_MIN_AREA_TEXT)
-            (CMD_MIN_HPWL,        CMD_MIN_HPWL_TEXT)
-            (CMD_FREE_TERMINALS,  CMD_FREE_TERMINALS_TEXT)
-            (CMD_SKIP_PWR_SUPPLY, CMD_SKIP_PWR_SUPPLY_TEXT)
-            (CMD_PARTITION_SIZE,  po::value<size_t>(),                                   CMD_PARTITION_SIZE_TEXT)
-            (CMD_PARTITION_COUNT, po::value<size_t>(),                                   CMD_PARTITION_COUNT_TEXT)
-            (CMD_DEF,             po::value<std::string>(),                              CMD_DEF_TEXT)
-            (CMD_LEF,             po::value<std::string>(),                              CMD_LEF_TEXT)
-            (CMD_BOOKSHELF,       po::value<std::string>(),                              CMD_BOOKSHELF_TEXT)
-            (CMD_SUPPLEMENT,      po::value<std::string>(),                              CMD_SUPPLEMENT_TEXT)
-            (CMD_SITE,            po::value<std::string>(),                              CMD_SITE_TEXT)
-            (CMD_TIMEOUT,         po::value<size_t>()->default_value(60),                CMD_TIMEOUT_TEXT)
-            (CMD_Z3_API,          po::value<bool>()->default_value(false),               CMD_Z3_API_TEXT)
-            (CMD_SOLUTIONS,       po::value<size_t>()->default_value(1),                 CMD_SOLUTIONS_TEXT)
-            (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT);
+    m_options_functions->add_options()
+        (CMD_HELP,            CMD_HELP_TEXT)
+        (CMD_BASH_COMPLETION, CMD_BASH_COMPLETION)
+        (CMD_SAVE_BEST,       CMD_SAVE_BEST_TEXT)
+        (CMD_DUMP_BEST,       CMD_DUMP_BEST_TEXT)
+        (CMD_DUMP_ALL,        CMD_DUMP_ALL_TEXT)
+        (CMD_SAVE_ALL,        CMD_SAVE_ALL_TEXT)
+        (CMD_VERBOSE,         CMD_VERBOSE_TEXT)
+        (CMD_STORE_LOG,       CMD_STORE_LOG_TEXT)
+        (CMD_STORE_SMT,       CMD_STORE_SMT_TEXT)
+        (CMD_PARETO,          CMD_PARETO_TEXT)
+        (CMD_LEX,             CMD_LEX_TEXT)
+        (CMD_MINIZINC,        CMD_MINIZINC_TEXT)
+        (CMD_PARQUET,         CMD_PARQUET_TEXT)
+        (CMD_PARTITION,       CMD_PARTITION_TEXT)
+        (CMD_MIN_AREA,        CMD_MIN_AREA_TEXT)
+        (CMD_MIN_HPWL,        CMD_MIN_HPWL_TEXT)
+        (CMD_FREE_TERMINALS,  CMD_FREE_TERMINALS_TEXT)
+        (CMD_SKIP_PWR_SUPPLY, CMD_SKIP_PWR_SUPPLY_TEXT)
+        (CMD_PARTITION_SIZE,  po::value<size_t>(),                                   CMD_PARTITION_SIZE_TEXT)
+        (CMD_PARTITION_COUNT, po::value<size_t>(),                                   CMD_PARTITION_COUNT_TEXT)
+        (CMD_DEF,             po::value<std::string>(),                              CMD_DEF_TEXT)
+        (CMD_LEF,             po::value<std::string>(),                              CMD_LEF_TEXT)
+        (CMD_BOOKSHELF,       po::value<std::string>(),                              CMD_BOOKSHELF_TEXT)
+        (CMD_SUPPLEMENT,      po::value<std::string>(),                              CMD_SUPPLEMENT_TEXT)
+        (CMD_SITE,            po::value<std::string>(),                              CMD_SITE_TEXT)
+        (CMD_TIMEOUT,         po::value<size_t>()->default_value(60),                CMD_TIMEOUT_TEXT)
+        (CMD_Z3_API,          po::value<bool>()->default_value(false),               CMD_Z3_API_TEXT)
+        (CMD_SOLUTIONS,       po::value<size_t>()->default_value(1),                 CMD_SOLUTIONS_TEXT)
+        (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT);
 
-        // Top Level Priority: Command Line
-        // Second Level Priority: Local Ini File
-        // Commandline Overwrites Config File Arguments
-        po::command_line_parser parser(m_argc, m_argv);
-        parser.options(*m_options_functions).style(
-                po::command_line_style::default_style | 
-                po::command_line_style::allow_slash_for_short);
+    // Top Level Priority: Command Line
+    // Second Level Priority: Local Ini File
+    // Commandline Overwrites Config File Arguments
+    po::command_line_parser parser(m_argc, m_argv);
+    parser.options(*m_options_functions).style(
+            po::command_line_style::default_style | 
+            po::command_line_style::allow_slash_for_short);
 
-        po::parsed_options parsed_options1 = parser.run();
-        po::store(parsed_options1, m_vm);
-        
-        po::notify(m_vm);
-        this->handle_configuration();
-        
-        std::ifstream project_ini(this->get_ini_file());
-        po::store(po::parse_config_file(project_ini, *m_options_functions), m_vm);
-        project_ini.close();
+    po::parsed_options parsed_options1 = parser.run();
+    po::store(parsed_options1, m_vm);
 
-        po::notify(m_vm);
-        this->handle_configuration();
+    po::notify(m_vm);
+    this->handle_configuration();
 
-        if (!fs::exists(this->get_ini_file())){
-            delete m_options_functions; m_options_functions = nullptr;
-            throw std::runtime_error("Config File Not Found!!");
-        }
-        if((this->get_def().empty() || this->get_lef().empty()) &&
-           this->get_bookshelf_file().empty()){
-            delete m_options_functions; m_options_functions = nullptr;
-            throw std::runtime_error("No LEF/DEF or Bookshelf file has been specified!");
-        }
-        if(this->get_site().empty() &&
-           this->get_bookshelf_file().empty()){
-            delete m_options_functions; m_options_functions = nullptr;
-            throw std::runtime_error("Site has not been specified!");
-        }
-        if(!this->get_def().empty() &&
-           !fs::exists(this->get_def())){
-            delete m_options_functions; m_options_functions = nullptr;
-            throw std::runtime_error("Could not find DEF File!");
-        }
-        if(!this->get_bookshelf_file().empty() &&
-            !fs::exists(this->get_bookshelf_file())){
-                delete m_options_functions; m_options_functions = nullptr;
-                throw std::runtime_error("Could not find Bookshelf file!");
-        }
+    std::ifstream project_ini(this->get_ini_file());
+    po::store(po::parse_config_file(project_ini, *m_options_functions), m_vm);
+    project_ini.close();
 
-        if(!this->get_lef().empty()){
-            for(auto itor: this->get_lef()){
-                if(!fs::exists(itor)){
-                    delete m_options_functions; m_options_functions = nullptr;
-                    throw std::runtime_error("Could not find LEF File (" + itor + ")");
-                }
-            }
-        }
-        this->set_logic(eInt);
-        this->set_base_path(Utils::Utils::get_base_path());
-        this->set_working_directory(fs::current_path().string());
-        this->set_results_directory("results");
-        this->set_results_id(this->existing_results() + 1);
-        this->set_image_directory("images");
-        this->set_smt_directory("smt");
-        this->set_mzn_directory("mzn");
-        this->set_parquet_directory("parquet");
-        this->set_log_name("placer.log");
-        this->set_database_file("results.db");
-        this->set_db_to_csv_script(this->get_base_path() + "/04_configuration/db_to_csv.sh");
+    po::notify(m_vm);
+    this->handle_configuration();
+    this->check_configuration();
+    this->set_default_configuration();
 
-        fs::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));
+    fs::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));
 
-        // Create Logger Singleton once the Commandline Information is known!
-        m_logger = Utils::Logger::getInstance();
-        m_timer  = new Placer::Utils::Timer();
-        m_mckt = new Placer::MacroCircuit();
+    // Create Logger Singleton once the Commandline Information is known!
+    m_logger = Utils::Logger::getInstance();
+    m_timer  = new Placer::Utils::Timer();
+    m_mckt = new Placer::MacroCircuit();
+}
 
-    } catch (std::exception const & exp){
-        std::cerr << std::endl;
-        std::cerr << "### Configuration Error! ###" << std::endl;
-        std::cerr << "Description: " << exp.what() << std::endl;
-        std::cerr << "See: " << this->get_binary_name() <<  " --help" << std::endl;
-        exit(-1);
-    }
+/**
+ * @brief Set Default Configuration
+ */
+void MacroPlacer::set_default_configuration()
+{
+    namespace fs = boost::filesystem;
+
+    this->set_logic(eInt);
+    this->set_base_path(Utils::Utils::get_base_path());
+    this->set_working_directory(fs::current_path().string());
+    this->set_results_directory("results");
+    this->set_results_id(this->existing_results() + 1);
+    this->set_image_directory("images");
+    this->set_smt_directory("smt");
+    this->set_mzn_directory("mzn");
+    this->set_parquet_directory("parquet");
+    this->set_log_name("placer.log");
+    this->set_database_file("results.db");
+    this->set_db_to_csv_script(this->get_base_path() + "/04_configuration/db_to_csv.sh");
 }
 
 /**
@@ -264,6 +232,56 @@ void MacroPlacer::handle_configuration()
 }
 
 /**
+ * @brief Check for Valid Configuration
+ */
+void MacroPlacer::check_configuration()
+{
+    try {
+        namespace fs = boost::filesystem;
+
+        if (!fs::exists(this->get_ini_file())){
+            delete m_options_functions; m_options_functions = nullptr;
+            throw std::runtime_error("Config File Not Found!!");
+        }
+        if((this->get_def().empty() || this->get_lef().empty()) &&
+           this->get_bookshelf_file().empty()){
+            delete m_options_functions; m_options_functions = nullptr;
+            throw std::runtime_error("No LEF/DEF or Bookshelf file has been specified!");
+        }
+        if(this->get_site().empty() &&
+           this->get_bookshelf_file().empty()){
+            delete m_options_functions; m_options_functions = nullptr;
+            throw std::runtime_error("Site has not been specified!");
+        }
+        if(!this->get_def().empty() &&
+           !fs::exists(this->get_def())){
+            delete m_options_functions; m_options_functions = nullptr;
+            throw std::runtime_error("Could not find DEF File!");
+        }
+        if(!this->get_bookshelf_file().empty() &&
+            !fs::exists(this->get_bookshelf_file())){
+                delete m_options_functions; m_options_functions = nullptr;
+                throw std::runtime_error("Could not find Bookshelf file!");
+        }
+
+        if(!this->get_lef().empty()){
+            for(auto itor: this->get_lef()){
+                if(!fs::exists(itor)){
+                    delete m_options_functions; m_options_functions = nullptr;
+                    throw std::runtime_error("Could not find LEF File (" + itor + ")");
+                }
+            }
+        }
+    } catch (std::exception const & exp){
+        std::cerr << std::endl;
+        std::cerr << "### Configuration Error! ###" << std::endl;
+        std::cerr << "Description: " << exp.what() << std::endl;
+        std::cerr << "See: " << this->get_binary_name() <<  " --help" << std::endl;
+        exit(-1);
+    }
+}
+
+/**
  * @brief Generate a Bash Completion Script based on the configured Boost Program Options
  */
 void MacroPlacer::bash_completion_script()
@@ -312,6 +330,15 @@ void MacroPlacer::bash_completion_script()
    std::fstream out_file(current_path + "/bash_completion_script.sh", std::ios::out);
    out_file << script.str();
    out_file.close();
+}
+
+/**
+ * @brief Print Dummy Case Tool Output (no argument/no config)
+ */
+void MacroPlacer::print_dummy()
+{
+    notimplemented_check();
+    this->print_header();
 }
 
 /**
@@ -393,11 +420,13 @@ void MacroPlacer::post_process()
  */
 size_t MacroPlacer::existing_results ()
 {
+    namespace fs = boost::filesystem;
+
     size_t retval = 0;
 
-    if(boost::filesystem::is_directory(this->get_results_directory())){
-        for(auto& file: boost::filesystem::directory_iterator(this->get_results_directory())){
-            boost::filesystem::path p(file);
+    if(fs::is_directory(this->get_results_directory())){
+        for(auto& file: fs::directory_iterator(this->get_results_directory())){
+            fs::path p(file);
             std::string name = p.filename().string();
             if(std::stoi(name) > static_cast<int>(retval)){
             retval = std::stoi(name);

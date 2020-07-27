@@ -1922,9 +1922,9 @@ std::string MacroCircuit::_manhattan_distance(std::string const & from_x,
  */
 void MacroCircuit::create_statistics()
 {
+    std::cout << "create statistics" << std::endl;
     auto best_area = m_eval->best_area();
     auto best_hpwl = m_eval->best_hpwl();
-
     std::cout << "HPWL: " << best_hpwl.first << " " << best_hpwl.second << std::endl;
 }
 
@@ -2120,7 +2120,6 @@ void MacroCircuit::process_key_value_results(std::map<std::string,
     }
 
     for(Component* component: m_components){
-
         size_t x = solution[component->get_lx().to_string()][id];
         size_t y = solution[component->get_ly().to_string()][id];
         eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
@@ -2131,23 +2130,19 @@ void MacroCircuit::process_key_value_results(std::map<std::string,
 
         m_logger->place_macro(component->get_id(), x ,y, o);
 
-        if (!this->get_minizinc_mode()){
-            //if (this->get_minimize_hpwl_mode()){
-                std::vector<Pin*> pins = component->get_pins();
+        std::vector<Pin*> pins = component->get_pins();
 
-                for (Pin* p: pins){
-                    if (p->is_free()){
-                        z3::expr x = p->get_pin_pos_x();
-                        z3::expr y = p->get_pin_pos_y();
+        for (Pin* p: pins){
+            if (p->is_free()){
+                z3::expr x = p->get_pin_pos_x();
+                z3::expr y = p->get_pin_pos_y();
 
-                        size_t x_pos = solution[x.to_string()][id];
-                        size_t y_pos = solution[y.to_string()][id];
+                size_t x_pos = solution[x.to_string()][id];
+                size_t y_pos = solution[y.to_string()][id];
 
-                        p->add_solution_pin_pos_x(x_pos);
-                        p->add_solution_pin_pos_y(y_pos);
-                    }
-                }
-            //}
+                p->add_solution_pin_pos_x(x_pos);
+                p->add_solution_pin_pos_y(y_pos);
+            }
         }
     }
 }
@@ -2191,7 +2186,6 @@ void MacroCircuit::dump_minizinc_instance()
         file << range << t->get_pos_x() << ";" << std::endl;
         file << range << t->get_pos_y() << ";" << std::endl;
     }
-
     for (auto itor: m_components_inside_die_constraints){
         file << itor << std::endl;
     }
@@ -2203,7 +2197,7 @@ void MacroCircuit::dump_minizinc_instance()
     }
     file << "var int: hpwl = " << m_hpwl_cost_function_constraints << ";" << std::endl;
     file << "var int: area = die_uy*die_ux;" << std::endl;
-    file << "var int: costfunction = area+hpwl;";
+    file << "var int: costfunction = area*hpwl;";
     file << "solve minimize costfunction;" << std::endl;
     file.close();
 }

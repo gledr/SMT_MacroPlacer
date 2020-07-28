@@ -366,12 +366,20 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
 {
     try {
         z3::expr_vector clauses(m_z3_ctx);
-        
+        std::vector<std::string> _clauses;
+
+        std::string _lx = m_lx.to_string();
+        std::string _ly = m_ly.to_string();
+
         for(auto pin: m_pins){
             z3::expr x = pin.second->get_pin_pos_x();
             z3::expr y = pin.second->get_pin_pos_y();
+
+            std::string _x = pin.second->get_pin_pos_x().to_string();
+            std::string _y = pin.second->get_pin_pos_y().to_string();
 ///{{{
             z3::expr_vector case_n(m_z3_ctx);
+            std::vector<std::string> _case_n;
 
             //LEFT PLANE
             z3::expr_vector case_n1(m_z3_ctx);
@@ -380,12 +388,24 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
             case_n1.push_back(y < (m_ly + m_height));
             case_n.push_back(z3::mk_and(case_n1));
 
+            std::vector<std::string> _case_n1;
+            _case_n1.push_back(mzn::mk_eq(_x, _lx));
+            _case_n1.push_back(mzn::mk_gt(_y, _ly));
+            _case_n1.push_back(mzn::mk_lt(_y, mzn::mk_add(_ly, m_height.to_string())));
+            _case_n.push_back(mzn::mk_and(_case_n1));
+
             //RIGHT PLANE
             z3::expr_vector case_n2(m_z3_ctx);
             case_n2.push_back(x == (m_lx + m_width));
             case_n2.push_back(y > m_ly);
             case_n2.push_back(y < (m_ly + m_height));
             case_n.push_back(z3::mk_and(case_n2));
+
+            std::vector<std::string> _case_n2;
+            _case_n2.push_back(mzn::mk_eq(_x, mzn::mk_add(_lx, m_width.to_string())));
+            _case_n2.push_back(mzn::mk_gt(_y, _ly));
+            _case_n2.push_back(mzn::mk_lt(_y, mzn::mk_add(_ly, m_height.to_string())));
+            _case_n.push_back(mzn::mk_and(_case_n2));
 
             //LOWER PLANE
             z3::expr_vector case_n3(m_z3_ctx);
@@ -394,15 +414,28 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
             case_n3.push_back(x < (m_lx + m_width));
             case_n.push_back(z3::mk_and(case_n3));
 
+            std::vector<std::string> _case_n3;
+            _case_n3.push_back(mzn::mk_eq(_y, _ly));
+            _case_n3.push_back(mzn::mk_gt(_x, _lx));
+            _case_n3.push_back(mzn::mk_lt(_x, mzn::mk_add(_lx, m_width.to_string())));
+            _case_n.push_back(mzn::mk_and(_case_n3));
+
             //UPPER PLANE
             z3::expr_vector case_n4(m_z3_ctx);
             case_n4.push_back(y == (m_ly + m_height));
             case_n4.push_back(x > m_lx);
             case_n4.push_back(x < (m_lx + m_width));
             case_n.push_back(z3::mk_and(case_n4));
+
+            std::vector<std::string> _case_n4;
+            _case_n4.push_back(mzn::mk_eq(_y, mzn::mk_add(_ly, m_height.to_string())));
+            _case_n4.push_back(mzn::mk_gt(_x, _lx));
+            _case_n4.push_back(mzn::mk_lt(_x, mzn::mk_add(_lx, m_width.to_string())));
+            _case_n.push_back(mzn::mk_and(_case_n4));
 ///}}}
 ///{{{
              z3::expr_vector case_w(m_z3_ctx);
+             std::vector<std::string> _case_w;
 
             //LEFT PLANE
             z3::expr_vector case_w1(m_z3_ctx);
@@ -411,13 +444,25 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
             case_w1.push_back(y < (m_ly + m_width));
             case_w.push_back(z3::mk_and(case_w1));
 
+            std::vector<std::string> _case_w1;
+            _case_w1.push_back(mzn::mk_eq(_x, mzn::mk_sub(_lx, m_height.to_string())));
+            _case_w1.push_back(mzn::mk_gt(_y, _ly));
+            _case_w1.push_back(mzn::mk_lt(_y, mzn::mk_add(_ly, m_width.to_string())));
+            _case_w.push_back(mzn::mk_and(_case_w1));
+
             //RIGHT PLANE
             z3::expr_vector case_w2(m_z3_ctx);
-            case_w2.push_back(x == (m_lx));
+            case_w2.push_back(x == m_lx);
             case_w2.push_back(y > m_ly);
             case_w2.push_back(y < (m_ly + m_width));
             case_w.push_back(z3::mk_and(case_w2));
 
+            std::vector<std::string> _case_w2;
+            _case_w2.push_back(mzn::mk_eq(_x, _lx));
+            _case_w2.push_back(mzn::mk_gt(_y, _ly));
+            _case_w2.push_back(mzn::mk_lt(_y, mzn::mk_add(_ly, m_width.to_string())));
+            _case_w.push_back(mzn::mk_and(_case_w2));
+            
             //LOWER PLANE
             z3::expr_vector case_w3(m_z3_ctx);
             case_w3.push_back(y == m_ly);
@@ -425,22 +470,37 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
             case_w3.push_back(x > (m_lx - m_height));
             case_w.push_back(z3::mk_and(case_w3));
 
+            std::vector<std::string> _case_w3;
+            _case_w3.push_back(mzn::mk_eq(_y, _ly));
+            _case_w3.push_back(mzn::mk_lt(_x, _lx));
+            _case_w3.push_back(mzn::mk_gt(_x, mzn::mk_sub(_lx, m_height.to_string())));
+            _case_w.push_back(mzn::mk_and(_case_w3));
+
             //UPPER PLANE
             z3::expr_vector case_w4(m_z3_ctx);
             case_w4.push_back(y == (m_ly + m_width));
             case_w4.push_back(x < m_lx);
             case_w4.push_back(x > (m_lx - m_height));
             case_w.push_back(z3::mk_and(case_w4));
+
+            std::vector<std::string> _case_w4;
+            _case_w4.push_back(mzn::mk_eq(_y, mzn::mk_add(_ly, m_width.to_string())));
+            _case_w4.push_back(mzn::mk_lt(_x, _lx));
+            _case_w4.push_back(mzn::mk_gt(_x, mzn::mk_sub(_lx, m_height.to_string())));
+            _case_w.push_back(mzn::mk_and(_case_w4));
 ///}}}
         if (rotation == e2D){
             clauses.push_back(z3::ite(this->is_N(), z3::mk_or(case_n), z3::ite(this->is_W(), z3::mk_or(case_w), m_encode->get_flag(false))));
+            _clauses.push_back(mzn::ite(this->_is_N(), mzn::mk_or(_case_n), mzn::mk_or(_case_w)));
         } else if (rotation == e4D){
             notimplemented_check();
         } else {
             notimplemented_check();
         }
     }
+
     m_encode_pin_macro_frontier = z3::mk_and(clauses);
+    m_encode_pin_macro_frontier_constraints = mzn::mk_and(_clauses);
 
     } catch (z3::exception const & exp){
         throw PlacerException(exp.msg());

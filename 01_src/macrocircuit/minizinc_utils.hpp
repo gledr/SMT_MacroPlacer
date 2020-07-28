@@ -23,6 +23,12 @@ namespace Placer {
         inline std::string mk_and(std::vector<std::string> const & values);
         inline std::string mk_or(std::vector<std::string> const & values);
         inline std::string mk_eq(std::string const & a, std::string const & b);
+        inline std::string mk_lt(std::string const & a, std::string const & b);
+        inline std::string mk_gt(std::string const & a, std::string const & b);
+        inline std::string mk_le(std::string const & a, std::string const & b);
+        inline std::string mk_ge(std::string const & a, std::string const & b);
+        inline std::string mk_add(std::string const & a, std::string const & b);
+        inline std::string mk_sub(std::string const & a, std::string const & b);
         inline std::string ite(std::string const & cond, 
                                std::string const & a,
                                std::string const & b);
@@ -91,7 +97,7 @@ namespace Placer {
         {
             return "if " + cond + " then " + a + " else " + b + " ;";
         }
-        
+
         /**
          * @brief Equal operator
          * 
@@ -102,6 +108,77 @@ namespace Placer {
         inline std::string mk_eq(std::string const & a, std::string const & b)
         {
             return "( " + a + " == " + b + " )";
+        }
+
+        /**
+         * @brief .Minizinc Less than Operator
+         * 
+         * @param a First Operand
+         * @param b Second Operand
+         * @return std::string
+         */
+        inline std::string mk_lt(std::string const & a, std::string const & b)
+        {
+            return " ( " + a + " < " + b + " )";
+        }
+
+        /**
+         * @brief Minizinc Greater Than Operator
+         * 
+         * @param a First Operand
+         * @param b Second Operand
+         * @return std::string
+         */
+        inline std::string mk_gt(std::string const & a, std::string const & b)
+        {
+            return " ( " + a + " > " + b + " )";
+        }
+
+        /**
+         * @brief Minizinc Less Equal Operator
+         * 
+         * @param a First Operand
+         * @param b Second Operand
+         * @return std::string
+         */
+        inline std::string mk_le(std::string const & a, std::string const & b)
+        {
+            return " ( " + a + " <= " + b + " )";
+        }
+
+        /**
+         * @brief Minizinc Greater Equal Operator
+         * 
+         * @param a First Operand
+         * @param b Second Operand
+         * @return std::string
+         */
+        inline std::string mk_ge(std::string const & a, std::string const & b)
+        {
+            return " ( " + a + " >= " + b + " )";
+        }
+
+        /**
+         * @brief Minizinc Add Operator
+         * 
+         * @param a First Operand
+         * @param b Second Operand
+         * @return std::string
+         */
+        inline std::string mk_add(std::string const & a, std::string const & b)
+        {
+            return " ( " + a + " + " + b + " )";
+        }
+        /**
+         * @brief Minizinc Sub Operator
+         * 
+         * @param a First Operand
+         * @param b Second Operand
+         * @return std::string
+         */
+        inline std::string mk_sub(std::string const & a, std::string const & b)
+        {
+            return " ( " + a + " - " + b + " )";
         }
         
     } /* namespace mzn */

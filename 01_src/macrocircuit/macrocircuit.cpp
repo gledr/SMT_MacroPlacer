@@ -1061,26 +1061,15 @@ void MacroCircuit::encode_components_inside_die(eRotation const type)
             _case_E.push_back(itor->_get_uy(eEast).str() + " <= " + _die_uy.str()); ///< UY
 
             if(type == eRotation::e2D){
-                std::stringstream _case_N_and;
-                std::stringstream _case_W_and;
-                _case_N_and << "(" << _case_N[0] << " /\\ "
-                            << _case_N[1] << " /\\ "
-                            << _case_N[2] << " /\\ " << _case_N[3] << ")";
-                            
-                _case_W_and << "(" << _case_W[0] << " /\\ "
-                            << _case_W[1] << " /\\ "
-                            << _case_W[2] << " /\\ " << _case_W[3] << ")";
-                            
-                std::stringstream _ite;
-                _ite << "if " << _is_N << " then " << _case_N_and.str() << " else " << _case_W_and.str() << " endif";
-                _clauses.push_back(_ite.str());
+                std::string _ite = mzn::ite(_is_N, mzn::mk_and(_case_N), mzn::mk_and(_case_W));
+                _clauses.push_back(_ite);
                 
                 z3::expr ite = z3::ite(is_N, z3::mk_and(case_N),
                                z3::ite(is_W, z3::mk_and(case_W), m_z3_ctx.bool_val(false)));
                 clauses.push_back(ite);
 
             } else if (type == eRotation::e4D){
-                assert (0);
+                assert ("Minizinc not Implemented");
                 z3::expr ite = z3::ite(is_N, z3::mk_and(case_N),
                                z3::ite(is_E, z3::mk_and(case_E),
                                z3::ite(is_S, z3::mk_and(case_S),
@@ -1343,24 +1332,14 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
 //}}}
 //{{{           Encoding
                 z3::expr clause = m_z3_ctx.int_val(0);
-                std::stringstream _clause;
+                std::string _clause;
                 
                 if(type == eRotation::e2D){
-                    std::stringstream case_nn_or;
-                    std::stringstream case_nw_or;
-                    std::stringstream case_wn_or;
-                    std::stringstream case_ww_or;
-                    
-                    case_nn_or << _case_nn[0] << " \\/ " << _case_nn[1] << " \\/ " << _case_nn[2] << " \\/ " << _case_nn[3];
-                    case_nw_or << _case_nw[0] << " \\/ " << _case_nw[1] << " \\/ " << _case_nw[2] << " \\/ " << _case_nw[3];
-                    case_wn_or << _case_wn[0] << " \\/ " << _case_wn[1] << " \\/ " << _case_wn[2] << " \\/ " << _case_wn[3];
-                    case_ww_or << _case_ww[0] << " \\/ " << _case_ww[1] << " \\/ " << _case_ww[2] << " \\/ " << _case_ww[3];
-                    
-                    _clause << "if (" << _is_NN << ") then " << case_nn_or.str()
-                            << " elseif (" << _is_NW << ") then " << case_nw_or.str()
-                            << " elseif (" << _is_WN << ") then " << case_wn_or.str()
-                            << " else " << case_ww_or.str() << " endif";
-                            
+                    _clause = mzn::ite(_is_NN, mzn::mk_or(_case_nn),
+                              mzn::ite(_is_NW, mzn::mk_or(_case_nw),
+                              mzn::ite(_is_WN, mzn::mk_or(_case_wn), 
+                                               mzn::mk_or(_case_ww))));
+
                     clause = z3::ite(is_NN, z3::mk_or(case_nn),
                              z3::ite(is_NW, z3::mk_or(case_nw),
                              z3::ite(is_WN, z3::mk_or(case_wn),
@@ -1388,7 +1367,7 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
                     notsupported_check("Only 2D and 4D Rotation are supported!");
                 }
                 clauses.push_back(clause);
-                _clauses.push_back(_clause.str());
+                _clauses.push_back(_clause);
 //}}}
             }
         }
@@ -1411,50 +1390,88 @@ void MacroCircuit::encode_components_non_overlapping(eRotation const type)
 void MacroCircuit::encode_terminals_on_frontier()
 {
     z3::expr_vector clauses(m_z3_ctx);
+    std::vector<std::string> _clauses;
 
     z3::expr die_lx = m_layout->get_lx();
     z3::expr die_ux = m_layout->get_ux();
     z3::expr die_ly = m_layout->get_ly();
     z3::expr die_uy = m_layout->get_uy();
+    
+    std::stringstream _die_lx; _die_lx << m_layout->get_lx();
+    std::stringstream _die_ux; _die_ux << m_layout->get_ux();
+    std::stringstream _die_ly; _die_ly << m_layout->get_ly();
+    std::stringstream _die_uy; _die_uy << m_layout->get_uy();
 
     for(auto itor: m_terminals){
         z3::expr_vector subclause(m_z3_ctx);
+        std::vector<std::string> _subclause;
+        
         z3::expr x = itor->get_pos_x();
         z3::expr y = itor->get_pos_y();
+        std::stringstream _x; _x << itor->get_pos_x();
+        std::stringstream _y; _y << itor->get_pos_y();
 
         // Case 1 x = moveable, y = ly
         z3::expr_vector case_1(m_z3_ctx);
         case_1.push_back(y == die_ly);
         case_1.push_back(x > die_lx);
         case_1.push_back(x < die_ux);
+        
+        std::vector<std::string> _case_1;
+        _case_1.push_back(_y.str() + " == " + _die_ly.str());
+        _case_1.push_back(_x.str() + " > " + _die_lx.str());
+        _case_1.push_back(_x.str() + " < " + _die_ux.str());
 
         // Case 2 x = moveable, y = uy
         z3::expr_vector case_2(m_z3_ctx);
         case_2.push_back(y == die_uy);
         case_2.push_back(x > die_lx);
         case_2.push_back(x < die_ux);
+        
+        std::vector<std::string> _case_2;
+        _case_2.push_back(_y.str() + " == " + _die_uy.str());
+        _case_2.push_back(_x.str() + " > " + _die_lx.str());
+        _case_2.push_back(_x.str() + " < " + _die_ux.str());
 
         // Case 3 x = lx, y = moveable
         z3::expr_vector case_3(m_z3_ctx);
         case_3.push_back(x == die_lx);
         case_3.push_back(y > die_ly);
         case_3.push_back(y < die_uy);
+        
+        std::vector<std::string> _case_3;
+        _case_3.push_back(_x.str() + " == " + _die_lx.str());
+        _case_3.push_back(_y.str() + " > " + _die_ly.str());
+        _case_3.push_back(_y.str() + " < " + _die_uy.str());
 
+        
         // Case 4 x = ux, y = moveable
         z3::expr_vector case_4(m_z3_ctx);
         case_4.push_back(x == die_ux);
         case_4.push_back(y > die_ly);
         case_4.push_back(y < die_uy);
+        
+        std::vector<std::string> _case_4;
+        _case_4.push_back(_x.str() + " == " + _die_ux.str());
+        _case_4.push_back(_y.str() + " > " + _die_ly.str());
+        _case_4.push_back(_y.str() + " < " + _die_ly.str());
 
         subclause.push_back(z3::mk_and(case_1));
         subclause.push_back(z3::mk_and(case_2));
         subclause.push_back(z3::mk_and(case_3));
         subclause.push_back(z3::mk_and(case_4));
+        
+        _subclause.push_back(mzn::mk_and(_case_1));
+        _subclause.push_back(mzn::mk_and(_case_2));
+        _subclause.push_back(mzn::mk_and(_case_3));
+        _subclause.push_back(mzn::mk_and(_case_4));
 
         clauses.push_back(z3::mk_or(subclause));
+        _clauses.push_back(mzn::mk_or(_subclause));
     }
 
     m_terminals_on_frontier = z3::mk_and(clauses);
+    m_terminals_on_frontier_constraints = mzn::mk_and(_clauses);
 }
 
 /**
@@ -1493,6 +1510,7 @@ void MacroCircuit::encode_terminals_center_edge()
         for (Terminal* t: m_terminals){
             z3::expr_vector clause(m_z3_ctx);
             std::vector<std::string> _clause;
+
             z3::expr x = t->get_pos_x();
             z3::expr y = t->get_pos_y();
             std::stringstream _x; _x << t->get_pos_x();
@@ -1502,7 +1520,7 @@ void MacroCircuit::encode_terminals_center_edge()
             z3::expr_vector w(m_z3_ctx);
             z3::expr_vector s(m_z3_ctx);
             z3::expr_vector e(m_z3_ctx);
-            
+
             std::vector<std::string> _n;
             std::vector<std::string> _w;
             std::vector<std::string> _s;
@@ -1522,7 +1540,7 @@ void MacroCircuit::encode_terminals_center_edge()
 
             s.push_back(x == s_x);
             s.push_back(y == s_y);
-            
+
             _s.push_back(_x.str() + " == " + _s_x.str());
             _s.push_back(_y.str() + " == " + _s_y.str());
 
@@ -1532,40 +1550,25 @@ void MacroCircuit::encode_terminals_center_edge()
             _e.push_back(_x.str() + " == " + _e_x.str());
             _e.push_back(_y.str() + " == " + _e_y.str());
 
-            std::stringstream and_n; and_n << "(" << _n[0] << " /\\ " << _n[1] << ")";
-            std::stringstream and_w; and_w << "(" << _w[0] << " /\\ " << _w[1] << ")";
-            std::stringstream and_s; and_s << "(" << _s[0] << " /\\ " << _s[1] << ")";
-            std::stringstream and_e; and_e << "(" << _e[0] << " /\\ " << _e[1] << ")";
-            
+            std::string and_w = mzn::mk_and(_w);
+            std::string and_s = mzn::mk_and(_s);
+            std::string and_e = mzn::mk_and(_e);
+
             clause.push_back(z3::mk_and(n));
             clause.push_back(z3::mk_and(w));
             clause.push_back(z3::mk_and(s));
             clause.push_back(z3::mk_and(e));
-
             clauses.push_back(z3::mk_or(clause));
-            
-            std::stringstream cases;
-            cases << "( " << and_n.str() << " \/ "
-                        << and_w.str() << " \/ "
-                        << and_s.str() << " \/ "
-                        << and_e.str() << " )";
-                        
-            _clauses.push_back(cases.str());
+
+            _clause.push_back(mzn::mk_and(_n));
+            _clause.push_back(mzn::mk_and(_w));
+            _clause.push_back(mzn::mk_and(_s));
+            _clause.push_back(mzn::mk_and(_e));
+            _clauses.push_back(mzn::mk_or(_clauses));
         }
-        std::stringstream builder;
-        if (_clauses.size() == 1){
-            assert (0);
-        } else {
-        
-            builder << "(";
-            for (size_t i = 0; i < _clauses.size()-1; ++i){
-                builder << _clauses[i] << " /\\ ";
-            }
-            builder << _clauses[_clauses.size()-1] << ")";
-        }
-        
         m_terminals_center_edge = z3::mk_and(clauses);
-        m_terminals_center_edge_constraints = builder.str();
+        m_terminals_center_edge_constraints = mzn::mk_and(_clauses);
+        
     } catch (z3::exception const & exp){
         std::cout << exp.msg() << std::endl;
         assert (0);
@@ -1581,37 +1584,57 @@ void MacroCircuit::encode_terminals_non_overlapping()
 {
     try {
         z3::expr_vector clauses(m_z3_ctx);
+        std::vector<std::string> _clauses;
         
         for(size_t i = 0; i < m_terminals.size(); ++i){
             for(size_t j = 0; j < m_terminals.size(); ++j){
                 z3::expr_vector subclause(m_z3_ctx);
+                std::vector<std::string> _subclause;
                 if(i == j){
                     continue;
                 }
 
                 Terminal* a = m_terminals[i];
                 Terminal* b = m_terminals[j];
-
+                std::stringstream ax; ax << a->get_pos_x();
+                std::stringstream ay; ay <<a->get_pos_y();
+                
+                std::stringstream bx; bx << b->get_pos_x();
+                std::stringstream by; by << b->get_pos_y();
+                
                 nullpointer_check (a);
                 nullpointer_check (b);
-
+            
                 // Case 1: x moveable
                 z3::expr_vector case_1(m_z3_ctx);
                 case_1.push_back(a->get_pos_x() > b->get_pos_x());
                 case_1.push_back(a->get_pos_x() < b->get_pos_x());
-
+                
+                std::vector<std::string> _case_1;
+                _case_1.push_back(ax.str() + " > " + bx.str());
+                _case_1.push_back(ax.str() + " < " + bx.str());
+            
                 // Case 2: y moveable
                 z3::expr_vector case_2(m_z3_ctx);
                 case_2.push_back(a->get_pos_y() > b->get_pos_y());
                 case_2.push_back(a->get_pos_y() < b->get_pos_y());
 
+                std::vector<std::string> _case_2;
+                _case_2.push_back(ay.str() + " > " + by.str());
+                _case_2.push_back(ay.str() + " y " + by.str());
+                
                 subclause.push_back(z3::mk_or(case_1));
                 subclause.push_back(z3::mk_or(case_2));
                 clauses.push_back(z3::mk_or(subclause));
+                
+                _subclause.push_back(mzn::mk_or(_case_1));
+                _subclause.push_back(mzn::mk_or(_case_2));
+                _clauses.push_back(mzn::mk_or(_subclause));
             }
         }
         m_terminals_non_overlapping = z3::mk_and(clauses);
-
+        m_terminals_non_overlapping_constraints = mzn::mk_and(_clauses);
+        
     } catch (z3::exception const & exp){
         throw PlacerException(exp.msg());
     }

@@ -18,6 +18,7 @@
 #include <layout.hpp>
 #include <pin.hpp>
 #include <supplement.hpp>
+#include <minizinc_utils.hpp>
 
 namespace Placer {
 

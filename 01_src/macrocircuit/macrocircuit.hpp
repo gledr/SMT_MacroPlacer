@@ -40,6 +40,7 @@
 #include <partitioning.hpp>
 #include <parquet.hpp>
 #include <encoding_utils.hpp>
+#include <minizinc_utils.hpp>
 #include <utils.hpp>
 #include <database.hpp>
 #include <plotter.hpp>
@@ -169,7 +170,9 @@ private:
     z3::expr m_components_inside_die;
     std::vector<std::string> m_components_inside_die_constraints;
     z3::expr m_terminals_on_frontier;
+    std::string m_terminals_on_frontier_constraints;
     z3::expr m_terminals_non_overlapping;
+    std::string m_terminals_non_overlapping_constraints;
     z3::expr m_terminals_center_edge;
     std::string m_terminals_center_edge_constraints;
     z3::expr m_hpwl_cost_function;

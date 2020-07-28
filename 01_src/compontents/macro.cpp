@@ -547,16 +547,9 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
             z3::expr clause = z3::ite(this->is_N(), z3::mk_and(case_n),
                             z3::ite(this->is_W(), z3::mk_and(case_w), m_z3_ctx.bool_val(false)));
             clauses.push_back(clause);
-            
-            std::stringstream _case_N_and;
-            std::stringstream _case_W_and;
-            _case_N_and << "(" << _case_n[0] << " /\\ " << _case_n[1] << ")";
-                            
-            _case_W_and << "(" << _case_w[0] << " /\\ " << _case_w[1] << ")";
-            
-            std::stringstream _ite;
-            _ite << "if " << this->_is_N() << " then " << _case_N_and.str() << " else " << _case_W_and.str() << " endif";
-            _clauses.push_back(_ite.str());
+
+            std::string _clause = mzn::ite(this->_is_N(), mzn::mk_and(_case_n), mzn::mk_and(_case_w));
+            _clauses.push_back(_clause);
         } else {
             assert (0);
         }
@@ -565,7 +558,6 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
     
     for (auto itor: _clauses){
         m_encode_pins_center_of_macro_clauses += itor;
-        //m_encode_pins_center_of_macro_clauses += ":"; // FIXME Was ist der doppelpunkt?
     }
 }
 

@@ -583,7 +583,11 @@ std::string Object::get_ini_file() const
 
 void Object::set_ini_file(std::string const & file)
 {
-    m_ini_file = file;
+    if (file.find(".") == std::string::npos){
+        m_ini_file = file + ".ini";
+    } else {
+        m_ini_file = file;
+    }
 }
 
 std::string Object::get_third_party_bin()

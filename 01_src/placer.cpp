@@ -81,7 +81,9 @@ void MacroPlacer::read_configuration()
         (CMD_TIMEOUT,         po::value<size_t>()->default_value(60),                CMD_TIMEOUT_TEXT)
         (CMD_Z3_API,          po::value<bool>()->default_value(false),               CMD_Z3_API_TEXT)
         (CMD_SOLUTIONS,       po::value<size_t>()->default_value(1),                 CMD_SOLUTIONS_TEXT)
-        (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT);
+        (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT)
+        (CMD_AREA_WEIGHT,     po::value<size_t>()->default_value(8),                 CMD_AREA_WEIGHT_TEXT)
+        (CMD_HPWL_WEIGHT,     po::value<size_t>()->default_value(2),                 CMD_HPWL_WEIGHT_TEXT);
 
     // Top Level Priority: Command Line
     // Second Level Priority: Local Ini File
@@ -228,6 +230,12 @@ void MacroPlacer::handle_configuration()
     }
     if(m_vm.count(CMD_INI_FILE)){
         this->set_ini_file(m_vm[CMD_INI_FILE].as<std::string>());
+    }
+    if(m_vm.count(CMD_AREA_WEIGHT)){
+        this->set_alpha_weight(m_vm[CMD_AREA_WEIGHT].as<size_t>());
+    }
+    if(m_vm.count(CMD_HPWL_WEIGHT)){
+        this->set_beta_weight(m_vm[CMD_HPWL_WEIGHT].as<size_t>());
     }
 }
 

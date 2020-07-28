@@ -1823,7 +1823,7 @@ void MacroCircuit::encode_hpwl_length()
 
             to_x = t->get_pos_x();
             to_y = t->get_pos_y();
-            
+
             _to_x << t->get_pos_x();
             _to_y << t->get_pos_y();
         } else if (to->has_macro()){
@@ -1835,7 +1835,7 @@ void MacroCircuit::encode_hpwl_length()
 
             to_x = p->get_pin_pos_x();
             to_y = p->get_pin_pos_y();
-            
+
             _to_x << p->get_pin_pos_x();
             _to_y << p->get_pin_pos_y();
         } else {
@@ -1868,7 +1868,7 @@ void MacroCircuit::encode_hpwl_length()
     } else {
         std::stringstream builder;
         builder << " ( ";
-        
+
         for(size_t i = 0; i < _clauses.size() -1; ++i){
             builder << _clauses[i] << " + ";
         }
@@ -2193,9 +2193,16 @@ void MacroCircuit::dump_minizinc_instance()
     for (Macro* m: m_macros){
         file << m->_get_pin_constraints() << std::endl;
     }
-    file << "var int: hpwl = " << m_hpwl_cost_function_constraints << ";" << std::endl;
-    file << "var int: area = die_uy*die_ux;" << std::endl;
-    file << "var int: costfunction = area*hpwl;";
+
+    size_t alpha = this->get_alpha_weight();
+    size_t beta = this->get_beta_weight();
+    
+    std::string s_alpha = std::to_string(alpha);
+    std::string s_beta = std::to_string(beta);
+    
+    file << "var int: area = (" << s_alpha << " * (die_uy*die_ux));" << std::endl;
+    file << "var int: hpwl = (" << s_beta << " * " <<  m_hpwl_cost_function_constraints << ");" << std::endl;
+    file << "var int: costfunction = area+hpwl;";
     file << "solve minimize costfunction;" << std::endl;
     file.close();
 }

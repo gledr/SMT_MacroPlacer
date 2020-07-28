@@ -198,6 +198,12 @@ protected:
     std::string get_minizinc_bin();
     std::string get_or_tools_bin();
 
+    void set_alpha_weight(size_t const val);
+    size_t get_alpha_weight() const;
+
+    void set_beta_weight(size_t const val);
+    size_t get_beta_weight() const;
+
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
 
@@ -247,6 +253,8 @@ private:
     static size_t m_num_partitions;
     static size_t m_solutions;
     static size_t m_results_id;
+    static size_t m_alpha_weight;
+    static size_t m_beta_weight;
     static eLogic m_logic;
     static z3::expr_vector m_stored_constraints;
     

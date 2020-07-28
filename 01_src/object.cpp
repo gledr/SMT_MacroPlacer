@@ -59,6 +59,8 @@ size_t Object::m_partition_id = 0;
 size_t Object::m_partition_size = 1;
 size_t Object::m_num_partitions = 1;
 size_t Object::m_key_counter = 0;
+size_t Object::m_alpha_weight = 0;
+size_t Object::m_beta_weight = 0;
 eLogic Object::m_logic = eInt;
 
 z3::context Object::m_z3_ctx(init_context());
@@ -606,4 +608,24 @@ std::string Object::get_minizinc_bin()
 std::string Object::get_or_tools_bin()
 {
     return this->get_third_party_bin() + "/fzn-or-tools";
+}
+
+size_t Object::get_alpha_weight() const
+{
+    return m_alpha_weight;
+}
+
+size_t Object::get_beta_weight() const
+{
+    return m_beta_weight;
+}
+
+void Object::set_alpha_weight(size_t const val)
+{
+    m_alpha_weight = val;
+}
+
+void Object::set_beta_weight(size_t const val)
+{
+    m_beta_weight = val;
 }

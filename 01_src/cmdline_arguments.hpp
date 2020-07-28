@@ -159,6 +159,16 @@ namespace Placer {
     constexpr const char CMD_PARTITION_COUNT_TEXT[] 
         ="Number of Partitions";
 
+    constexpr const char CMD_AREA_WEIGHT[]
+        = "alpha";
+    constexpr const char CMD_AREA_WEIGHT_TEXT[]
+        = "Weight of Area for Optimization";
+
+    constexpr const char CMD_HPWL_WEIGHT[]
+        = "beta";
+    constexpr const char CMD_HPWL_WEIGHT_TEXT[]
+        = "Weight of HPWL for Optimization";
+
 } /* namespace Placer */
 
 #endif /* CMDLINE_ARGUMENTS */

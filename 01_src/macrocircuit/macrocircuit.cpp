@@ -970,22 +970,23 @@ void MacroCircuit::config_z3()
  */
 void MacroCircuit::run_encoding()
 {
-    std::cout << "a" << std::endl;
-    this->encode_components_inside_die(e2D);
-    std::cout << "b" << std::endl;
-    this->encode_components_non_overlapping(e2D);
-
     if (this->get_free_terminals()){
-        //this->encode_terminals_non_overlapping();
-        //this->encode_terminals_on_frontier();
-        this->encode_terminals_center_edge();
- 
-        //m_z3_opt->add(m_terminals_non_overlapping.simplify());
-        //m_z3_opt->add(m_terminals_on_frontier.simplify());
-        m_z3_opt->add(m_terminals_center_edge.simplify());
+        if (this->get_minimize_die_mode()){
+            this->encode_terminals_center_edge();
+            m_z3_opt->add(m_terminals_center_edge.simplify());
+        } else if (this->get_minimize_hpwl_mode()){
+            this->encode_terminals_non_overlapping();
+            this->encode_terminals_on_frontier();
+            m_z3_opt->add(m_terminals_non_overlapping.simplify());
+            m_z3_opt->add(m_terminals_on_frontier.simplify());
+        } else {
+            assert (0);
+        }
     }
-
     if (this->get_minimize_die_mode()){
+        this->encode_components_inside_die(e2D);
+        this->encode_components_non_overlapping(e2D);
+
         m_z3_opt->add(m_components_inside_die.simplify());
         m_z3_opt->add(m_components_non_overlapping.simplify());
     }
@@ -993,7 +994,6 @@ void MacroCircuit::run_encoding()
     if (this->get_stored_constraints().size() > 0){
         m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
     }
-
     if (this->get_partitioning()){
         z3::expr_vector clauses(m_z3_ctx);
         for (Partition* p: m_partitons){
@@ -1009,13 +1009,12 @@ void MacroCircuit::run_encoding()
         }
         m_z3_opt->add(z3::mk_and(clauses));
     }
-
     if (this->get_minimize_die_mode()){
         //m_z3_opt->minimize(m_layout->get_ux() * m_layout->get_uy());
         m_z3_opt->minimize(m_layout->get_ux());
         m_z3_opt->minimize(m_layout->get_uy());
     }
-
+    
     this->encode_hpwl_length();
     for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
     //    m_z3_opt->minimize(m_hpwl_edges[i].simplify());
@@ -1534,26 +1533,26 @@ void MacroCircuit::encode_terminals_center_edge()
         z3::expr n_x = m_layout->get_ux() / 2;
         z3::expr n_y = m_layout->get_uy();
 
-        std::string _n_x = mzn::mk_div(m_layout->get_ux().to_string(), "/2");
+        std::string _n_x = mzn::mk_div(m_layout->get_ux().to_string(), "2");
         std::string _n_y = m_layout->get_uy().to_string();
 
         z3::expr w_x = m_layout->get_lx();
         z3::expr w_y = m_layout->get_uy() / 2;
 
         std::string _w_x = m_layout->get_lx().to_string();
-        std::string _w_y = mzn::mk_div(m_layout->get_uy().to_string(),"/2");
+        std::string _w_y = mzn::mk_div(m_layout->get_uy().to_string(),"2");
 
         z3::expr s_x = m_layout->get_ux() / 2;
         z3::expr s_y = m_layout->get_ly();
 
-        std::string _s_x = mzn::mk_div(m_layout->get_ux().to_string(), "/2/");
+        std::string _s_x = mzn::mk_div(m_layout->get_ux().to_string(), "2");
         std::string _s_y = m_layout->get_ly().to_string();
 
         z3::expr e_x = m_layout->get_ux();
         z3::expr e_y = m_layout->get_uy() / 2;
 
         std::string _e_x = m_layout->get_ux().to_string();
-        std::string _e_y = mzn::mk_div(m_layout->get_uy().to_string(), "/2");
+        std::string _e_y = mzn::mk_div(m_layout->get_uy().to_string(), "2");
 
         for (Terminal* t: m_terminals){
             z3::expr_vector clause(m_z3_ctx);
@@ -1577,26 +1576,26 @@ void MacroCircuit::encode_terminals_center_edge()
             n.push_back(x == n_x);
             n.push_back(y == n_y);
 
-            _n.push_back(mzn::mk_eq(x.to_string(), n_x.to_string()));
-            _n.push_back(mzn::mk_eq(y.to_string(), n_y.to_string()));
+            _n.push_back(mzn::mk_eq(x.to_string(), _n_x));
+            _n.push_back(mzn::mk_eq(y.to_string(), _n_y));
 
             w.push_back(x == w_x);
             w.push_back(y == w_y);
 
-            _w.push_back(mzn::mk_eq(x.to_string(), w_x.to_string()));
-            _w.push_back(mzn::mk_eq(y.to_string(), w_y.to_string()));
+            _w.push_back(mzn::mk_eq(x.to_string(), _w_x));
+            _w.push_back(mzn::mk_eq(y.to_string(), _w_y));
 
             s.push_back(x == s_x);
             s.push_back(y == s_y);
 
-            _s.push_back(mzn::mk_eq(x.to_string(), s_x.to_string()));
-            _s.push_back(mzn::mk_eq(y.to_string(), s_y.to_string()));
+            _s.push_back(mzn::mk_eq(x.to_string(), _s_x));
+            _s.push_back(mzn::mk_eq(y.to_string(), _s_y));
 
             e.push_back(x == e_x);
             e.push_back(y == e_y);
 
-            _e.push_back(mzn::mk_eq(x.to_string(), e_x.to_string()));
-            _e.push_back(mzn::mk_eq(y.to_string(), e_y.to_string()));
+            _e.push_back(mzn::mk_eq(x.to_string(), _e_x));
+            _e.push_back(mzn::mk_eq(y.to_string(), _e_y));
 
             std::string and_w = mzn::mk_and(_w);
             std::string and_s = mzn::mk_and(_s);
@@ -2236,14 +2235,18 @@ void MacroCircuit::dump_minizinc_instance()
     file << "% Do not modify!" << std::endl;
     file << "% " << Utils::Utils::get_current_time() << std::endl;
     file << std::endl;
-    file << range << m_layout->get_ux() << ";" << std::endl;
-    file << range << m_layout->get_uy() << ";" << std::endl;
+    if (this->get_minimize_die_mode()){
+        file << range << m_layout->get_ux() << ";" << std::endl;
+        file << range << m_layout->get_uy() << ";" << std::endl;
+    }
     
     for(Macro* m: m_macros){
-        file << range << m->get_lx() << ";" << std::endl;
-        file << range << m->get_ly() << ";" << std::endl;
-        if (!m->get_orientation().is_numeral()){
-            file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
+        if (this->get_minimize_die_mode()){
+            file << range << m->get_lx() << ";" << std::endl;
+            file << range << m->get_ly() << ";" << std::endl;
+            if (!m->get_orientation().is_numeral()){
+                file << "var 0..1: " << m->get_orientation() << ";" << std::endl;
+            }
         }
 
         for (Pin* p: m->get_pins()){
@@ -2255,14 +2258,23 @@ void MacroCircuit::dump_minizinc_instance()
         file << range << t->get_pos_x() << ";" << std::endl;
         file << range << t->get_pos_y() << ";" << std::endl;
     }
-    for (auto itor: m_components_inside_die_constraints){
-        file << itor << std::endl;
+    if (this->get_minimize_die_mode()){
+        for (auto itor: m_components_inside_die_constraints){
+            file << itor << std::endl;
+        }
+        for (auto itor: m_components_non_overlapping_constraints){
+            file << itor << std::endl;
+        }
     }
-    for (auto itor: m_components_non_overlapping_constraints){
-        file << itor << std::endl;
+    if (this->get_free_terminals()){
+        if (this->get_minimize_die_mode()){
+            file << "constraint " << m_terminals_center_edge_constraints << ";" << std::endl;
+        } else if (this->get_minimize_hpwl_mode()){
+            
+        }
     }
     for (Macro* m: m_macros){
-        file << m->_get_pin_constraints() << std::endl;
+        file << "constraint " << m->_get_pin_constraints() << ";" << std::endl;
     }
 
     size_t alpha = this->get_alpha_weight();
@@ -2271,9 +2283,17 @@ void MacroCircuit::dump_minizinc_instance()
     std::string s_alpha = std::to_string(alpha);
     std::string s_beta = std::to_string(beta);
 
-    file << "var int: area = (" << s_alpha << " * (die_uy*die_ux));" << std::endl;
-    file << "var int: hpwl = (" << s_beta << " * " <<  m_hpwl_cost_function_constraints << ");" << std::endl;
-    file << "var int: costfunction = area+hpwl;";
+    if (this->get_minimize_die_mode()){
+        file << "var int: area = (" << s_alpha << " * (die_uy*die_ux));" << std::endl;
+        file << "var int: hpwl = (" << s_beta << " * " <<  m_hpwl_cost_function_constraints << ");" << std::endl;
+        file << "var int: costfunction = area+hpwl;";
+    } else if (this->get_minimize_hpwl_mode()){
+        file << "var int: hpwl = " << m_hpwl_cost_function_constraints << " ; " << std::endl;
+        file << "var int: costfunction = hpwl;";
+    } else {
+        assert (0);
+    }
+  
     file << "solve minimize costfunction;" << std::endl;
     file.close();
 }

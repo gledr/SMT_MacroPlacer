@@ -270,31 +270,26 @@ void Macro::encode_pins()
     if (this->get_minimize_die_mode()){
         this->encode_pins_center_of_macro(e2D);
         clauses.push_back(m_encode_pins_center_of_macro.simplify());
-        
+        m_pin_constraints_clauses = m_encode_pins_center_of_macro_clauses;
     } else if (this->get_minimize_hpwl_mode()){
         this->encode_pins_on_macro_frontier(e2D);
+        //this->encode_pins_non_overlapping();
+
         clauses.push_back(m_encode_pin_macro_frontier.simplify());
+        //clauses.push_back(m_encode_pins_not_overlapping.simplify());
+
+        //m_pin_constraints_clauses = mzn::mk_and(m_encode_pin_macro_frontier_constraints,
+        //                                        m_encode_pins_not_overlapping_constraints);
+        m_pin_constraints_clauses = m_encode_pin_macro_frontier_constraints;
     } else {
         assert (0);
     }
-    
-    // Pins are at the macro edge non overlapping
-   
-    //this->encode_pins_non_overlapping();
 
-    // Pins are positioned relative to the macro center
-    //this->encode_pins_relative_to_center(e2D);
-    //clauses.push_back(m_encode_pins_relative_to_center);
-    
-  
-    //clauses.push_back(m_encode_pins_not_overlapping);
-    
     if (clauses.size() == 1){
         m_pin_constraints = clauses[0];
     } else {
         m_pin_constraints =  z3::mk_and(clauses);
     }
-    m_pin_constraints_clauses = "constraint " + m_encode_pins_center_of_macro_clauses + ";";
 }
 
 /**

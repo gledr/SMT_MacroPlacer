@@ -281,6 +281,7 @@ void Bookshelf::read_nets()
                     pins.push_back(id);
                     
                 } else {
+                    std::cout << id << std::endl;
                     notsupported_check("Only Terminals and Macros are allowed!");
                 }
             }
@@ -1104,6 +1105,7 @@ void Bookshelf::strip_terminals()
  */
 bool Bookshelf::check_name_dac2002(std::string const & name)
 {
+    return true;
     if ((name[0] == 'p') || (name[0] == 'o')){
         return true;
     } else {

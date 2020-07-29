@@ -241,8 +241,8 @@ namespace Placer {
         inline std::string mk_div(std::string const & a, std::string const & b)
         {
             check_pre(a, b);
-            
-            return " ( " + a + " / " + b + " )";
+
+            return "( " + a + " div " + b + " )";
         }
 
     } /* namespace mzn */

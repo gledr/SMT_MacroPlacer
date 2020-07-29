@@ -462,7 +462,7 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
             _case_w2.push_back(mzn::mk_gt(_y, _ly));
             _case_w2.push_back(mzn::mk_lt(_y, mzn::mk_add(_ly, m_width.to_string())));
             _case_w.push_back(mzn::mk_and(_case_w2));
-            
+
             //LOWER PLANE
             z3::expr_vector case_w3(m_z3_ctx);
             case_w3.push_back(y == m_ly);
@@ -490,7 +490,8 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
             _case_w.push_back(mzn::mk_and(_case_w4));
 ///}}}
         if (rotation == e2D){
-            clauses.push_back(z3::ite(this->is_N(), z3::mk_or(case_n), z3::ite(this->is_W(), z3::mk_or(case_w), m_encode->get_flag(false))));
+            clauses.push_back(z3::ite(this->is_N(), z3::mk_or(case_n),
+                              z3::ite(this->is_W(), z3::mk_or(case_w), m_encode->get_flag(false))));
             _clauses.push_back(mzn::ite(this->_is_N(), mzn::mk_or(_case_n), mzn::mk_or(_case_w)));
         } else if (rotation == e4D){
             notimplemented_check();
@@ -513,9 +514,10 @@ void Macro::encode_pins_on_macro_frontier(eRotation const rotation)
 void Macro::encode_pins_non_overlapping()
 {
     z3::expr_vector clauses(m_z3_ctx);
-    
+    std::vector<std::string> _clauses;
+
     std::vector<Pin*> pins = this->get_pins();
-    
+
     for (size_t i = 0; i < m_pins.size(); ++i){
         for (size_t j = 0; j < m_pins.size(); ++j){
             if (i == j){
@@ -523,8 +525,9 @@ void Macro::encode_pins_non_overlapping()
             } else {
                 Pin* a = pins[i];
                 Pin* b = pins[j];
-                
+
                 z3::expr_vector clause(m_z3_ctx);
+                std::vector<std::string> _clause;
                 //
                 // Use Case North as default since pins are already encoded 
                 // to the frontier
@@ -534,15 +537,31 @@ void Macro::encode_pins_non_overlapping()
                 z3::expr upper = m_encode->gt(a->get_pin_pos_y(), b->get_pin_pos_y());
                 z3::expr lower = m_encode->lt(a->get_pin_pos_y(), b->get_pin_pos_y());
 
+                std::string _left = mzn::mk_lt(a->get_pin_pos_x().to_string(),
+                                               b->get_pin_pos_x().to_string());
+                std::string _right = mzn::mk_gt(a->get_pin_pos_x().to_string(),
+                                                b->get_pin_pos_x().to_string());
+                std::string _upper = mzn::mk_gt(a->get_pin_pos_y().to_string(),
+                                                b->get_pin_pos_y().to_string());
+                std::string _lower = mzn::mk_lt(a->get_pin_pos_y().to_string(),
+                                                b->get_pin_pos_y().to_string());
+
                 clause.push_back(left);
                 clause.push_back(right);
                 clause.push_back(upper);
                 clause.push_back(lower);
                 clauses.push_back(z3::mk_or(clause));
+
+                _clause.push_back(_left);
+                _clause.push_back(_right);
+                _clause.push_back(_upper);
+                _clause.push_back(_lower);
+                _clauses.push_back(mzn::mk_or(_clause));
             }
         }
     }
     m_encode_pins_not_overlapping = z3::mk_and(clauses);
+    m_encode_pins_not_overlapping_constraints = mzn::mk_and(_clauses);
 }
 
 /**
@@ -557,21 +576,25 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
 
     for(auto _pin: m_pins){
         Pin* pin = _pin.second;
-        
+
         std::size_t _width = m_width.get_numeral_uint()/2;
         std::size_t _height = m_height.get_numeral_uint()/2;
-        
+
 ///{{{  Case N
         z3::expr_vector case_n(m_z3_ctx);
         case_n.push_back(pin->get_pin_pos_x() == (m_lx + (m_width/2)));
         case_n.push_back(pin->get_pin_pos_y() == (m_ly + (m_height/2)));
-        
+
         std::vector<std::string> _case_n;
-        std::stringstream c; c << "( " << pin->get_pin_pos_x() << " == ( " << m_lx << " + " << _width << "))";
-        std::stringstream d; d << "( " << pin->get_pin_pos_y() << " == ( " << m_ly << " + " << _height << "))";
-        
-        _case_n.push_back(c.str());
-        _case_n.push_back(d.str());
+
+        std::string c = mzn::mk_eq(pin->get_pin_pos_x().to_string(), 
+                                   mzn::mk_add(m_lx.to_string(), 
+                                               std::to_string(_width)));
+        std::string d = mzn::mk_eq(pin->get_pin_pos_y().to_string(), 
+                                   mzn::mk_add(m_ly.to_string(), 
+                                               std::to_string(_height)));
+        _case_n.push_back(c);
+        _case_n.push_back(d);
 ///}}}
 ///{{{  Case W
         z3::expr_vector case_w(m_z3_ctx);
@@ -579,11 +602,14 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
         case_w.push_back(pin->get_pin_pos_y() == (m_ly + (m_width/2)));
         
         std::vector<std::string> _case_w;
-        std::stringstream a; a << "(" << pin->get_pin_pos_x() << " == (" << m_lx << " - " << _height << "))";
-        std::stringstream b; b << "(" << pin->get_pin_pos_y() << " == (" << m_lx << " - " << _width << "))";
-        
-        _case_w.push_back(a.str());
-        _case_w.push_back(b.str());
+        std::string a = mzn::mk_eq(pin->get_pin_pos_x().to_string(), 
+                                   mzn::mk_sub(m_lx.to_string(), 
+                                               std::to_string(_height)));
+        std::string b = mzn::mk_eq(pin->get_pin_pos_y().to_string(), 
+                                   mzn::mk_sub(m_lx.to_string(), 
+                                               std::to_string(_width)));
+        _case_w.push_back(a);
+        _case_w.push_back(b);
 ///}}}
 ///{{{  Case S
         z3::expr_vector case_s(m_z3_ctx);
@@ -615,7 +641,7 @@ void Macro::encode_pins_center_of_macro(eRotation const rotation)
         }
     }
     m_encode_pins_center_of_macro = z3::mk_and(clauses);
-    
+
     for (auto itor: _clauses){
         m_encode_pins_center_of_macro_clauses += itor;
     }

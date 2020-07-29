@@ -14,25 +14,38 @@
 
 #include <vector>
 #include <string>
+#include <sstream>
 
 #include <exception.hpp>
 
 namespace Placer {
+
     namespace mzn {
 
-        inline std::string mk_and(std::vector<std::string> const & values);
-        inline std::string mk_or(std::vector<std::string> const & values);
-        inline std::string mk_eq(std::string const & a, std::string const & b);
-        inline std::string mk_lt(std::string const & a, std::string const & b);
-        inline std::string mk_gt(std::string const & a, std::string const & b);
-        inline std::string mk_le(std::string const & a, std::string const & b);
-        inline std::string mk_ge(std::string const & a, std::string const & b);
-        inline std::string mk_add(std::string const & a, std::string const & b);
-        inline std::string mk_sub(std::string const & a, std::string const & b);
-        inline std::string ite(std::string const & cond, 
-                               std::string const & a,
-                               std::string const & b);
+        /**
+         * @brief Check Incoming Values
+         * 
+         * @param a First Value
+         * @param b Second Value
+         */
+        static inline void check_pre(std::string const & a, std::string const & b)
+        {
+            assertion_check(!a.empty());
+            assertion_check(!b.empty());
+        }
         
+        /**
+         * @brief Check Incoming Values
+         * 
+         * @param values Vector of Values
+         */
+        static inline void check_pre(std::vector<std::string> const & values)
+        {
+            for (auto itor: values){
+                assertion_check(!itor.empty());
+            }
+        }
+
         /**
          * @brief Perform And Operation on Vector
          * 
@@ -41,21 +54,37 @@ namespace Placer {
          */
         inline std::string mk_and(std::vector<std::string> const & values)
         {
-            std::string retval;
+            check_pre(values);
+
+            std::stringstream retval;
 
             if (values.size() == 0){
                 throw Utils::PlacerException("Can not perform mk_and on empty vector!");
             } else if (values.size() == 1){
-                retval = values[0];
+                retval << values[0];
             } else {
                 std::string and_token = " /\\ ";
-                retval + "( ";
+                retval << "( ";
                 for (size_t i = 0; i < values.size() - 1; ++i){
-                    retval + values[i] + and_token;
+                    retval << values[i] << and_token;
                 }
-                retval + values[values.size() - 1] + " )";
+                retval << values[values.size() - 1] << " )";
             }
-            return retval;
+            return retval.str();
+        }
+        
+        /**
+         * @brief Perform And Operation on Two Values
+         * 
+         * @param a Operand a
+         * @param b Operand b
+         * @return std::string
+         */
+        inline std::string mk_and(std::string const & a, std::string const & b)
+        {
+            check_pre(a ,b);
+
+            return "( " + a + " /\\ " + b + " )";
         }
 
         /**
@@ -66,21 +95,23 @@ namespace Placer {
          */
         inline std::string mk_or(std::vector<std::string> const & values)
         {
-            std::string retval;
+            check_pre(values);
+
+            std::stringstream retval;
 
             if (values.size() == 0){
                 throw Utils::PlacerException("Can not perform mk_or on empty vector!");
             } else if (values.size() == 1){
-                retval = values[0];
+                retval << values[0];
             } else {
                 std::string or_token = " \\/ ";
-                retval + "( ";
+                retval << "( ";
                 for (size_t i = 0; i < values.size() - 1; ++i){
-                    retval + values[i] + or_token;
+                    retval << values[i] << or_token;
                 }
-                retval + values[values.size() - 1] + " )";
+                retval << values[values.size() - 1] << " )";
             }
-            return retval;
+            return retval.str();
         }
 
         /**
@@ -91,11 +122,15 @@ namespace Placer {
          * @param b Second Path
          * @return std::string
          */
-        inline std::string ite(std::string const & cond, 
+        inline std::string ite(std::string const & cond,
                                std::string const & a,
                                std::string const & b)
         {
-            return "if " + cond + " then " + a + " else " + b + " ;";
+            assertion_check(!cond.empty());
+            assertion_check(!a.empty());
+            assertion_check(!b.empty());
+
+            return "if " + cond + " then " + a + " else " + b + "endif ";
         }
 
         /**
@@ -107,11 +142,13 @@ namespace Placer {
          */
         inline std::string mk_eq(std::string const & a, std::string const & b)
         {
+            check_pre(a, b);
+            
             return "( " + a + " == " + b + " )";
         }
 
         /**
-         * @brief .Minizinc Less than Operator
+         * @brief Minizinc Less than Operator
          * 
          * @param a First Operand
          * @param b Second Operand
@@ -119,6 +156,8 @@ namespace Placer {
          */
         inline std::string mk_lt(std::string const & a, std::string const & b)
         {
+            check_pre(a, b);
+
             return " ( " + a + " < " + b + " )";
         }
 
@@ -131,6 +170,8 @@ namespace Placer {
          */
         inline std::string mk_gt(std::string const & a, std::string const & b)
         {
+            check_pre(a, b);
+
             return " ( " + a + " > " + b + " )";
         }
 
@@ -143,6 +184,8 @@ namespace Placer {
          */
         inline std::string mk_le(std::string const & a, std::string const & b)
         {
+            check_pre(a, b);
+
             return " ( " + a + " <= " + b + " )";
         }
 
@@ -155,6 +198,8 @@ namespace Placer {
          */
         inline std::string mk_ge(std::string const & a, std::string const & b)
         {
+            check_pre(a, b);
+
             return " ( " + a + " >= " + b + " )";
         }
 
@@ -167,8 +212,11 @@ namespace Placer {
          */
         inline std::string mk_add(std::string const & a, std::string const & b)
         {
+            check_pre(a, b);
+
             return " ( " + a + " + " + b + " )";
         }
+
         /**
          * @brief Minizinc Sub Operator
          * 
@@ -178,10 +226,27 @@ namespace Placer {
          */
         inline std::string mk_sub(std::string const & a, std::string const & b)
         {
+            check_pre(a, b);
+
             return " ( " + a + " - " + b + " )";
         }
-        
+
+        /**
+         * @brief Minizinc Division Operator
+         * 
+         * @param a First Operand
+         * @param b Second Operand
+         * @return std::string
+         */
+        inline std::string mk_div(std::string const & a, std::string const & b)
+        {
+            check_pre(a, b);
+            
+            return " ( " + a + " / " + b + " )";
+        }
+
     } /* namespace mzn */
+
 } /* namespace Placer */
 
 #endif /* MINIZINC_HPP */

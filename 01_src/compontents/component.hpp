@@ -35,10 +35,10 @@ public:
     z3::expr get_ux(eOrientation const orientation);
     z3::expr get_uy(eOrientation const orientation);
     
-    std::stringstream _get_lx(eOrientation const orientation);
-    std::stringstream _get_ly(eOrientation const orientation);
-    std::stringstream _get_ux(eOrientation const orientation);
-    std::stringstream _get_uy(eOrientation const orientation);
+    std::string _get_lx(eOrientation const orientation);
+    std::string _get_ly(eOrientation const orientation);
+    std::string _get_ux(eOrientation const orientation);
+    std::string _get_uy(eOrientation const orientation);
     
     size_t get_lx_numeral();
     size_t get_ly_numeral();

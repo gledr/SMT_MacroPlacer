@@ -56,7 +56,7 @@ public:
 
     virtual size_t get_area();
     virtual void dump(std::ostream & stream = std::cout);
-    
+
     void set_parent_partition(Partition* const parent);
     Partition* get_parent_partition();
 
@@ -98,14 +98,15 @@ private:
     void encode_pins_relative_to_center(eRotation const rotation);
 
     z3::expr m_pin_constraints;
-    std::string m_pin_constraints_clauses;
     z3::expr m_encode_pin_macro_frontier;
-    std::string m_encode_pin_macro_frontier_constraints;
     z3::expr m_encode_pins_not_overlapping;
-    std::string m_encode_pin_not_overlapping_constraints;
     z3::expr m_encode_pins_center_of_macro;
-    std::string m_encode_pins_center_of_macro_clauses;
     z3::expr m_encode_pins_relative_to_center;
+
+    std::string m_pin_constraints_clauses;
+    std::string m_encode_pin_macro_frontier_constraints;
+    std::string m_encode_pins_not_overlapping_constraints;
+    std::string m_encode_pins_center_of_macro_clauses;
 };
 
 } /* namespace Placer */

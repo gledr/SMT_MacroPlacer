@@ -178,7 +178,7 @@ z3::expr Component::get_lx(eOrientation const orientation)
     }
 }
 
-std::stringstream Component::_get_lx(eOrientation const orientation)
+std::string Component::_get_lx(eOrientation const orientation)
 {
     std::stringstream ret_val;
     
@@ -194,7 +194,7 @@ std::stringstream Component::_get_lx(eOrientation const orientation)
         notimplemented_check();
     }
     
-    return ret_val;
+    return ret_val.str();
 }
 /**
  * @brief Get lxy coordinate depdending on component rotation
@@ -217,7 +217,7 @@ z3::expr Component::get_ly(eOrientation const orientation)
     }
 }
 
-std::stringstream Component::_get_ly(eOrientation const orientation)
+std::string Component::_get_ly(eOrientation const orientation)
 {
     std::stringstream ret_val;
 
@@ -232,7 +232,7 @@ std::stringstream Component::_get_ly(eOrientation const orientation)
     } else {
         notimplemented_check();
     }
-    return ret_val;
+    return ret_val.str();
 }
 
 /**
@@ -256,7 +256,7 @@ z3::expr Component::get_ux(eOrientation const orientation)
     }
 }
 
-std::stringstream Component::_get_ux(eOrientation const orientation)
+std::string Component::_get_ux(eOrientation const orientation)
 {
     std::stringstream ret_val;
     
@@ -272,7 +272,7 @@ std::stringstream Component::_get_ux(eOrientation const orientation)
         notimplemented_check();
     }
     
-    return ret_val;
+    return ret_val.str();
 }
 
 /**
@@ -296,7 +296,7 @@ z3::expr Component::get_uy(eOrientation const orientation)
     }
 }
 
-std::stringstream Component::_get_uy(eOrientation const orientation)
+std::string Component::_get_uy(eOrientation const orientation)
 {
     std::stringstream ret_val;
 
@@ -311,7 +311,7 @@ std::stringstream Component::_get_uy(eOrientation const orientation)
     } else {
         notimplemented_check();
     }
-    return ret_val;
+    return ret_val.str();
 }
 
 /**

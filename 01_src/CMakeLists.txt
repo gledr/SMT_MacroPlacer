@@ -204,7 +204,6 @@ endif(PLACER_BUILD_JSONCPP)
 target_link_libraries(smt_placer PUBLIC
     ${Boost_LIBRARIES}
     Python2::Python
-    Python2::NumPy
     ${JSONCPP_LIBRARIES}
     ${Z3_LIBRARIES}
     def

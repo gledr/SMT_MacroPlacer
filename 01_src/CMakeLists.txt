@@ -28,6 +28,27 @@ else (PLACER_BUILD_JSONCPP)
     pkg_check_modules(JSONCPP jsoncpp)
 endif(PLACER_BUILD_JSONCPP)
 
+if (ENABLE_KAHYPAR)
+    set (KAHYPAR_LIBRARIES
+        ${THIRD_PARTY_LIB}/libkahypar.so
+    )
+else (ENABLE_KAHYPAR)
+    set (KAHYPAR_LIBRARIES
+    
+    )
+endif(ENABLE_KAHYPAR)
+
+if (ENABLE_PARQUET)
+    set (PARQUET_LIBRARIES
+        ${PARQUET_HOME}/lib/libParquetFP.a
+        ${ABKCOMMON_HOME}/lib/libABKCommon.a
+    )
+else (ENABLE_PARQUET)
+    set (PARQUET_LIBRARIES
+        
+    )
+endif (ENABLE_PARQUET)
+
 add_definitions(-D_CPPUNWIND)
 
 ############################################################
@@ -144,13 +165,25 @@ add_executable(bookshelf_converter
 add_dependencies(smt_placer
     def
     lef
-    build_kahypar
     build_minizinc
     placer_config
-    ABKCommon
-    ParquetFP
     placer_utils
 )
+
+if (ENABLE_KAHYPAR)
+    add_dependencies(smt_placer
+        build_kahypar
+    )
+     add_definitions(-DBUILD_KAHYPAR)   
+endif(ENABLE_KAHYPAR)
+
+if (BUILD_PARQUET)
+    add_dependencies(smt_placer
+        ABKCommon
+        ParquetFP
+    )
+    add_definitions(-DENABLE_PARQUET) 
+endif (BUILD_PARQUET)
 
 if(PLACER_BUILD_Z3)
     add_dependencies(smt_placer build_z3)
@@ -178,9 +211,8 @@ target_link_libraries(smt_placer PUBLIC
     defzlib
     lef
     lefzlib
-    ${THIRD_PARTY_LIB}/libkahypar.so
-    ${PARQUET_HOME}/lib/libParquetFP.a
-    ${ABKCOMMON_HOME}/lib/libABKCommon.a
+    ${KAHYPAR_LIBRARIES}
+    ${PARQUET_LIBRARIES}
     pthread
     dl
     placer_utils

@@ -22,10 +22,11 @@
 #include <object.hpp>
 #include <utils.hpp>
 
+#ifdef ENABLE_PARQUET
 #include <Parquet.h>
 #include <mixedpackingfromdb.h>
 #include "btreeanneal.h"
-
+#endif
 namespace Placer {
 
 /**
@@ -58,9 +59,11 @@ private:
     Tree* m_tree;
     Layout* m_layout;
 
+#ifdef ENABLE_PARQUET
     parquetfp::DB* m_db;
     parquetfp::Nodes* m_nodes;
     parquetfp::Nets* m_nets;
+#endif
 
     Macro* find_macro(std::string const & name);
 };

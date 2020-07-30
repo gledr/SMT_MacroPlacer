@@ -28,7 +28,11 @@ option(PLACER_BUILD_BOOST
 option(PLACER_BUILD_JSONCPP 
     "Download and Build Jsoncpp or use System wide installed Jsoncpp version" OFF)  
 option(PLACER_BUILD_SQLITE3
-    "Download and Build Sqlite3 or use System wide installed Sqlite3 version" OFF)  
+    "Download and Build Sqlite3 or use System wide installed Sqlite3 version" OFF)
+option (ENABLE_KAHYPAR
+    "Download and Build Kahypar for Hypergraph Partitioning Support" OFF)
+option (ENABLE_PARQUET
+    "Build Parquet Placer for Floorplanning" OFF)
     
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

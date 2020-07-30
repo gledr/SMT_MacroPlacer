@@ -13,7 +13,6 @@
 #define PARTITIONING_HPP
 
 #include <z3++.h>
-#include <libkahypar.h>
 #include <cmath>
 #include <memory>
 
@@ -27,12 +26,16 @@
 #include <exception.hpp>
 #include <tree.hpp>
 
+#ifdef BUILD_KAHYPAR
+#include <libkahypar.h>
+#endif
+
 namespace Placer {
 
 /**
  * @class Partitioning
  * 
- * @brief Split Problem into Subproblems 
+ * @brief Split Problem into Subproblems
  */
 class Partitioning: public virtual Object {
 public:

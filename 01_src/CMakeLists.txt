@@ -177,13 +177,13 @@ if (ENABLE_KAHYPAR)
      add_definitions(-DBUILD_KAHYPAR)   
 endif(ENABLE_KAHYPAR)
 
-if (BUILD_PARQUET)
+if (ENABLE_PARQUET)
     add_dependencies(smt_placer
         ABKCommon
         ParquetFP
     )
     add_definitions(-DENABLE_PARQUET) 
-endif (BUILD_PARQUET)
+endif (ENABLE_PARQUET)
 
 if(PLACER_BUILD_Z3)
     add_dependencies(smt_placer build_z3)

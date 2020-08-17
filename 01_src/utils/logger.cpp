@@ -389,6 +389,11 @@ void Logger::print_header(std::stringstream const & header)
     LOG(eStdOut) << header.str();
 }
 
+void Logger::print_footer(std::stringstream const & footer)
+{
+    LOG(eStdOut) << footer.str();
+}
+
 void Logger::print_version(std::string const & date,
                            std::string const & commit,
                            std::string const& author,

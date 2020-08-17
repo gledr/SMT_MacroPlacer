@@ -21,7 +21,8 @@ using namespace Placer::Utils;
  * @param argv Command Line Arguments Value
  */
 MacroPlacer::MacroPlacer(int const argc, char ** argv):
-    Object()
+    Object(),
+    m_header_width(0)
 {
     nullpointer_check (argv);
 
@@ -318,20 +319,30 @@ void MacroPlacer::bash_completion_script()
  */
 void MacroPlacer::print_header()
 {
-    size_t max_len = 0;
     std::stringstream headerstream;
 
     std::ifstream header (this->get_base_path() + "/01_src/utils/header.ascii");
     std::string line;
     while(std::getline(header, line)){
-        if (line.size() > max_len){
-            max_len = line.size();
+        if (line.size() > m_header_width){
+            m_header_width = line.size();
         }
         headerstream << line << std::endl;
     }
     header.close();
     m_logger->print_header(headerstream);
-    m_logger->print_version(GIT_DATE, GIT_HASH, GIT_NAME, max_len);
+    m_logger->print_version(GIT_DATE, GIT_HASH, GIT_NAME, m_header_width);
+}
+
+/**
+ * @brief Print Tool Footer
+ */
+void MacroPlacer::print_footer()
+{
+    std::stringstream footer;
+    footer << std::string (m_header_width, '-');
+
+    m_logger->print_footer(footer);
 }
 
 /**
@@ -384,6 +395,8 @@ void MacroPlacer::post_process()
     if (this->get_store_to_db()){
         m_mckt->results_to_db();
     }
+
+    this->print_footer();
 }
 
 /**

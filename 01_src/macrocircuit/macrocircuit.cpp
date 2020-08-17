@@ -1675,17 +1675,26 @@ void MacroCircuit::create_statistics()
     if (this->get_minimize_die_mode()){
         auto all_area = m_eval->all_area();
         
-        for (auto itor: all_area){
-            std::cout << "Statistics Area: " << std::endl;
-            std::cout << itor.first << ": " << itor.second << std::endl;
+        if (all_area.size() == 1){
+            std::cout << "Statistics Area: " << all_area[0].second << std::endl;
+        } else {
+            for (auto itor: all_area){
+                std::cout << "Statistics Area: " << std::endl;
+                std::cout << itor.first << ": " << itor.second << std::endl;
+            }
         }
     }
+
     if (this->get_minimize_hpwl_mode()){
         auto all_hpwl = m_eval->all_hpwl();
-        
-        for (auto itor: all_hpwl){
-            std::cout << "Statistics HPWL: " << std::endl;
-            std::cout << itor.first << ": " << itor.second << std::endl;
+
+        if (all_hpwl.size() == 1){
+            std::cout << "Statistics HPWL: " << all_hpwl[0].second << std::endl;
+        } else {
+            for (auto itor: all_hpwl){
+                std::cout << "Statistics HPWL: " << std::endl;
+                std::cout << itor.first << ": " << itor.second << std::endl;
+            }
         }
     }
 }

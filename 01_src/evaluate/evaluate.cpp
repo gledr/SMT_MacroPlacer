@@ -272,8 +272,6 @@ void Evaluate::plot_hpwl_distribution()
  */
 size_t Evaluate::calculate_area(size_t const solution)
 {
-    std::cout << "Calculate Area" << std::endl;
-    
     Layout* layout = m_mckt->get_layout();
     //assertion_check (layout->has_solution(solution));
 

@@ -57,8 +57,11 @@ private:
     Utils::Logger* m_logger;
     Utils::Timer* m_timer;
 
+    size_t m_header_width;
+
     void bash_completion_script();
     void print_header();
+    void print_footer();
 
     void read_configuration();
     void handle_configuration();

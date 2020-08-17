@@ -148,6 +148,7 @@ public:
     void export_db_to_csv(std::string const & filename);
     void export_hypergraph(std::string const & filename);
     void print_header(std::stringstream const & header);
+    void print_footer(std::stringstream const & footer);
     void print_version(std::string const & date,
                       std::string const & commit,
                       std::string const & author,

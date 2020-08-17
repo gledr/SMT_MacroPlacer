@@ -92,9 +92,19 @@ void Plotter::run()
         size_t width = cmp->get_width().get_numeral_uint();
         size_t height = cmp->get_height().get_numeral_uint();
 
-        size_t o  = cmp->get_solution_orientation(m_solution_id);
-        size_t lx = cmp->get_solution_lx(m_solution_id);
-        size_t ly = cmp->get_solution_ly(m_solution_id);
+        size_t o = 0;
+        size_t lx = 0;
+        size_t ly = 0;
+        
+        if (cmp->is_free()){
+            o  = cmp->get_solution_orientation(m_solution_id);
+            lx = cmp->get_solution_lx(m_solution_id);
+            ly = cmp->get_solution_ly(m_solution_id);
+        } else {
+            o  = cmp->get_orientation().get_numeral_uint();
+            lx = cmp->get_lx_numeral();
+            ly = cmp->get_ly_numeral();
+        }
         std::string id = cmp->get_id();
 
         // North
@@ -233,18 +243,38 @@ void Plotter::draw_pin(Component* parent, Pin* pin)
             return;
         }
     }
-
-    eOrientation o = parent->get_solution_orientation(m_solution_id);
+    
+    eOrientation o = eOrientation::eNorth;
+    
+    if (parent->is_free()){
+        o = parent->get_solution_orientation(m_solution_id);
+    } else {
+        o = static_cast<eOrientation>(parent->get_orientation().get_numeral_uint());
+    }
+    
+   
     if (o == eNorth){
-        lx = parent->get_solution_lx(m_solution_id);
-        ly = parent->get_solution_ly(m_solution_id);
+        if (parent->is_free()){
+            lx = parent->get_solution_lx(m_solution_id);
+            ly = parent->get_solution_ly(m_solution_id);
+        } else {
+            lx = parent->get_lx_numeral();
+            ly = parent->get_ly_numeral();
+        }
         ux = lx + parent->get_width_numeral();
         uy = ly + parent->get_height_numeral();
     } else if (o == eWest){
-        lx = parent->get_solution_lx(m_solution_id) - parent->get_height_numeral();
-        ly = parent->get_solution_ly(m_solution_id);
-        ux = parent->get_solution_lx(m_solution_id);
-        uy = parent->get_solution_ly(m_solution_id) + parent->get_width_numeral();
+        if (parent->is_free()){
+            lx = parent->get_solution_lx(m_solution_id) - parent->get_height_numeral();
+            ly = parent->get_solution_ly(m_solution_id);
+            ux = parent->get_solution_lx(m_solution_id);
+            uy = parent->get_solution_ly(m_solution_id) + parent->get_width_numeral();
+        } else {
+            lx = parent->get_lx_numeral()- parent->get_height_numeral();
+            ly = parent->get_ly_numeral();
+            ux = parent->get_lx_numeral();
+            uy = parent->get_ly_numeral() + parent->get_width_numeral();
+        }
     } else {
         notimplemented_check();
     }

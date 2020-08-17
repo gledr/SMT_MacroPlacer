@@ -1494,23 +1494,24 @@ void MacroCircuit::dump_smt_instance()
         }
         
         for (Terminal* t: m_terminals){
-            if (t->is_free()){
+            //if (t->is_free()){
                 out_file << "(get-value (" << t->get_pos_x() << "))" << std::endl;
                 out_file << "(get-value (" << t->get_pos_y() << "))" << std::endl;
-            }
+            //}
         }
         for(Component* c: m_components){
             if (c->is_free()){
                 out_file << "(get-value (" << c->get_lx() << "))" << std::endl;
                 out_file << "(get-value (" << c->get_ly() << "))" << std::endl;
                 out_file << "(get-value (" << c->get_orientation() << "))" << std::endl;
-                
-                for (Pin* p: c->get_pins()){
-                    out_file << "(get-value (" << p->get_pin_pos_x() << "))" << std::endl;
-                    out_file << "(get-value (" << p->get_pin_pos_y() << "))" << std::endl;
-                }
+            }
+            
+            for (Pin* p: c->get_pins()){
+                out_file << "(get-value (" << p->get_pin_pos_x() << "))" << std::endl;
+                out_file << "(get-value (" << p->get_pin_pos_y() << "))" << std::endl;
             }
         }
+    
         sol++;
         if (sol <= this->get_max_solutions()){
             out_file << "(check-sat)" << std::endl;
@@ -1668,7 +1669,6 @@ z3::expr MacroCircuit::manhattan_distance(z3::expr const & from_x,
  */
 void MacroCircuit::create_statistics()
 {
-    return;
     if (this->get_minimize_die_mode()){
         auto all_area = m_eval->all_area();
         
@@ -1845,23 +1845,29 @@ void MacroCircuit::solve_no_api()
  */
 void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<size_t>> & solution, size_t const id)
 {
-    size_t ux = solution[m_layout->get_ux().to_string()][id];
-    size_t uy = solution[m_layout->get_uy().to_string()][id];
+    if (this->get_minimize_die_mode()){
+        assert (solution.find(m_layout->get_ux().to_string()) != solution.end());
+        assert (solution.find(m_layout->get_uy().to_string()) != solution.end());
+        size_t ux = solution[m_layout->get_ux().to_string()][id];
+        size_t uy = solution[m_layout->get_uy().to_string()][id];
 
-    double area_estimation = ux * uy;
-    double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
-    m_logger->result_die_area(area_estimation);
-    m_logger->white_space(white_space);
+        double area_estimation = ux * uy;
+        double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
+        m_logger->result_die_area(area_estimation);
+        m_logger->white_space(white_space);
 
-    m_layout->set_solution_ux(ux);
-    m_layout->set_solution_uy(uy);
-    m_logger->add_solution_layout(ux, uy);
-    
+        m_layout->set_solution_ux(ux);
+        m_layout->set_solution_uy(uy);
+        m_logger->add_solution_layout(ux, uy);
+    }
     for (Terminal* terminal: m_terminals){
         z3::expr clause_x = terminal->get_pos_x();
         z3::expr clause_y = terminal->get_pos_y();
 
         if (this->get_free_terminals()){
+            assert (solution.find(clause_x.to_string()) != solution.end());
+            assert (solution.find(clause_y.to_string()) != solution.end());
+            
             size_t val_x = solution[clause_x.to_string()][id];
             size_t val_y = solution[clause_y.to_string()][id];
 
@@ -1874,18 +1880,21 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
         }
     }
 
+  
     for(Component* component: m_components){
+        if (this->get_minimize_die_mode()){
+            assert (solution.find(component->get_lx().to_string()) != solution.end());
+            assert (solution.find(component->get_ly().to_string()) != solution.end());
+            size_t x = solution[component->get_lx().to_string()][id];
+            size_t y = solution[component->get_ly().to_string()][id];
+            eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
 
-        size_t x = solution[component->get_lx().to_string()][id];
-        size_t y = solution[component->get_ly().to_string()][id];
-        eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
+            component->add_solution_lx(x);
+            component->add_solution_ly(y);
+            component->add_solution_orientation(o);
 
-        component->add_solution_lx(x);
-        component->add_solution_ly(y);
-        component->add_solution_orientation(o);
-
-        m_logger->place_macro(component->get_id(), x ,y, o);
-
+            m_logger->place_macro(component->get_id(), x ,y, o);
+        }
         //if (this->get_minimize_hpwl_mode()){
             std::vector<Pin*> pins = component->get_pins();
 
@@ -1894,6 +1903,9 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
                     z3::expr x = p->get_pin_pos_x();
                     z3::expr y = p->get_pin_pos_y();
 
+                    assert (solution.find(x.to_string()) != solution.end());
+                    assert (solution.find(y.to_string()) != solution.end());
+                    
                     size_t x_pos = solution[x.to_string()][id];
                     size_t y_pos = solution[y.to_string()][id];
 

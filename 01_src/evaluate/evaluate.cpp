@@ -153,8 +153,13 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                     from_y = p->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
                     
                 } else {
-                    from_x = m->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
-                    from_y = m->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                    if (m->is_free()){
+                        from_x = m->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
+                        from_y = m->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                    } else {
+                        from_x = m->get_lx_numeral()+ pin->get_solution_pin_pos_x(solution);
+                        from_y = m->get_ly_numeral() + pin->get_solution_pin_pos_y(solution);
+                    }
                 }
                 
             
@@ -195,8 +200,13 @@ size_t Evaluate::calculate_hpwl(size_t const solution)
                     to_y = p->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
                     
                 } else {
-                    to_x = m->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
-                    to_y = m->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                     if (m->is_free()){
+                        to_x = m->get_solution_lx(solution) + pin->get_solution_pin_pos_x(solution);
+                        to_y = m->get_solution_ly(solution) + pin->get_solution_pin_pos_y(solution);
+                    } else {
+                        to_x = m->get_lx_numeral()+ pin->get_solution_pin_pos_x(solution);
+                        to_y = m->get_ly_numeral() + pin->get_solution_pin_pos_y(solution);
+                    }
                 }
             } else if (to->has_cell()){
                 continue;
@@ -262,8 +272,10 @@ void Evaluate::plot_hpwl_distribution()
  */
 size_t Evaluate::calculate_area(size_t const solution)
 {
+    std::cout << "Calculate Area" << std::endl;
+    
     Layout* layout = m_mckt->get_layout();
-    assertion_check (layout->has_solution(solution));
+    //assertion_check (layout->has_solution(solution));
 
     size_t lx = layout->get_lx().get_numeral_uint();
     size_t ly = layout->get_ly().get_numeral_uint();

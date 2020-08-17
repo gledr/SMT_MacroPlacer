@@ -263,19 +263,30 @@ void Evaluate::plot_hpwl_distribution()
 size_t Evaluate::calculate_area(size_t const solution)
 {
     Layout* layout = m_mckt->get_layout();
-    assertion_check (layout->has_solution(solution));
+    
+    if (this->get_minimize_die_mode()){
+        assertion_check (layout->has_solution(solution));
+    }
 
-    size_t lx = layout->get_lx().get_numeral_uint();
-    size_t ly = layout->get_ly().get_numeral_uint();
+    size_t lx = 0;
+    size_t ly = 0;
     size_t ux = 0;
     size_t uy = 0;
 
+    if (layout->is_free_lx() && layout->is_free_ly()){
+        lx = 0;
+        ly = 0;
+    } else {
+        lx = layout->get_lx_numerical();
+        ly = layout->get_ly_numerical();
+    }
+    
     if (layout->is_free_ux() && layout->is_free_uy()){
         ux = layout->get_solution_ux(solution);
         uy = layout->get_solution_uy(solution);
     } else {
-        ux = layout->get_ux().get_numeral_uint();
-        uy = layout->get_uy().get_numeral_uint();
+        ux = layout->get_ux_numercial();
+        uy = layout->get_uy_numerical();
     }
 
     return (ux - lx) * (uy -ly);

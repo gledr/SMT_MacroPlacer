@@ -266,7 +266,7 @@ void Bookshelf::read_nets()
                             pins.push_back(pin);
                         // Pin is free
                         } else {
-                            std::string pin =  "%0.0_%0.0";
+                            std::string pin = "%0.0_%0.0";
                             this->add_pin_to_macro(id, pin, direction, "", "");
                             pins.push_back(pin);
                         }

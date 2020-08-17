@@ -1,3 +1,14 @@
+#==================================================================
+# Author       : Pointner Sebastian
+# Company      : Johannes Kepler University
+# Name         : SMT Macro Placer
+# Workfile     : CMakeLists.txt
+#
+# Date         : 30.July 2020
+# Compiler     : cmake version 3.18.0
+# Copyright    : Johannes Kepler University
+# Description  : Root CMakeLists
+#==================================================================
 cmake_minimum_required(VERSION 3.12)
 
 project(SMT_MacroPlacer)

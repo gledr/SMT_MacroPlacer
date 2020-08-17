@@ -788,6 +788,7 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
     // Write Position of Terminals
 ///{{{
     for(auto itor: m_terminals){
+        std::cout << itor->get_name() << std::endl;
         if(!itor->is_free()){
             continue;
         }
@@ -798,7 +799,10 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
 
             auto idx = m_circuit->defPinMap.find(itor->get_id());
             LefDefParser::defiPin& pin = m_circuit->defPinStor[idx->second];
-            m_circuit->defPinStor[idx->second].setPlacement(DEFI_COMPONENT_PLACED, pos_x, pos_y, 1);
+            pin.Init();
+            pin.setPlacement(DEFI_COMPONENT_PLACED, pos_x, pos_y, 1);
+           
+            
         }
     }
 ///}}}
@@ -1992,6 +1996,7 @@ std::string MacroCircuit::_manhattan_distance(std::string const & from_x,
  */
 void MacroCircuit::create_statistics()
 {
+    return;
     auto best_area = m_eval->best_area();
     auto best_hpwl = m_eval->best_hpwl();
     std::cout << "HPWL: " << best_hpwl.first << " " << best_hpwl.second << std::endl;
@@ -2154,48 +2159,53 @@ void MacroCircuit::process_key_value_results(std::map<std::string,
                                              std::vector<size_t>> & solution,
                                              size_t const id)
 {
-    size_t ux = solution[m_layout->get_ux().to_string()][id];
-    size_t uy = solution[m_layout->get_uy().to_string()][id];
+    if (this->get_minimize_die_mode()){
+        size_t ux = solution[m_layout->get_ux().to_string()][id];
+        size_t uy = solution[m_layout->get_uy().to_string()][id];
+        
+        double area_estimation = ux * uy;
+        double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
+        m_logger->result_die_area(area_estimation);
+        m_logger->white_space(white_space);
 
-    double area_estimation = ux * uy;
-    double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
-    m_logger->result_die_area(area_estimation);
-    m_logger->white_space(white_space);
+        m_layout->set_solution_ux(ux);
+        m_layout->set_solution_uy(uy);
+        m_logger->add_solution_layout(ux, uy);
+    }
 
-    m_layout->set_solution_ux(ux);
-    m_layout->set_solution_uy(uy);
-    m_logger->add_solution_layout(ux, uy);
+    if (this->get_free_terminals()){
+        for (Terminal* terminal: m_terminals){
+            z3::expr clause_x = terminal->get_pos_x();
+            z3::expr clause_y = terminal->get_pos_y();
 
-    for (Terminal* terminal: m_terminals){
-        z3::expr clause_x = terminal->get_pos_x();
-        z3::expr clause_y = terminal->get_pos_y();
+            if (this->get_free_terminals()){
+                size_t val_x = solution[clause_x.to_string()][id];
+                size_t val_y = solution[clause_y.to_string()][id];
 
-        if (this->get_free_terminals()){
-            size_t val_x = solution[clause_x.to_string()][id];
-            size_t val_y = solution[clause_y.to_string()][id];
+                terminal->add_solution_pos_x(val_x);
+                terminal->add_solution_pos_y(val_y);
 
-            terminal->add_solution_pos_x(val_x);
-            terminal->add_solution_pos_y(val_y);
-
-            m_logger->place_terminal(terminal->get_name(),
-                                    val_x,
-                                    val_y);
+                m_logger->place_terminal(terminal->get_name(),
+                                        val_x,
+                                        val_y);
+            }
         }
     }
 
     for(Component* component: m_components){
-        size_t x = solution[component->get_lx().to_string()][id];
-        size_t y = solution[component->get_ly().to_string()][id];
-        
-        if (!component->get_orientation().is_numeral()){
-            eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
-            component->add_solution_orientation(o);
+        if (this->get_minimize_die_mode()){
+            size_t x = solution[component->get_lx().to_string()][id];
+            size_t y = solution[component->get_ly().to_string()][id];
+
+            if (!component->get_orientation().is_numeral()){
+                eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
+                component->add_solution_orientation(o);
+            }
+            component->add_solution_lx(x);
+            component->add_solution_ly(y);
+
+            m_logger->place_macro(component->get_id(), x ,y, eNorth);
         }
-        component->add_solution_lx(x);
-        component->add_solution_ly(y);
-
-        m_logger->place_macro(component->get_id(), x ,y, eNorth);
-
         std::vector<Pin*> pins = component->get_pins();
 
         for (Pin* p: pins){
@@ -2359,7 +2369,6 @@ void MacroCircuit::solve_minizinc()
         results_content.push_back(line);
     }
     results.close();
-
     if (results_content[0] == "%% TIMEOUT"){
         std::cout << "timeout" << std::endl;
         exit(0);
@@ -2372,6 +2381,7 @@ void MacroCircuit::solve_minizinc()
         for (auto itor: results_content){
             std::string remove_semicolon = itor.substr(0, itor.size() -1);
             std::vector<std::string> token = Utils::Utils::tokenize(remove_semicolon, " = ");
+            assert (token.size() == 2);
 
             key_value_results[token[0]].push_back(std::stoi(token[1]));
         }

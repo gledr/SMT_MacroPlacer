@@ -47,7 +47,7 @@ public:
 
     z3::expr& get_pin_pos_x();
     z3::expr& get_pin_pos_y();
-    
+
     void set_pin_pos_x(size_t const pos);
     void set_pin_pos_y(size_t const pos);
 
@@ -56,7 +56,7 @@ public:
 
     void set_x_offset_percentage(int const offset);
     void set_y_offset_percentage(int const offset);
-    
+
     void set_x_offset(int const offset);
     void set_y_offset(int const offset);
 
@@ -91,9 +91,11 @@ public:
 
     static e_pin_direction string2enum(std::string const & name);
     static std::string enum2string(e_pin_direction const direction);
-    
+
     void set_bookshelf_pin_id(std::string const & id);
     std::string get_bookshelf_pin_id() const;
+
+    size_t get_key();
 
 private:
     size_t m_bitwidht;
@@ -103,6 +105,7 @@ private:
     EncodingUtils* m_encode;
     Utils::Logger* m_logger;
 
+    size_t m_key;
     std::string m_pin_name;
     std::string m_macro_name;
     e_pin_direction m_direction;

@@ -501,8 +501,8 @@ void Tree::merge_edges()
             }
             
             if (*a == *b){
-                std::cout << "Merge " << a->get_from()->get_id() << " " << a->get_from_pin() << " " << b->get_from()->get_id() << " " <<  b->get_from_pin() << " "
-                                      << a->get_to()->get_id() << " " << a->get_to_pin() << " " << b->get_to()->get_id() << " " <<  b->get_to_pin() << std::endl;
+                //std::cout << "Merge " << a->get_from()->get_id() << " " << a->get_from_pin() << " " << b->get_from()->get_id() << " " <<  b->get_from_pin() << " "
+                //                     << a->get_to()->get_id() << " " << a->get_to_pin() << " " << b->get_to()->get_id() << " " <<  b->get_to_pin() << std::endl;
                 a->set_weight(a->get_weight() + b->get_weight());
                 delete b; m_edges[j] = nullptr;
             }

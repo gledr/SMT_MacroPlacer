@@ -27,6 +27,7 @@ Pin::Pin(std::string const & name,
          size_t const & x,
          size_t const & y):
     Object(),
+    m_key(m_key_counter++),
     m_encode(new EncodingUtils()),
     m_pin_name(name),
     m_direction(direction),
@@ -37,7 +38,7 @@ Pin::Pin(std::string const & name,
 {
     m_bitwidht = 0;
     m_frequency = 0;
-    
+
     m_logger->add_fixed_pin(name, "", x, y);
 }
 
@@ -52,12 +53,13 @@ Pin::Pin(std::string const & pin_name,
          std::string const & macro_name,
          e_pin_direction const direction):
     Object(),
+    m_key(m_key_counter++),
     m_encode(new EncodingUtils()),
     m_pin_name(pin_name),
     m_macro_name(macro_name),
     m_direction(direction),
-    m_pin_pos_x(m_encode->get_constant(macro_name + pin_name + "_pos_x")),
-    m_pin_pos_y(m_encode->get_constant(macro_name + pin_name + "_pos_y")),
+    m_pin_pos_x(m_encode->get_constant(macro_name + std::to_string(m_key) + "_pos_x")),
+    m_pin_pos_y(m_encode->get_constant(macro_name + std::to_string(m_key) + "_pos_y")),
     m_offset_x_percentage(0),
     m_offset_y_percentage(0),
     m_is_free(true),
@@ -65,7 +67,7 @@ Pin::Pin(std::string const & pin_name,
 {
     m_bitwidht = 0;
     m_frequency = 0;
-    
+
     m_logger->add_free_pin(pin_name, macro_name);
 }
 
@@ -125,6 +127,16 @@ bool Pin::has_bitwidth()
 std::string Pin::get_macro_name()
 {
     return m_macro_name;
+}
+
+/**
+ * @brief Get Pins Identifier Key
+ * 
+ * @return size_t
+ */
+size_t Pin::get_key()
+{
+    return m_key;
 }
 
 /**

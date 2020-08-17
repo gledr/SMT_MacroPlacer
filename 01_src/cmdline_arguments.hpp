@@ -98,6 +98,10 @@ namespace Placer {
         = "free-terminals";
     constexpr const char CMD_FREE_TERMINALS_TEXT[] 
         = "Ignore Any Existing Terminal Placement";
+    constexpr const char CMD_FREE_COMPONENTS[]
+        = "free-components";
+    constexpr const char CMD_FREE_COMPONENTS_TEXT[]
+        = "Ignore Any Existing FIXED Component Placement";
 
     constexpr const char CMD_SKIP_PWR_SUPPLY[] 
         = "skip-power-supply";

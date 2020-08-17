@@ -70,6 +70,7 @@ void MacroPlacer::read_configuration()
             (CMD_MIN_AREA,        CMD_MIN_AREA_TEXT)
             (CMD_MIN_HPWL,        CMD_MIN_HPWL_TEXT)
             (CMD_FREE_TERMINALS,  CMD_FREE_TERMINALS_TEXT)
+            (CMD_FREE_COMPONENTS, CMD_FREE_COMPONENTS_TEXT)
             (CMD_SKIP_PWR_SUPPLY, CMD_SKIP_PWR_SUPPLY_TEXT)
             (CMD_PARTITION_SIZE,  po::value<size_t>(),                                   CMD_PARTITION_SIZE_TEXT)
             (CMD_PARTITION_COUNT, po::value<size_t>(),                                   CMD_PARTITION_COUNT_TEXT)
@@ -245,6 +246,9 @@ void MacroPlacer::handle_configuration()
     }
     if(m_vm.count(CMD_FREE_TERMINALS)){
         this->set_free_terminals(true);
+    }
+    if(m_vm.count(CMD_FREE_COMPONENTS)){
+        this->set_free_components(true);
     }
     if (m_vm.count(CMD_SKIP_PWR_SUPPLY)){
         this->set_skip_power_network(true);

@@ -46,6 +46,7 @@ bool Object::m_lex_optimizer = false;
 bool Object::m_partitioning = false;
 bool Object::m_parquet_fp = false;
 bool Object::m_free_terminals = false;
+bool Object::m_free_components = false;
 bool Object::m_strip_terminals = false;
 bool Object::m_skip_power_network = false;
 size_t Object::m_timeout = 0;
@@ -459,6 +460,16 @@ bool Object::get_free_terminals() const
 void Object::set_free_terminals(bool const value)
 {
     m_free_terminals = value;
+}
+
+bool Object::get_free_components() const
+{
+    return m_free_components;
+}
+
+void Object::set_free_components(bool const value)
+{
+    m_free_components = value;
 }
 
 void Object::set_strip_terminals(bool const val)

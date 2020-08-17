@@ -30,7 +30,10 @@ struct MacroDefinition {
 
     std::string name;
     std::string id;
+    bool is_unplaced;
     bool is_placed;
+    bool is_fixed;
+    bool is_cover;
 
     size_t width;
     size_t height;

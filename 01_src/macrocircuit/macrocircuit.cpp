@@ -250,6 +250,9 @@ void MacroCircuit::create_macro_definitions()
             macro_definition.orientation = 
                 static_cast<eOrientation>(itor.placementOrient());
             macro_definition.is_placed = itor.isPlaced();
+            macro_definition.is_unplaced = itor.isUnplaced();
+            macro_definition.is_cover = itor.isCover();
+            macro_definition.is_fixed = itor.isFixed();
 
             for(auto pin: lef_pins){
                 PinDefinition pin_def;
@@ -365,7 +368,7 @@ void MacroCircuit::add_macros()
     for (MacroDefinition macro_definition: m_macro_definitions){
         Macro* m = nullptr;
 
-        if (macro_definition.is_placed){
+        if (macro_definition.is_fixed && !this->get_free_components()){
             m = new Macro(macro_definition.name,
                           macro_definition.id,
                           macro_definition.width,
@@ -1779,9 +1782,12 @@ void MacroCircuit::solve_no_api()
 
     std::vector<std::string> args;
     args.push_back(smt_file);
-    
-    std::cout << this->get_third_party_bin() << std::endl;
+
+#if BUILD_Z3
+    Utils::Utils::system_execute(this->get_third_party_bin() + "z3", args, results_file, true);
+#else 
     Utils::Utils::system_execute("z3", args, results_file, true);
+#endif
 
     std::map<std::string, std::vector<size_t>> key_value_results;
     std::vector<std::string> z3_results;

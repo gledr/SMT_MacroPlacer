@@ -49,6 +49,7 @@ bool Object::m_free_terminals = false;
 bool Object::m_free_components = false;
 bool Object::m_strip_terminals = false;
 bool Object::m_skip_power_network = false;
+bool Object::m_store_db = false;
 size_t Object::m_timeout = 0;
 size_t Object::m_bitwidth_orientation;
 size_t Object::m_solutions = 1;
@@ -565,4 +566,14 @@ void Object::set_ini_file(std::string const & file)
 std::string Object::get_third_party_bin()
 {
     return this->get_base_path() + "/05_third_party/bin/";
+}
+
+void Object::set_store_to_db(bool const value)
+{
+    m_store_db = value;
+}
+
+bool Object::get_store_to_db() const 
+{
+    return m_store_db;
 }

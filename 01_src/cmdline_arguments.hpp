@@ -135,8 +135,13 @@ namespace Placer {
 
     constexpr const char CMD_STORE_SMT[] 
         = "store-smt";
-    constexpr const char CMD_STORE_SMT_TEXT[] = 
-        "Store the generated SMT2 problems to the filesystem";
+    constexpr const char CMD_STORE_SMT_TEXT[]
+        = "Store the generated SMT2 problems to the filesystem";
+
+    constexpr const char CMD_STORE_DB[]
+        = "store-db";
+    constexpr const char CMD_STORE_DB_TEXT[]
+        = "Store Results to Database";
 
     constexpr const char CMD_PARTITION[] 
         = "partition";

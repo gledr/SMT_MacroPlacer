@@ -188,6 +188,9 @@ protected:
     void set_ini_file(std::string const & file);
     std::string get_ini_file() const;
 
+    void set_store_to_db(bool const value);
+    bool get_store_to_db() const;
+
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
 
@@ -223,6 +226,7 @@ private:
     static bool m_dump_all;
     static bool m_dump_best;
     static bool m_store_smt;
+    static bool m_store_db;
     static bool m_pareto_optimizer;
     static bool m_lex_optimizer;
     static bool m_parquet_fp;

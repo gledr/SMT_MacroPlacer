@@ -60,6 +60,7 @@ void MacroPlacer::read_configuration()
             (CMD_DUMP_BEST,       CMD_DUMP_BEST_TEXT)
             (CMD_DUMP_ALL,        CMD_DUMP_ALL_TEXT)
             (CMD_SAVE_ALL,        CMD_SAVE_ALL_TEXT)
+            (CMD_STORE_DB,        CMD_STORE_DB_TEXT)
             (CMD_VERBOSE,         CMD_VERBOSE_TEXT)
             (CMD_STORE_LOG,       CMD_STORE_LOG_TEXT)
             (CMD_STORE_SMT,       CMD_STORE_SMT_TEXT)
@@ -210,6 +211,9 @@ void MacroPlacer::handle_configuration()
     }
     if (m_vm.count(CMD_DUMP_BEST)){
         this->set_dump_best(true);
+    }
+    if(m_vm.count(CMD_STORE_DB)){
+        this->set_store_to_db(true);
     }
     if(m_vm.count(CMD_TIMEOUT)){
         this->set_timeout(m_vm[CMD_TIMEOUT].as<size_t>());
@@ -370,7 +374,6 @@ void MacroPlacer::post_process()
     if (this->get_save_best()){
         m_mckt->save_best();
     }
-
     if (this->get_dump_all()){
         m_mckt->dump_all();
     }
@@ -378,7 +381,9 @@ void MacroPlacer::post_process()
         m_mckt->dump_best();
     }
     m_mckt->create_statistics();
-    m_mckt->results_to_db();
+    if (this->get_store_to_db()){
+        m_mckt->results_to_db();
+    }
 }
 
 /**

@@ -75,6 +75,7 @@ public:
 
     void unsat_solution();
     void unknown_solution();
+    void solver_timeout();
 
     void use_timeout(size_t const sec);
 

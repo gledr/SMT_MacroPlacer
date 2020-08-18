@@ -185,6 +185,7 @@ void Logger::white_space(double const & val)
     msg <<  "Whitespace Area: " << val << " %";
     LOG(eInfo) << msg.str();
 }
+
 void Logger::unsat_solution()
 {
     LOG(eInfo) << "UNSAT: No valid Solution could be found!";
@@ -195,10 +196,15 @@ void Logger::unknown_solution()
     LOG(eInfo) << "UNKNOWN: No Solution Found! Check Timeout and Memory Limits!";
 }
 
+void Logger::solver_timeout()
+{
+    LOG(eInfo) << "Timeout: No Solution Found! Check Timeout Limits!";
+}
+
 void Logger::solve_optimize()
 {
     LOG(eInfo) << "Solving Optimization Problem...";
-}   
+}
 
 void Logger::use_pareto_optimizer()
 {
@@ -217,7 +223,7 @@ void Logger::use_box_optimizer ()
 
 void Logger::pareto_step()
 {
-  LOG(eInfo) << "Next Pareto Optimization Step";
+    LOG(eInfo) << "Next Pareto Optimization Step";
 }
 
 void Logger::set_die_ux(size_t const val)
@@ -240,7 +246,7 @@ void Logger::set_die_lx(size_t const val)
     msg << "Setting Die lx to " << val;
     LOG(eInfo) << msg.str();
 }
-  
+
 void Logger::set_die_ly(size_t const val)
 {
     std::stringstream msg;
@@ -339,14 +345,14 @@ void Logger::solver_version (std::string const & version)
     LOG(eInfo) << msg.str();
 }
 
-void Logger::execution_start ()
+void Logger::execution_start()
 {
     std::stringstream msg;
     msg <<  "Execution Start: " << Utils::Utils::get_current_time();
     LOG(eDebug) << Utils::Utils::get_bash_string_blink_red(msg.str());
 }
 
-void Logger::execution_end ()
+void Logger::execution_end()
 {
     std::stringstream msg;
     msg <<  "Execution End: " << Utils::Utils::get_current_time();

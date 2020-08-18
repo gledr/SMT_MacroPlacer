@@ -1809,12 +1809,15 @@ void MacroCircuit::solve_no_api()
     results.close();
 
     if (z3_results[0] == "sat"){
-        
+        // Nothing to do
     } else if (z3_results[0] == "unsat"){
          m_logger->unsat_solution();
         exit(0);
     } else if (z3_results[0] == "unknown"){
         m_logger->unknown_solution();
+        exit(0);
+    } else if (z3_results[0] == "timeout"){
+        m_logger->solver_timeout();
         exit(0);
     } else {
         assert (0);

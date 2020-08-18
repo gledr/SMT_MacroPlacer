@@ -55,7 +55,7 @@ public:
 
     virtual size_t get_area();
     virtual void dump(std::ostream & stream = std::cout);
-    
+
     void set_parent_partition(Partition* const parent);
     Partition* get_parent_partition();
 
@@ -80,9 +80,6 @@ private:
     Partition* m_parent;
 
     size_t m_key;
-
-    size_t m_layout_x;
-    size_t m_layout_y;
 
     void handle_supplement();
     void resolve_pin_position();

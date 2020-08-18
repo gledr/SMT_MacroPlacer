@@ -125,6 +125,9 @@ void MacroCircuit::build_circuit_lefdef()
             nullpointer_check (m_circuit);
             this->set_design_name(m_circuit->defDesignName);
 
+            this->set_lefdef_units(m_circuit->defUnit);
+            m_logger->lefdef_units(m_circuit->defUnit);
+
             bool found = false;
             for(auto itor: m_circuit->lefSiteStor) {
                 if(itor.siteClass() == this->get_site()){
@@ -150,14 +153,13 @@ void MacroCircuit::build_circuit_lefdef()
 
             m_logger->min_die_area(m_estimated_area);
 
+            // TODO: Fix that threads can run parallel again
             std::thread macro_worker(&MacroCircuit::add_macros, this);
             macro_worker.join();
             std::thread cell_worker(&MacroCircuit::add_cells, this);
             cell_worker.join();
             std::thread terminal_worker(&MacroCircuit::add_terminals, this);
             terminal_worker.join();
-
-            m_layout->set_units(m_circuit->defUnit);
 
             this->init_tree(eLEFDEF);
 }
@@ -698,29 +700,29 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
     if (m_layout->is_free_lx()){
         notimplemented_check();
     } else {
-        lx = m_layout->get_lx_numerical();
+        lx = m_layout->get_lx_numerical() / this->get_lefdef_units();
     }
     if (m_layout->is_free_ly()){
         notimplemented_check();
     } else {
-        ly = m_layout->get_ly_numerical();
+        ly = m_layout->get_ly_numerical() / this->get_lefdef_units();
     }
      if (m_layout->is_free_ux()){
-        ux = m_layout->get_solution_ux(solution);
+        ux = m_layout->get_solution_ux(solution) / this->get_lefdef_units();
     } else {
-        ux = m_layout->get_ux_numercial();
+        ux = m_layout->get_ux_numercial() / this->get_lefdef_units();
     }
      if (m_layout->is_free_uy()){
-        uy = m_layout->get_solution_uy(solution);
+        uy = m_layout->get_solution_uy(solution) / this->get_lefdef_units();
     } else {
-        uy = m_layout->get_uy_numerical();
+        uy = m_layout->get_uy_numerical() / this->get_lefdef_units();
     }
 
     defiGeometries data(nullptr);
     data.Init();
     data.startList(lx,ly);
     data.addToList(ux,uy);
-    
+
     m_circuit->defDieArea.Destroy();
     m_circuit->defDieArea.Init();
     m_circuit->defDieArea.addPoint(&data);
@@ -821,11 +823,11 @@ void MacroCircuit::dump(std::ostream& stream)
 {
     stream << std::string(30, '+') << std::endl;
     stream << "Design (" << this->get_design_name() << ")" << std::endl;
-    stream << "DieArea (" << m_layout->get_ux().get_numeral_uint() -
-                             m_layout->get_lx().get_numeral_uint() 
-                          << " x " << m_layout->get_uy().get_numeral_uint()-
-                            m_layout->get_lx().get_numeral_uint() << ")" << std::endl;
-    stream << "Units: " << m_layout->get_units().get_numeral_uint() << std::endl;
+    stream << "DieArea (" << m_layout->get_ux_numercial() -
+                             m_layout->get_lx_numerical() 
+                          << " x " << m_layout->get_uy_numerical() -
+                            m_layout->get_lx_numerical() << ")" << std::endl;
+    stream << "Units: " << this->get_lefdef_units() << std::endl;
     for(auto itor: m_macros){
         itor->dump(stream);
     }
@@ -972,7 +974,6 @@ void MacroCircuit::run_encoding()
     }
     
     m_z3_opt->minimize(m_hpwl_cost_function);
-    
 }
 
 /**

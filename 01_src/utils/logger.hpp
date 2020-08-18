@@ -48,11 +48,12 @@ public:
 
     void dump_all();
     void dump_best();
-    
+
     void save_all(eInputFormat const type);
     void save_best(eInputFormat const type);
-    
+
     void solver_version(std::string const & version);
+    void lefdef_units(size_t const value);
 
     void supplement_file(std::string const & file);
     void write_supplement(std::string const & file);

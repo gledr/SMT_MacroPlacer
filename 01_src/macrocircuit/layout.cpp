@@ -104,16 +104,6 @@ z3::expr& Layout::get_uy()
 }
 
 /**
- * @brief Get units used in design
- * 
- * @return z3::expr&
- */
-z3::expr& Layout::get_units()
-{
-    return m_units;
-}
-
-/**
  * @brief Free ux variable
  */
 void Layout::free_ux ()
@@ -195,16 +185,6 @@ void Layout::set_uy(size_t const val)
     m_logger->set_die_uy(val);
     m_free_uy = false;
     m_uy = m_encode->get_value(val);
-}
-
-/**
- * @brief Set Value for Units
- * 
- * @param val Value for units
- */
-void Layout::set_units(size_t const val)
-{
-    m_units = m_encode->get_value(val);
 }
 
 /**

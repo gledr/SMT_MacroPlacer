@@ -46,13 +46,11 @@ public:
     z3::expr& get_ux();
     z3::expr& get_ly();
     z3::expr& get_uy();
-    z3::expr& get_units();
 
     void set_lx(size_t const val);
     void set_ly(size_t const val);
     void set_ux(size_t const val);
     void set_uy(size_t const val);
-    void set_units(size_t const val);
 
     void set_formula_ux(z3::expr const & formula);
     void set_formula_uy(z3::expr const & formula);

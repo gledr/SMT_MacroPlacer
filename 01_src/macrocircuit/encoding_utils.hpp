@@ -131,7 +131,7 @@ public:
         return ret_val;
     }
 
-    inline z3::expr get_value(size_t const value)
+    inline z3::expr get_value(unsigned long const value)
     {
         z3::expr ret_val(m_z3_ctx);
 

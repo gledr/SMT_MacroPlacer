@@ -191,6 +191,9 @@ protected:
     void set_store_to_db(bool const value);
     bool get_store_to_db() const;
 
+    void set_lefdef_units(size_t const value);
+    size_t get_lefdef_units() const;
+
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
 
@@ -239,6 +242,7 @@ private:
     static size_t m_num_partitions;
     static size_t m_solutions;
     static size_t m_results_id;
+    static size_t m_lefdef_units;
     static eLogic m_logic;
     static z3::expr_vector m_stored_constraints;
 

@@ -18,8 +18,6 @@
 #include <iostream>
 #include <fstream>
 
-#include <z3++.h>
-
 #include <boost/program_options.hpp>
 #include <boost/filesystem.hpp>
 
@@ -36,19 +34,19 @@ namespace Placer {
 class MacroPlacer: public virtual Object {
 public:
     MacroPlacer(int const argc, char ** argv);
-    
+
     virtual ~MacroPlacer();
 
     void init();
 
     void run();
-    
+
     void post_process();
 
 private:
     int m_argc;
     char** m_argv;
-    
+
     boost::program_options::options_description* m_options_functions;
     boost::program_options::variables_map m_vm;
 

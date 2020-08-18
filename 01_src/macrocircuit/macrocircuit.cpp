@@ -734,7 +734,7 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
         auto idx = m_circuit->defComponentMap.find(itor->get_id());
         LefDefParser::defiComponent& macro = m_circuit->defComponentStor[idx->second];
 
-        macro.setPlacementStatus(DEFI_COMPONENT_PLACED);
+        macro.setPlacementStatus(DEFI_COMPONENT_FIXED);
         macro.setPlacementLocation(itor->get_solution_lx(solution),
                                    itor->get_solution_ly(solution),
                                    itor->get_solution_orientation(solution));
@@ -1790,6 +1790,7 @@ void MacroCircuit::solve_no_api()
                                  + this->get_design_name() + "_results.txt";
 
     std::vector<std::string> args;
+    args.push_back("-T:" + std::to_string(this->get_timeout())); // -T:sec 
     args.push_back(smt_file);
 
 #if BUILD_Z3

@@ -22,8 +22,8 @@
 
 namespace Placer {
 
-enum eRotation { eFixed, e2D, e4D };
-enum eLogic { eInt, eBitVector };
+enum eRotation {eFixed, e2D, e4D};
+enum eLogic {eInt, eBitVector};
 enum eInputFormat {eLEFDEF, eBookshelf};
 
 enum eOrientation {
@@ -241,7 +241,7 @@ private:
     static size_t m_results_id;
     static eLogic m_logic;
     static z3::expr_vector m_stored_constraints;
-    
+
     static z3::context init_context();
 };
 

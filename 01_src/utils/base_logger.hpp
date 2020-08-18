@@ -55,7 +55,7 @@ public:
      */
     template<typename T>
     LogStream& operator<< (T const & val)
-    { 
+    {
         std::string level_id = this->log_level_to_string(p_severity_level);
 
         if(p_log_enabled) {
@@ -66,7 +66,7 @@ public:
                     out_file << level_id << val << std::endl;
                     out_file.close();
                 }
-                
+
             } else if (this->log_debug() || this->log_warning()){
                 if(this->p_log_to_shell){
                     std::cout << level_id << val << std::endl;

@@ -66,7 +66,6 @@ z3::expr_vector Object::m_stored_constraints(m_z3_ctx);
 
 Object::Object()
 {
-
 }
 
 Object::~Object()
@@ -147,7 +146,10 @@ std::string& Object::get_image_directory() const
 
 void Object::set_image_directory(std::string const & name)
 {
-    m_image_directory = m_results_directory + "/" + std::to_string(m_results_id) + "/" + name;
+    m_image_directory = 
+        m_results_directory + "/"
+        + std::to_string(m_results_id) + "/" 
+        + name;
 }
 
 bool Object::get_verbose() const
@@ -182,7 +184,10 @@ std::string Object::get_smt_directory() const
 
 void Object::set_smt_directory(std::string const & name)
 {
-    m_smt_directory = m_results_directory + "/" + std::to_string(m_results_id) + "/" + name;
+    m_smt_directory = 
+        m_results_directory + "/" 
+        + std::to_string(m_results_id) 
+        + "/" + name;
 }
 
 std::string Object::get_log_name() const
@@ -202,7 +207,10 @@ std::string Object::get_parquet_directory() const
 
 void Object::set_parquet_directory(std::string const & directory)
 {
-    m_parquet_directory = m_results_directory + "/" + std::to_string(m_results_id) + "/" + directory;
+    m_parquet_directory = 
+        m_results_directory + "/"
+        + std::to_string(m_results_id) + "/" 
+        + directory;
 }
 
 void Object::set_bookshelf_file(std::string const & file)

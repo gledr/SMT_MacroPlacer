@@ -10,7 +10,6 @@
 // Description  : Macro Placer Frontend
 //==================================================================
 #include <placer.hpp>
-#include <z3++.h>
 
 int main (int argc, char ** argv)
 {

@@ -58,7 +58,8 @@ size_t Object::m_partition_id = 0;
 size_t Object::m_partition_size = 1;
 size_t Object::m_num_partitions = 1;
 size_t Object::m_key_counter = 0;
-size_t Object::m_lefdef_units = 0;
+size_t Object::m_def_units = 0;
+size_t Object::m_lef_units = 0;
 eLogic Object::m_logic = eInt;
 
 z3::context Object::m_z3_ctx(init_context());
@@ -587,16 +588,26 @@ bool Object::get_store_to_db() const
     return m_store_db;
 }
 
-void Object::set_lefdef_units(size_t const value)
+void Object::set_def_units(size_t const value)
 {
-    std::cout << "a" << std::endl; 
-    
-    m_lefdef_units = value;
+    m_def_units = value;
 }
 
-size_t Object::get_lefdef_units() const
+size_t Object::get_def_units() const
 {
-    assert (m_lefdef_units > 0);
+    assert (m_def_units > 0);
 
-    return m_lefdef_units;
+    return m_def_units;
+}
+
+void Object::set_lef_units(size_t const value)
+{
+    m_lef_units = value;
+}
+
+size_t Object::get_lef_units() const
+{
+    assert (m_lef_units > 0);
+
+    return m_lef_units;
 }

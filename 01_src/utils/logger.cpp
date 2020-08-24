@@ -592,7 +592,12 @@ void Logger::write_def(std::string const & filename)
     LOG(eInfo) << std::string("Writing DEF file " + filename);
 }
 
-void Logger::lefdef_units(size_t const values)
+void Logger::def_units(size_t const values)
 {
     LOG(eInfo) << std::string("Using DEF Units: " + std::to_string(values));
+}
+
+void Logger::lef_units(size_t const values)
+{
+    LOG(eInfo) << std::string("Using LEF Units: " + std::to_string(values));
 }

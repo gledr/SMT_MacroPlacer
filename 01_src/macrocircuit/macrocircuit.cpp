@@ -26,6 +26,9 @@ MacroCircuit::MacroCircuit():
     m_terminals_non_overlapping(m_encode->get_value(0)),
     m_terminals_center_edge(m_encode->get_value(0)),
     m_hpwl_cost_function(m_encode->get_value(0)),
+    m_layout_on_grid(m_encode->get_value(0)),
+    m_terminals_on_grid(m_encode->get_value(0)),
+    m_components_on_grid(m_encode->get_value(0)),
     m_hpwl_edges(m_z3_ctx)
 {
     m_z3_opt = new z3::optimize(m_z3_ctx);
@@ -37,6 +40,7 @@ MacroCircuit::MacroCircuit():
     m_partitioning = new Partitioning();
     m_parquet = new ParquetFrontend();
     m_plotter = new Plotter();
+    m_def_utils = new DefUtils();
 
     m_circuit = nullptr;
     m_solutions = 0;
@@ -84,6 +88,7 @@ MacroCircuit::~MacroCircuit()
     delete m_timer; m_timer = nullptr;
     delete m_db; m_db = nullptr;
     delete m_plotter; m_plotter = nullptr;
+    delete m_def_utils; m_def_utils = nullptr;
 
     m_logger = nullptr;
 }
@@ -125,8 +130,11 @@ void MacroCircuit::build_circuit_lefdef()
             nullpointer_check (m_circuit);
             this->set_design_name(m_circuit->defDesignName);
 
-            this->set_lefdef_units(m_circuit->defUnit);
-            m_logger->lefdef_units(m_circuit->defUnit);
+            this->set_def_units(m_circuit->defUnit);
+            m_logger->def_units(m_circuit->defUnit);
+
+            this->set_lef_units(static_cast<size_t>(m_circuit->lefUnit.databaseNumber()));
+            m_logger->lef_units(static_cast<size_t>(m_circuit->lefUnit.databaseNumber()));
 
             bool found = false;
             for(auto itor: m_circuit->lefSiteStor) {
@@ -141,10 +149,10 @@ void MacroCircuit::build_circuit_lefdef()
                 throw std::runtime_error("Site (" + this->get_site() + ") not found!");
             }
             if (!this->get_minimize_die_mode()){
-                m_layout->set_lx(m_circuit->defDieArea.xl());
-                m_layout->set_ux(m_circuit->defDieArea.xh());
-                m_layout->set_ly(m_circuit->defDieArea.yl());
-                m_layout->set_uy(m_circuit->defDieArea.yh());
+                m_layout->set_lx(m_circuit->defDieArea.xl() * this->get_def_units());
+                m_layout->set_ux(m_circuit->defDieArea.xh() * this->get_def_units());
+                m_layout->set_ly(m_circuit->defDieArea.yl() * this->get_def_units());
+                m_layout->set_uy(m_circuit->defDieArea.yh() * this->get_def_units());
             }
 
             this->create_macro_definitions();
@@ -245,10 +253,10 @@ void MacroCircuit::create_macro_definitions()
             MacroDefinition macro_definition;
             macro_definition.name = itor.name();
             macro_definition.id = itor.id();
-            macro_definition.width = lef_data.sizeX();
-            macro_definition.height = lef_data.sizeY();
-            macro_definition.lx = itor.placementX();
-            macro_definition.ly = itor.placementY();
+            macro_definition.width = lef_data.sizeX();                            // microns
+            macro_definition.height = lef_data.sizeY();                           // microns
+            macro_definition.lx = m_def_utils->def_to_microns(itor.placementX()); // microns
+            macro_definition.ly = m_def_utils->def_to_microns(itor.placementY()); // microns
             macro_definition.orientation = 
                 static_cast<eOrientation>(itor.placementOrient());
             macro_definition.is_placed = itor.isPlaced();
@@ -444,8 +452,8 @@ void MacroCircuit::add_terminals()
         if (this->get_free_terminals()){
             tmp = new Terminal(itor.pinName(), direction);
         } else if (itor.pinPort(0)->isPlaced()){
-            int x = itor.pinPort(0)->placementX();
-            int y = itor.pinPort(0)->placementY();
+            int x = m_def_utils->def_to_microns(itor.pinPort(0)->placementX()); // microns
+            int y = m_def_utils->def_to_microns(itor.pinPort(0)->placementY()); // microns
             eOrientation o = static_cast<eOrientation>(itor.pinPort(0)->orient());
             tmp = new Terminal(itor.pinName(), x, y, direction, o);
         } else {
@@ -700,22 +708,22 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
     if (m_layout->is_free_lx()){
         notimplemented_check();
     } else {
-        lx = m_layout->get_lx_numerical() / this->get_lefdef_units();
+        lx = m_def_utils->microns_to_def(m_layout->get_lx_numerical());
     }
     if (m_layout->is_free_ly()){
         notimplemented_check();
     } else {
-        ly = m_layout->get_ly_numerical() / this->get_lefdef_units();
+        ly = m_def_utils->microns_to_def(m_layout->get_ly_numerical());
     }
      if (m_layout->is_free_ux()){
-        ux = m_layout->get_solution_ux(solution) / this->get_lefdef_units();
+        ux = m_def_utils->microns_to_def(m_layout->get_solution_ux(solution));
     } else {
-        ux = m_layout->get_ux_numercial() / this->get_lefdef_units();
+        ux = m_def_utils->microns_to_def(m_layout->get_ux_numercial());
     }
      if (m_layout->is_free_uy()){
-        uy = m_layout->get_solution_uy(solution) / this->get_lefdef_units();
+        uy = m_def_utils->microns_to_def(m_layout->get_solution_uy(solution));
     } else {
-        uy = m_layout->get_uy_numerical() / this->get_lefdef_units();
+        uy = m_def_utils->microns_to_def(m_layout->get_uy_numerical());
     }
 
     defiGeometries data(nullptr);
@@ -737,8 +745,8 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
         LefDefParser::defiComponent& macro = m_circuit->defComponentStor[idx->second];
 
         macro.setPlacementStatus(DEFI_COMPONENT_FIXED);
-        macro.setPlacementLocation(itor->get_solution_lx(solution),
-                                   itor->get_solution_ly(solution),
+        macro.setPlacementLocation(m_def_utils->microns_to_def(itor->get_solution_lx(solution)),
+                                   m_def_utils->microns_to_def(itor->get_solution_ly(solution)),
                                    itor->get_solution_orientation(solution));
     }
 ///}}}
@@ -750,8 +758,8 @@ void MacroCircuit::write_def(std::string const & name, size_t const solution)
         }
 
         if (itor->has_solution(solution)){
-            size_t pos_x = itor->get_solution_pos_x(solution);
-            size_t pos_y = itor->get_solution_pos_y(solution);
+            size_t pos_x = m_def_utils->microns_to_def(itor->get_solution_pos_x(solution));
+            size_t pos_y = m_def_utils->microns_to_def(itor->get_solution_pos_y(solution));
 
             auto idx = m_circuit->defPinMap.find(itor->get_id());
             LefDefParser::defiPin& pin = m_circuit->defPinStor[idx->second];
@@ -827,7 +835,7 @@ void MacroCircuit::dump(std::ostream& stream)
                              m_layout->get_lx_numerical() 
                           << " x " << m_layout->get_uy_numerical() -
                             m_layout->get_lx_numerical() << ")" << std::endl;
-    stream << "Units: " << this->get_lefdef_units() << std::endl;
+    stream << "Units: " << this->get_def_units() << std::endl;
     for(auto itor: m_macros){
         itor->dump(stream);
     }
@@ -925,22 +933,26 @@ void MacroCircuit::config_z3()
  */
 void MacroCircuit::run_encoding()
 {
-    this->encode_components_inside_die(e2D);
-    this->encode_components_non_overlapping(e2D);
-
     if (this->get_free_terminals()){
         //this->encode_terminals_non_overlapping();
         //this->encode_terminals_on_frontier();
         this->encode_terminals_center_edge();
+        this->encode_terminals_on_grid();
 
         //m_z3_opt->add(m_terminals_non_overlapping.simplify());
         //m_z3_opt->add(m_terminals_on_frontier.simplify());
         m_z3_opt->add(m_terminals_center_edge.simplify());
+        m_z3_opt->add(m_terminals_on_grid.simplify());
     }
     
     if (this->get_minimize_die_mode()){
+        this->encode_components_inside_die(e2D);
+        this->encode_components_non_overlapping(e2D);
+        this->encode_layout_on_grid();
+        this->encode_components_on_grid();
         m_z3_opt->add(m_components_inside_die.simplify());
         m_z3_opt->add(m_components_non_overlapping.simplify());
+        m_z3_opt->add(m_layout_on_grid.simplify());
     }
     if (this->get_stored_constraints().size() > 0){
         m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
@@ -1935,4 +1947,78 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
             }
         //}
     }
+}
+
+/**
+ * @brief Ensure that Values of the Layout fit together with the used Def Units
+ */
+void MacroCircuit::encode_layout_on_grid()
+{
+    if (this->get_minimize_die_mode()){
+        z3::expr_vector coordinates(m_z3_ctx);
+        z3::expr lx = z3::mod(m_layout->get_lx(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+        z3::expr ly = z3::mod(m_layout->get_ly(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+        z3::expr ux = z3::mod(m_layout->get_ux(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+        z3::expr uy = z3::mod(m_layout->get_uy(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+
+        coordinates.push_back(lx);
+        coordinates.push_back(ly);
+        coordinates.push_back(ux);
+        coordinates.push_back(uy);
+
+        m_layout_on_grid = z3::mk_and(coordinates);
+    } else {
+        m_layout_on_grid = m_encode->get_flag(true);
+    }
+}
+
+/**
+ * @brief Ensure that Values for the Terminals fit together with the used Def Units
+ */
+void MacroCircuit::encode_terminals_on_grid()
+{
+    if (this->get_free_terminals()){
+        z3::expr_vector constraints(m_z3_ctx);
+
+        for (Terminal* t : m_terminals){
+            z3::expr_vector pair(m_z3_ctx);
+            z3::expr x = z3::mod(t->get_pos_x(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+            z3::expr y = z3::mod(t->get_pos_y(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+            constraints.push_back(z3::mk_and(pair));
+        }
+        m_terminals_on_grid = z3::mk_and(constraints);
+    } else {
+        m_terminals_on_grid = m_encode->get_flag(true);
+    }
+}
+
+/**
+ * @brief Ensure that Values for the Components fit together with the used Def Units
+ */
+void MacroCircuit::encode_components_on_grid()
+{
+    z3::expr_vector constraints(m_z3_ctx);
+
+    for (Component* c: m_components){
+        if (c->is_free()){
+            z3::expr_vector coordinates(m_z3_ctx);
+            z3::expr lx = z3::mod(c->get_lx(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+            z3::expr ly = z3::mod(c->get_ly(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+            coordinates.push_back(lx);
+            coordinates.push_back(ly);
+            constraints.push_back(z3::mk_and(coordinates));
+        }
+
+        for (Pin* p: c->get_pins()){
+            if (p->is_free()){
+                z3::expr_vector coordinates(m_z3_ctx);
+                z3::expr lx = z3::mod(p->get_pin_pos_x(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+                z3::expr ly = z3::mod(p->get_pin_pos_y(), m_encode->get_value(this->get_def_units())) == m_encode->get_value(0);
+                coordinates.push_back(lx);
+                coordinates.push_back(ly);
+                constraints.push_back(z3::mk_and(coordinates));
+            }
+        }
+    }
+    m_components_on_grid = z3::mk_and(constraints);
 }

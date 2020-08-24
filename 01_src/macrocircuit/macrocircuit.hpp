@@ -41,6 +41,7 @@
 #include <parquet.hpp>
 #include <encoding_utils.hpp>
 #include <utils.hpp>
+#include <def_utils.hpp>
 #include <database.hpp>
 #include <plotter.hpp>
 
@@ -100,6 +101,7 @@ private:
     Utils::Logger* m_logger;
     Utils::Timer* m_timer;
     Utils::Database* m_db;
+    Utils::DefUtils* m_def_utils;
     Supplement* m_supplement;
     Bookshelf* m_bookshelf;
     Partitioning* m_partitioning;
@@ -163,6 +165,9 @@ private:
     void encode_terminals_non_overlapping();
     void encode_terminals_center_edge();
     void encode_hpwl_length();
+    void encode_layout_on_grid();
+    void encode_components_on_grid();
+    void encode_terminals_on_grid();
 
     z3::expr m_components_non_overlapping;
     z3::expr m_components_inside_die;
@@ -170,6 +175,9 @@ private:
     z3::expr m_terminals_non_overlapping;
     z3::expr m_terminals_center_edge;
     z3::expr m_hpwl_cost_function;
+    z3::expr m_layout_on_grid;
+    z3::expr m_terminals_on_grid;
+    z3::expr m_components_on_grid;
     z3::expr_vector m_hpwl_edges;
 
     z3::expr manhattan_distance(z3::expr const & from_x,

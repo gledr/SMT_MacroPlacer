@@ -41,15 +41,15 @@ Macro::Macro(std::string const & name,
     m_id = id;
     m_lx = m_encode->get_constant(id + "_lx");
     m_ly = m_encode->get_constant(id + "_ly");
-    m_width = m_encode->get_value(width * this->get_lefdef_units());
-    m_height = m_encode->get_value(height * this->get_lefdef_units());
+    m_width = m_encode->get_value(width);
+    m_height = m_encode->get_value(height);
     //m_orientation = m_encode->get_value(eWest);
     m_orientation = m_encode->get_constant(id + "_orientation");
     m_logger = Logger::getInstance();
 
     m_logger->add_free_macro(id,
-                             width * this->get_lefdef_units(),
-                             height * get_lefdef_units());
+                             width,
+                             height);
 }
 
 /**
@@ -79,10 +79,10 @@ Macro::Macro(std::string const & name,
     m_encode_pins_center_of_macro(m_encode->get_value(0)),
     m_encode_pins_relative_to_center(m_encode->get_value(0))
 {
-    m_lx = m_encode->get_value(pos_lx * this->get_lefdef_units());
-    m_ly = m_encode->get_value(pos_ly * this->get_lefdef_units());
-    m_width = m_encode->get_value(width * this->get_lefdef_units());
-    m_height = m_encode->get_value(height * this->get_lefdef_units());
+    m_lx = m_encode->get_value(pos_lx);
+    m_ly = m_encode->get_value(pos_ly);
+    m_width = m_encode->get_value(width);
+    m_height = m_encode->get_value(height);
     m_orientation = m_encode->get_value(orientation);
     m_name = name;
     m_id = id;

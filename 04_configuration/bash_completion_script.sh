@@ -1,7 +1,7 @@
 #! /bin/bash
 #
 # Generted File! Do not modify!
-# Tue Jun 16 09:57:15 2020
+# Tue Aug 25 10:17:16 2020
 #
 
 #
@@ -28,6 +28,7 @@ local cur
 			--dump-best \
 			--dump-all \
 			--save-all \
+			--store-db \
 			--verbose \
 			--store-log \
 			--store-smt \
@@ -38,7 +39,10 @@ local cur
 			--minimize-area \
 			--minimize-hpwl \
 			--free-terminals \
+			--free-components \
 			--skip-power-supply \
+			--z3-shell \
+			--z3-api \
 			--partition-size \
 			--partition-count \
 			--def \

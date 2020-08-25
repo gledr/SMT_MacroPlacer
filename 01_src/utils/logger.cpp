@@ -125,10 +125,6 @@ void Logger::timer_single_solution(std::string const & id, size_t const ms)
     notimplemented_check();
 }
 
-void Logger::solve_allsat()
-{
-}
-
 void Logger::solve_solution()
 {
     LOG(eDebug) << "Solve Single Solution";
@@ -600,4 +596,14 @@ void Logger::def_units(size_t const values)
 void Logger::lef_units(size_t const values)
 {
     LOG(eInfo) << std::string("Using LEF Units: " + std::to_string(values));
+}
+
+void Logger::z3_api_mode()
+{
+    LOG(eInfo) << "Invoke Z3 Solver using API";
+}
+
+void Logger::z3_shell_mode()
+{
+    LOG(eInfo) << "Invoke Z3 Solver using Shell";
 }

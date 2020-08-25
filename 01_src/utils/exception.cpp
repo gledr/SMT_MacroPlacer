@@ -63,3 +63,8 @@ void RunTimeCheck::__notsupported_check__(std::string const & msg, std::string c
     msg_str << msg << "(" << file << ":" << line << ")";
     throw PlacerNotSupported(msg_str.str());
 }
+
+void RunTimeCheck::__unreachable_check__(std::string const & file, size_t const line)
+{
+    throw PlacerNotReachable("Unreachable Code!" + file + ":" + std::to_string(line));
+}

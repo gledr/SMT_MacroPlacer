@@ -50,6 +50,8 @@ bool Object::m_free_components = false;
 bool Object::m_strip_terminals = false;
 bool Object::m_skip_power_network = false;
 bool Object::m_store_db = false;
+bool Object::m_z3_shell_mode = false;
+bool Object::m_z3_api_mode = false;
 size_t Object::m_timeout = 0;
 size_t Object::m_bitwidth_orientation;
 size_t Object::m_solutions = 1;
@@ -610,4 +612,24 @@ size_t Object::get_lef_units() const
     assert (m_lef_units > 0);
 
     return m_lef_units;
+}
+
+bool Object::get_z3_api_mode() const
+{
+    return m_z3_api_mode;
+}
+
+bool Object::get_z3_shell_mode() const
+{
+    return m_z3_shell_mode;
+}
+
+void Object::set_z3_api_mode(bool const val)
+{
+    m_z3_api_mode = val;
+}
+
+void Object::set_z3_shell_mode(bool const val)
+{
+    m_z3_shell_mode = val;
 }

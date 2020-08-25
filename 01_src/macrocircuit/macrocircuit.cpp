@@ -361,8 +361,13 @@ void MacroCircuit::place()
         m_parquet->store_bookshelf_results();
         m_solutions = 1;
     } else {
-        this->solve_no_api();
-        //this->solve();
+        if (this->get_z3_shell_mode()){
+            this->solve_no_api();
+        } else if (this->get_z3_api_mode()){
+            this->solve();
+        } else {
+            
+        }
     }
 
     m_timer->stop_timer("total");
@@ -944,15 +949,15 @@ void MacroCircuit::run_encoding()
         m_z3_opt->add(m_terminals_center_edge.simplify());
         m_z3_opt->add(m_terminals_on_grid.simplify());
     }
-    
+
     if (this->get_minimize_die_mode()){
         this->encode_components_inside_die(e2D);
         this->encode_components_non_overlapping(e2D);
-        this->encode_layout_on_grid();
+        //this->encode_layout_on_grid();
         this->encode_components_on_grid();
         m_z3_opt->add(m_components_inside_die.simplify());
         m_z3_opt->add(m_components_non_overlapping.simplify());
-        m_z3_opt->add(m_layout_on_grid.simplify());
+        //m_z3_opt->add(m_layout_on_grid.simplify());
     }
     if (this->get_stored_constraints().size() > 0){
         m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
@@ -1439,6 +1444,7 @@ void MacroCircuit::encode_terminals_non_overlapping()
 void MacroCircuit::solve()
 {
     try {
+        m_logger->z3_api_mode();
         m_logger->solve_optimize();
 
         if(this->get_store_smt()){
@@ -1796,6 +1802,8 @@ void MacroCircuit::process_results(z3::model const & m)
  */
 void MacroCircuit::solve_no_api()
 {
+    m_logger->z3_shell_mode();
+
     this->dump_smt_instance();
     boost::filesystem::current_path(this->get_smt_directory());
     std::string smt_file = "top_" + this->get_design_name() + ".smt2";

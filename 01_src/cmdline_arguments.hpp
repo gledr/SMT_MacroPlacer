@@ -73,6 +73,15 @@ namespace Placer {
         = "lex";
     constexpr const char CMD_LEX_TEXT[] 
         = "Utilize Z3s Lex Optimizer";
+        
+    constexpr const char CMD_Z3_API[]
+        = "z3-api";
+    constexpr const char CMD_Z3_API_TEXT[]
+        = "Invoke Z3 Solver using API";
+    constexpr const char CMD_Z3_SHELL[]
+        = "z3-shell";
+    constexpr const char CMD_Z3_SHELL_TEXT[]
+        = "Invoke Z3 Solver using Shell";
 
     constexpr const char CMD_PARQUET[] 
         = "parquet";

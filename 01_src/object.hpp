@@ -197,6 +197,12 @@ protected:
     void set_lef_units(size_t const value);
     size_t get_lef_units() const;
 
+    void set_z3_api_mode(bool const val);
+    bool get_z3_api_mode() const;
+
+    void set_z3_shell_mode(bool const val);
+    bool get_z3_shell_mode() const;
+
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
 
@@ -241,6 +247,8 @@ private:
     static bool m_free_components;
     static bool m_strip_terminals;
     static bool m_skip_power_network;
+    static bool m_z3_api_mode;
+    static bool m_z3_shell_mode;
     static size_t m_partition_size;
     static size_t m_num_partitions;
     static size_t m_solutions;

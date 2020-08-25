@@ -36,7 +36,7 @@ MacroPlacer::MacroPlacer(int const argc, char ** argv):
 MacroPlacer::~MacroPlacer()
 {
     Utils::Logger::destroy();
-    
+
     delete m_options_functions; m_options_functions = nullptr;
     delete m_timer; m_timer = nullptr;
     delete m_mckt; m_mckt = nullptr;
@@ -74,6 +74,8 @@ void MacroPlacer::read_configuration()
             (CMD_FREE_TERMINALS,  CMD_FREE_TERMINALS_TEXT)
             (CMD_FREE_COMPONENTS, CMD_FREE_COMPONENTS_TEXT)
             (CMD_SKIP_PWR_SUPPLY, CMD_SKIP_PWR_SUPPLY_TEXT)
+            (CMD_Z3_SHELL,        po::value<bool>()->default_value(true),                CMD_Z3_SHELL_TEXT)
+            (CMD_Z3_API  ,        po::value<bool>()->default_value(false),               CMD_Z3_API_TEXT)
             (CMD_PARTITION_SIZE,  po::value<size_t>(),                                   CMD_PARTITION_SIZE_TEXT)
             (CMD_PARTITION_COUNT, po::value<size_t>(),                                   CMD_PARTITION_COUNT_TEXT)
             (CMD_DEF,             po::value<std::string>(),                              CMD_DEF_TEXT)
@@ -95,10 +97,10 @@ void MacroPlacer::read_configuration()
 
         po::parsed_options parsed_options1 = parser.run();
         po::store(parsed_options1, m_vm);
-        
+
         po::notify(m_vm);
         this->handle_configuration();
-        
+
         std::ifstream project_ini(this->get_ini_file());
         po::store(po::parse_config_file(project_ini, *m_options_functions), m_vm);
         project_ini.close();
@@ -130,7 +132,6 @@ void MacroPlacer::read_configuration()
                 delete m_options_functions; m_options_functions = nullptr;
                 throw std::runtime_error("Could not find Bookshelf file!");
         }
-
         if(!this->get_lef().empty()){
             for(auto itor: this->get_lef()){
                 if(!fs::exists(itor)){
@@ -139,6 +140,11 @@ void MacroPlacer::read_configuration()
                 }
             }
         }
+        if (this->get_z3_api_mode () == this->get_z3_shell_mode()){
+            delete m_options_functions; m_options_functions = nullptr;
+            throw std::runtime_error("Only one Z3 mode shall be activated at one time!");
+        }
+
         this->set_logic(eInt);
         this->set_base_path(Utils::Utils::get_base_path());
         this->set_working_directory(fs::current_path().string());
@@ -260,6 +266,12 @@ void MacroPlacer::handle_configuration()
     }
     if(m_vm.count(CMD_INI_FILE)){
         this->set_ini_file(m_vm[CMD_INI_FILE].as<std::string>());
+    }
+    if (m_vm.count(CMD_Z3_API)){
+        this->set_z3_api_mode(m_vm[CMD_Z3_API].as<bool>());
+    }
+    if (m_vm.count(CMD_Z3_SHELL)){
+        this->set_z3_shell_mode(m_vm[CMD_Z3_SHELL].as<bool>());
     }
 }
 

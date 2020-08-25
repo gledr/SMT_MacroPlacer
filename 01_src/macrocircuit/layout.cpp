@@ -269,7 +269,7 @@ void Layout::set_solution_ux(size_t const val)
  */
 void Layout::set_solution_uy(size_t const val)
 {
-    m_logger->add_solution_die_ux(val);
+    m_logger->add_solution_die_uy(val);
     m_solutions_uy.push_back(val);
 }
 
@@ -288,7 +288,7 @@ size_t Layout::get_idx_best_solution()
     for(size_t i = 0; i < m_solutions_uy.size(); ++i){
         size_t x = m_solutions_ux[i];
         size_t y = m_solutions_uy[i];
-        
+
         double tmp = ((double)x * (double)y)/1000000;
 
         if(tmp < best_area){
@@ -333,49 +333,49 @@ void Layout::set_formula_uy (z3::expr const & formula)
 }
 
 /**
- * @brief ...
+ * @brief  Get LY as Unsigned Integer
  * 
  * @return size_t
  */
 size_t Layout::get_ly_numerical()
 {
-    assert (m_ly.is_numeral());
+    assertion_check (m_ly.is_numeral());
 
     return m_ly.get_numeral_uint();
 }
 
 /**
- * @brief ...
+ * @brief  Get LX as Unsigned Integer
  * 
  * @return size_t
  */
 size_t Layout::get_lx_numerical()
 {
-    assert (m_lx.is_numeral());
+    assertion_check (m_lx.is_numeral());
 
     return m_lx.get_numeral_uint();
 }
 
 /**
- * @brief ...
+ * @brief  Get UX as Unsigned Integer
  * 
  * @return size_t
  */
 size_t Layout::get_ux_numercial()
 {
-    assert (m_ux.is_numeral());
+    assertion_check (m_ux.is_numeral());
 
     return m_ux.get_numeral_uint();
 }
 
 /**
- * @brief ...
+ * @brief Get UY as Unsigned Integer
  * 
  * @return size_t
  */
 size_t Layout::get_uy_numerical()
 {
-    assert (m_uy.is_numeral());
+    assertion_check (m_uy.is_numeral());
 
     return m_uy.get_numeral_uint();
 }

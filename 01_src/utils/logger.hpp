@@ -73,7 +73,9 @@ public:
 
     void solve_optimize();
     void solve_solution();
-    void solve_allsat();
+
+    void z3_api_mode();
+    void z3_shell_mode();
 
     void unsat_solution();
     void unknown_solution();

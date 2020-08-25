@@ -33,6 +33,8 @@ public:
     static void __notsupported_check__(std::string const & msg,
                                        std::string const & file,
                                        size_t const line);
+    static void __unreachable_check__(std::string const & file,
+                                      size_t const line);
 };
 
 } /* namespace Placer::Utils */
@@ -55,6 +57,9 @@ public:
 
 #define notsupported_check(expr)                                                        \
     Placer::Utils::RunTimeCheck::__notsupported_check__(expr, __FILE__, __LINE__);
+    
+#define unreachable_check()                                                             \
+    Placer::Utils::RunTimeCheck::__unreachable_check__(__FILE__, __LINE__);
 
 namespace Placer::Utils {
 
@@ -131,6 +136,25 @@ public:
     {
         std::cerr << what << std::endl;
         exit(0);
+    }
+};
+
+/**
+ * @class PlacerNotReachable
+ * @brief Unreachable Code
+ */ 
+class PlacerNotReachable: public std::logic_error {
+public:
+    /**
+     * @brief Constructor
+     * 
+     * @param what Error Message
+     */
+    PlacerNotReachable(std::string const & what):
+        std::logic_error(what) 
+    {
+        std::cerr << this->what() << std::endl;
+        exit (0);
     }
 };
 

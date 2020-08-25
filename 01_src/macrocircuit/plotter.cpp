@@ -58,6 +58,7 @@ void Plotter::run()
     if(!boost::filesystem::exists(this->get_image_directory())){
         boost::filesystem::create_directories(this->get_image_directory());
     }
+    boost::filesystem::current_path(this->get_image_directory());
 
     matplotlibcpp::backend("Agg"); // Set Agg backend for the case running
                                    // on a workstation without X support
@@ -95,7 +96,7 @@ void Plotter::run()
         size_t o = 0;
         size_t lx = 0;
         size_t ly = 0;
-        
+
         if (cmp->is_free()){
             o  = cmp->get_solution_orientation(m_solution_id);
             lx = cmp->get_solution_lx(m_solution_id);

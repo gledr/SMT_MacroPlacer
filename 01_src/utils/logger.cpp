@@ -24,7 +24,7 @@ Logger* Logger::getInstance()
         Logger::p_instance = new Logger();
         Logger::p_singleton = true;
     }
-    
+
     return p_instance;
 }
 
@@ -35,8 +35,8 @@ void Logger::destroy()
 }
 
 Logger::Logger():
-    BaseLogger(),
-    Object()
+    Object(),
+    BaseLogger()
 {
     p_log_stream->set_enabled(true);
     p_log_stream->set_quiet(false);
@@ -319,7 +319,7 @@ void Logger::save_all (eInputFormat const type)
     } else if (type == eBookshelf){
         LOG(eInfo) << "Exporting all Placement Solutions as Bookshelf";
     } else {
-        assert (0);
+        unreachable_check();
     }
 }
 
@@ -330,7 +330,7 @@ void Logger::save_best(eInputFormat const type)
     } else if (type == eBookshelf){
         LOG(eInfo) << "Exporting Best Placement Solutions as Bookshelf";
     } else {
-        assert (0);
+        unreachable_check();
     }
 }
 
@@ -526,7 +526,7 @@ void Logger::place_pin_x(std::string const & pin_name,
 {
     std::stringstream msg;
     msg << "Place Pin X " << pin_name << "(" << parent_name << ") to " << pos;
-    
+
     LOG(eDebug) << msg.str();
 }
 
@@ -536,7 +536,7 @@ void Logger::place_pin_y(std::string const & pin_name,
 {
     std::stringstream msg;
     msg << "Place Pin Y " << pin_name << "(" << parent_name << ") to " << pos;
-    
+
     LOG(eDebug) << msg.str();
 }
 
@@ -554,7 +554,7 @@ void Logger::place_terminal_y(std::string const & terminal_name,
 {
     std::stringstream msg;
     msg << "Place Terminal Y " << terminal_name << " to " << pos;
-    
+
     LOG(eDebug) << msg.str();
 }
 
@@ -565,7 +565,7 @@ void Logger::add_fixed_pin(std::string const & pin_name,
 {
     std::stringstream msg;
     msg << "Adding Fixed Pin " << pin_name << " to " << parent_name << " at (" << x << ":" << y << ")";
-    
+
     LOG(eDebug) << msg.str();
 }
 

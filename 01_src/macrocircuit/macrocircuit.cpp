@@ -246,7 +246,7 @@ void MacroCircuit::create_macro_definitions()
     for(auto& itor: m_circuit->defComponentStor){
         if(this->is_macro(itor)){
             auto idx = m_circuit->lefMacroMap.find(itor.name());
-            assert (idx != m_circuit->lefMacroMap.end());
+            assertion_check (idx != m_circuit->lefMacroMap.end());
             lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
             std::vector<lefiPin> lef_pins = m_circuit->lefPinStor[idx->second];
 
@@ -452,7 +452,7 @@ void MacroCircuit::add_terminals()
         e_pin_direction direction = Pin::string2enum(itor.direction());
         Terminal* tmp = nullptr;
 
-        assert (itor.numPorts() == 1);
+        assertion_check (itor.numPorts() == 1);
 
         if (this->get_free_terminals()){
             tmp = new Terminal(itor.pinName(), direction);
@@ -500,7 +500,7 @@ void MacroCircuit::dump_best()
         std::pair<size_t, size_t> best_hpwl = m_eval->best_hpwl();
         m_plotter->set_data(m_terminals, m_components, best_hpwl.first, m_layout);
     } else {
-        assert (0);
+        unreachable_check();
     };
     m_plotter->run();
 }
@@ -533,7 +533,7 @@ void MacroCircuit::save_all()
             m_supplement->write_supplement_file();
         }
     } else {
-        assert (0);
+        unreachable_check();
     }
 }
 
@@ -579,7 +579,7 @@ void MacroCircuit::save_best()
             m_bookshelf->write_placement(best_hpwl.first);
         }
     } else {
-        assert (0);
+        unreachable_check();
     }
 }
 
@@ -801,7 +801,7 @@ bool MacroCircuit::is_macro(LefDefParser::defiComponent const & macro)
 {
     try {
         auto idx = m_circuit->lefMacroMap.find(macro.name());
-        assert (idx != m_circuit->lefMacroMap.end());
+        assertion_check (idx != m_circuit->lefMacroMap.end());
 
         LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
 
@@ -821,7 +821,7 @@ bool MacroCircuit::is_macro(LefDefParser::defiComponent const & macro)
 bool MacroCircuit::is_standard_cell(LefDefParser::defiComponent const & cell)
 {
     auto idx = m_circuit->lefMacroMap.find(cell.name());
-    assert (idx != m_circuit->lefMacroMap.end());
+    assertion_check (idx != m_circuit->lefMacroMap.end());
     LefDefParser::lefiMacro& lef_data = m_circuit->lefMacroStor[idx->second];
 
     return lef_data.sizeY() == m_standard_cell_height;
@@ -952,13 +952,18 @@ void MacroCircuit::run_encoding()
 
     if (this->get_minimize_die_mode()){
         this->encode_components_inside_die(e2D);
-        this->encode_components_non_overlapping(e2D);
-        //this->encode_layout_on_grid();
-        this->encode_components_on_grid();
         m_z3_opt->add(m_components_inside_die.simplify());
+
+        this->encode_components_non_overlapping(e2D);
         m_z3_opt->add(m_components_non_overlapping.simplify());
-        //m_z3_opt->add(m_layout_on_grid.simplify());
+
+        this->encode_layout_on_grid();
+        m_z3_opt->add(m_layout_on_grid.simplify());
+
+        this->encode_components_on_grid();
+        m_z3_opt->add(m_components_on_grid.simplify());
     }
+
     if (this->get_stored_constraints().size() > 0){
         m_z3_opt->add(z3::mk_and(this->get_stored_constraints()));
     }
@@ -987,10 +992,10 @@ void MacroCircuit::run_encoding()
 
     this->encode_hpwl_length();
     for (size_t i = 0; i < m_hpwl_edges.size(); ++i){
-    //    m_z3_opt->minimize(m_hpwl_edges[i].simplify());
+        m_z3_opt->minimize(m_hpwl_edges[i].simplify());
     }
     
-    m_z3_opt->minimize(m_hpwl_cost_function);
+    //m_z3_opt->minimize(m_hpwl_cost_function);
 }
 
 /**
@@ -1841,7 +1846,7 @@ void MacroCircuit::solve_no_api()
         m_logger->solver_timeout();
         exit(0);
     } else {
-        assert (0);
+        notimplemented_check();
     }
     m_solutions = 1;
 
@@ -1886,8 +1891,8 @@ void MacroCircuit::solve_no_api()
 void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<size_t>> & solution, size_t const id)
 {
     if (this->get_minimize_die_mode()){
-        assert (solution.find(m_layout->get_ux().to_string()) != solution.end());
-        assert (solution.find(m_layout->get_uy().to_string()) != solution.end());
+        assertion_check (solution.find(m_layout->get_ux().to_string()) != solution.end());
+        assertion_check (solution.find(m_layout->get_uy().to_string()) != solution.end());
         size_t ux = solution[m_layout->get_ux().to_string()][id];
         size_t uy = solution[m_layout->get_uy().to_string()][id];
 
@@ -1905,8 +1910,8 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
         z3::expr clause_y = terminal->get_pos_y();
 
         if (this->get_free_terminals()){
-            assert (solution.find(clause_x.to_string()) != solution.end());
-            assert (solution.find(clause_y.to_string()) != solution.end());
+            assertion_check (solution.find(clause_x.to_string()) != solution.end());
+            assertion_check (solution.find(clause_y.to_string()) != solution.end());
             
             size_t val_x = solution[clause_x.to_string()][id];
             size_t val_y = solution[clause_y.to_string()][id];
@@ -1923,8 +1928,8 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
   
     for(Component* component: m_components){
         if (this->get_minimize_die_mode()){
-            assert (solution.find(component->get_lx().to_string()) != solution.end());
-            assert (solution.find(component->get_ly().to_string()) != solution.end());
+            assertion_check (solution.find(component->get_lx().to_string()) != solution.end());
+            assertion_check (solution.find(component->get_ly().to_string()) != solution.end());
             size_t x = solution[component->get_lx().to_string()][id];
             size_t y = solution[component->get_ly().to_string()][id];
             eOrientation o = static_cast<eOrientation>(solution[component->get_orientation().to_string()][id]);
@@ -1943,8 +1948,8 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
                     z3::expr x = p->get_pin_pos_x();
                     z3::expr y = p->get_pin_pos_y();
 
-                    assert (solution.find(x.to_string()) != solution.end());
-                    assert (solution.find(y.to_string()) != solution.end());
+                    assertion_check(solution.find(x.to_string()) != solution.end());
+                    assertion_check (solution.find(y.to_string()) != solution.end());
                     
                     size_t x_pos = solution[x.to_string()][id];
                     size_t y_pos = solution[y.to_string()][id];
@@ -2016,7 +2021,7 @@ void MacroCircuit::encode_components_on_grid()
             coordinates.push_back(ly);
             constraints.push_back(z3::mk_and(coordinates));
         }
-
+        continue;
         for (Pin* p: c->get_pins()){
             if (p->is_free()){
                 z3::expr_vector coordinates(m_z3_ctx);

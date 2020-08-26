@@ -116,7 +116,6 @@ int Database::__callback__(int argc, char **argv, char **azColName)
  */
 void Database::place_component(size_t const solution, Component* component)
 {
-    assert (component != nullptr);
     nullpointer_check (component);
 
     std::string s    = std::to_string(solution);

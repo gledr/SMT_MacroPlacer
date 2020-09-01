@@ -607,3 +607,8 @@ void Logger::z3_shell_mode()
 {
     LOG(eInfo) << "Invoke Z3 Solver using Shell";
 }
+
+void Logger::optimathsat_shell_mode()
+{
+    LOG(eInfo) << "Invoke OptiMathSat Solver using Shell";
+}

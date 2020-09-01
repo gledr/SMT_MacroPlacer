@@ -64,15 +64,20 @@ namespace Placer {
     constexpr const char CMD_SUPPLEMENT_TEXT[] 
         = "JSON File holding additional information";
 
+    constexpr const char CMD_SOLVER_BACKEND[]
+        = "solver-backend";
+    constexpr const char CMD_SOLVER_BACKEND_TEXT[]
+        = "Select SMT Solving Backend";
+
     constexpr const char CMD_PARETO[] 
         = "pareto";
     constexpr const char CMD_PARETO_TEXT[] 
-        = "Utilize Z3s Pareto Optimizer";
+        = "Utilize Pareto Optimizer";
 
     constexpr const char CMD_LEX[] 
         = "lex";
     constexpr const char CMD_LEX_TEXT[] 
-        = "Utilize Z3s Lex Optimizer";
+        = "Utilize Lex Optimizer";
         
     constexpr const char CMD_Z3_API[]
         = "z3-api";

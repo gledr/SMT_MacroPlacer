@@ -188,8 +188,9 @@ private:
     /**
      * SMT Solving
      */ 
-    void solve();
-    void solve_no_api();
+    void solve_z3_api();
+    void solve_z3_no_api();
+    void solve_optimathsat_no_api();
     void process_results(z3::model const & m);
     void dump_smt_instance();
     void process_key_value_results(std::map<std::string, std::vector<size_t>> & solution, size_t const id);

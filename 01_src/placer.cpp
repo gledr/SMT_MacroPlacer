@@ -83,6 +83,7 @@ void MacroPlacer::read_configuration()
             (CMD_BOOKSHELF,       po::value<std::string>(),                              CMD_BOOKSHELF_TEXT)
             (CMD_SUPPLEMENT,      po::value<std::string>(),                              CMD_SUPPLEMENT_TEXT)
             (CMD_SITE,            po::value<std::string>(),                              CMD_SITE_TEXT)
+            (CMD_SOLVER_BACKEND,  po::value<std::string>()->default_value("z3"),         CMD_SOLVER_BACKEND_TEXT)
             (CMD_TIMEOUT,         po::value<size_t>()->default_value(60),                CMD_TIMEOUT_TEXT)
             (CMD_SOLUTIONS,       po::value<size_t>()->default_value(1),                 CMD_SOLUTIONS_TEXT)
             (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT);
@@ -272,6 +273,16 @@ void MacroPlacer::handle_configuration()
     }
     if (m_vm.count(CMD_Z3_SHELL)){
         this->set_z3_shell_mode(m_vm[CMD_Z3_SHELL].as<bool>());
+    }
+    if (m_vm.count(CMD_SOLVER_BACKEND)){
+        std::string input = m_vm[CMD_SOLVER_BACKEND].as<std::string>();
+        if (input == "z3"){
+            this->set_solver_backend(eZ3);
+        } else if (input == "optimathsat"){
+            this->set_solver_backend(eOptiMathSat);
+        } else {
+            throw std::runtime_error("Invalid Solver Backend!");
+        }
     }
 }
 

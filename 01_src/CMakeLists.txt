@@ -174,6 +174,7 @@ add_dependencies(smt_placer
     lef
     placer_config
     placer_utils
+    build_optimathsat
 )
 
 if(PLACER_BUILD_Z3)

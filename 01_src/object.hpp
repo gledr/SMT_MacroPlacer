@@ -26,6 +26,7 @@ namespace Placer {
 enum eRotation {eFixed, e2D, e4D};
 enum eLogic {eInt, eBitVector};
 enum eInputFormat {eLEFDEF, eBookshelf};
+enum eSolverBackend {eZ3, eOptiMathSat};
 
 enum eOrientation {
      eNorth     = 0,
@@ -204,6 +205,9 @@ protected:
     void set_z3_shell_mode(bool const val);
     bool get_z3_shell_mode() const;
 
+    void set_solver_backend(eSolverBackend const & backend);
+    eSolverBackend get_solver_backend() const;
+
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
 
@@ -226,6 +230,7 @@ private:
     static std::string m_database_file;
     static std::string m_db_to_csv_script;
     static std::string m_ini_file;
+    static eSolverBackend m_solver_backend;
     static size_t m_timeout;
     static size_t m_bitwidth_orientation;
     static size_t m_partition_id;

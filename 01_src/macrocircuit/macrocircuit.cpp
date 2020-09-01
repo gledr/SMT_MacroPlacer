@@ -149,10 +149,10 @@ void MacroCircuit::build_circuit_lefdef()
                 throw std::runtime_error("Site (" + this->get_site() + ") not found!");
             }
             if (!this->get_minimize_die_mode()){
-                m_layout->set_lx(m_circuit->defDieArea.xl() * this->get_def_units());
-                m_layout->set_ux(m_circuit->defDieArea.xh() * this->get_def_units());
-                m_layout->set_ly(m_circuit->defDieArea.yl() * this->get_def_units());
-                m_layout->set_uy(m_circuit->defDieArea.yh() * this->get_def_units());
+                m_layout->set_lx(m_def_utils->def_to_microns(m_circuit->defDieArea.xl()));
+                m_layout->set_ux(m_def_utils->def_to_microns(m_circuit->defDieArea.xh()));
+                m_layout->set_ly(m_def_utils->def_to_microns(m_circuit->defDieArea.yl()));
+                m_layout->set_uy(m_def_utils->def_to_microns(m_circuit->defDieArea.yh()));
             }
 
             this->create_macro_definitions();
@@ -344,7 +344,10 @@ void MacroCircuit::encode_smt()
         m_layout->free_ux();
     }
 
-    this->config_z3();
+    if (this->get_solver_backend() == eZ3){
+        this->config_z3();
+    }
+
     this->run_encoding();
 }
 
@@ -361,12 +364,18 @@ void MacroCircuit::place()
         m_parquet->store_bookshelf_results();
         m_solutions = 1;
     } else {
-        if (this->get_z3_shell_mode()){
-            this->solve_no_api();
-        } else if (this->get_z3_api_mode()){
-            this->solve();
+        if (this->get_solver_backend() == eZ3){
+            if (this->get_z3_shell_mode()){
+                this->solve_z3_no_api();
+            } else if (this->get_z3_api_mode()){
+                this->solve_z3_api();
+            } else {
+                unreachable_check();
+            }
+        } else if (this->get_solver_backend() == eOptiMathSat){
+            this->solve_optimathsat_no_api();
         } else {
-            
+            unreachable_check();
         }
     }
 
@@ -947,7 +956,7 @@ void MacroCircuit::run_encoding()
         //m_z3_opt->add(m_terminals_non_overlapping.simplify());
         //m_z3_opt->add(m_terminals_on_frontier.simplify());
         m_z3_opt->add(m_terminals_center_edge.simplify());
-        m_z3_opt->add(m_terminals_on_grid.simplify());
+        //m_z3_opt->add(m_terminals_on_grid.simplify());
     }
 
     if (this->get_minimize_die_mode()){
@@ -958,10 +967,10 @@ void MacroCircuit::run_encoding()
         m_z3_opt->add(m_components_non_overlapping.simplify());
 
         this->encode_layout_on_grid();
-        m_z3_opt->add(m_layout_on_grid.simplify());
+        //m_z3_opt->add(m_layout_on_grid.simplify());
 
         this->encode_components_on_grid();
-        m_z3_opt->add(m_components_on_grid.simplify());
+        //m_z3_opt->add(m_components_on_grid.simplify());
     }
 
     if (this->get_stored_constraints().size() > 0){
@@ -1446,7 +1455,7 @@ void MacroCircuit::encode_terminals_non_overlapping()
 /**
  * @brief Solve encoded SMT problem
  */
-void MacroCircuit::solve()
+void MacroCircuit::solve_z3_api()
 {
     try {
         m_logger->z3_api_mode();
@@ -1508,11 +1517,13 @@ void MacroCircuit::dump_smt_instance()
     std::ofstream out_file(smt_file);
     out_file << "(set-option :produce-models true)" << std::endl;
     out_file << "(set-logic UFNIA)" << std::endl;
+    if (this->get_solver_backend() == eOptiMathSat){
+        out_file << "(set-option :opt.priority pareto)" << std::endl;
+    }
     out_file << *m_z3_opt;
     size_t sol = 1;
 
     do {
-    
         if (m_layout->is_free_ux()){
             out_file << "(get-value (" << m_layout->get_ux() << "))" << std::endl;
         }
@@ -1805,7 +1816,7 @@ void MacroCircuit::process_results(z3::model const & m)
  * 
  * TODO Figure out why the API seems to run slower
  */
-void MacroCircuit::solve_no_api()
+void MacroCircuit::solve_z3_no_api()
 {
     m_logger->z3_shell_mode();
 
@@ -1883,6 +1894,84 @@ void MacroCircuit::solve_no_api()
 }
 
 /**
+ * @brief Solve SMT Instance using OptimathSat
+ */
+void MacroCircuit::solve_optimathsat_no_api()
+{
+    m_logger->optimathsat_shell_mode();
+
+    this->dump_smt_instance();
+    boost::filesystem::current_path(this->get_smt_directory());
+    std::string smt_file = "top_" + this->get_design_name() + ".smt2";
+    std::string results_file = this->get_smt_directory() +  "/top_" 
+                                 + this->get_design_name() + "_results.txt";
+
+    std::vector<std::string> args;
+    args.push_back(smt_file);
+
+    Utils::Utils::system_execute(this->get_third_party_bin() + "optimathsat", args, results_file, true);
+
+    std::map<std::string, std::vector<size_t>> key_value_results;
+    std::vector<std::string> z3_results;
+    std::string line;
+    std::ifstream results(results_file);
+    while(std::getline(results, line)){
+        z3_results.push_back(line);
+    }
+    results.close();
+
+    if (z3_results[0] == "sat"){
+        // Nothing to do
+    } else if (z3_results[0] == "unsat"){
+         m_logger->unsat_solution();
+        exit(0);
+    } else if (z3_results[0] == "unknown"){
+        m_logger->unknown_solution();
+        exit(0);
+    } else if (z3_results[0] == "timeout"){
+        m_logger->solver_timeout();
+        exit(0);
+    } else {
+        notimplemented_check();
+    }
+    m_solutions = 1;
+
+    for (size_t i = 1; i < z3_results.size(); ++i){
+        std::string line = z3_results[i];
+        
+        if (line == "sat"){
+            m_solutions++;
+        } else if (line == "unsat"){
+            m_logger->unsat_solution();
+            break;
+        } else if (line == "unknown"){
+            m_logger->unknown_solution();
+            break;
+        }
+        
+        if (line[0] == '(' && line[line.size()-1] == ')'){
+            // Drop out brackets first
+            line = line.substr(2, line.size()-1);
+            line = line.substr(0, line.size()-2);
+            
+            // Drop inner brackets
+            line = line.substr(1, line.size()-1);
+            line = line.substr(0, line.size()-1);
+            
+            std::vector<std::string> token = Utils::Utils::tokenize(line, " ");
+            std::string key = token[0];
+            size_t value = std::stoi(token[1]);
+            
+            key_value_results[key].push_back(value);
+        }
+    }
+
+    for (size_t i = 0; i < m_solutions; ++i){
+        this->process_key_value_results(key_value_results, i);
+    }
+}
+
+/**
  * @brief Process a generated result
  * 
  * @param solution Results
@@ -1898,6 +1987,7 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
 
         double area_estimation = ux * uy;
         double white_space = 100 - ((m_estimated_area/area_estimation)*100.0);
+
         m_logger->result_die_area(area_estimation);
         m_logger->white_space(white_space);
 
@@ -1925,7 +2015,6 @@ void MacroCircuit::process_key_value_results(std::map<std::string, std::vector<s
         }
     }
 
-  
     for(Component* component: m_components){
         if (this->get_minimize_die_mode()){
             assertion_check (solution.find(component->get_lx().to_string()) != solution.end());

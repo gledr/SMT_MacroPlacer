@@ -30,6 +30,7 @@ std::string Object::m_database_file;
 std::string Object::m_db_to_csv_script;
 std::string Object::m_base_path;
 std::string Object::m_ini_file;
+eSolverBackend Object::m_solver_backend;
 std::vector<std::string> Object::m_lef;
 bool Object::m_verbose = false;
 bool Object::m_log = false;
@@ -637,4 +638,14 @@ void Object::set_z3_api_mode(bool const val)
 void Object::set_z3_shell_mode(bool const val)
 {
     m_z3_shell_mode = val;
+}
+
+eSolverBackend Object::get_solver_backend() const
+{
+    return m_solver_backend;
+}
+
+void Object::set_solver_backend(eSolverBackend const & backend)
+{
+    m_solver_backend = backend;
 }

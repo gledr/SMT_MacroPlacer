@@ -1,6 +1,34 @@
 
 find_package(Python2 COMPONENTS Development NumPy)
 
+if(PLACER_ENABLE_PARQUET)
+    add_dependencies(smt_placer
+        ABKCommon
+        ParquetFP
+    )
+    set (PARQUET_LIBRARIES
+        ${PARQUET_HOME}/lib/libParquetFP.a
+        ${ABKCOMMON_HOME}/lib/libABKCommon.a
+    )
+
+    add_definitions(-DENABLE_PARQUET)   
+else(PLACER_ENABLE_PARQUET)
+    set (PARQUET_LIBRARIES
+    
+    )
+endif(PLACER_ENABLE_PARQUET)
+
+if (PLACER_ENABLE_KAHYPAR)
+    add_dependencies(smt_placer build_kahypar)
+    add_definitions(-DENABLE_KAHYPAR)   
+    set (KAHYPAR_LIBRARIES
+        ${THIRD_PARTY_LIB}/libkahypar.so
+    )
+else (PLACER_ENABLE_KAHYPAR)
+    set (KAHYPAR_LIBRARIES
+    
+    )
+endif(PLACER_ENABLE_KAHYPAR)
 
 if(PLACER_BUILD_Z3)
     set(Z3_LIBRARIES ${THIRD_PARTY_LIB}/libz3.so)
@@ -144,10 +172,7 @@ add_executable(bookshelf_converter
 add_dependencies(smt_placer
     def
     lef
-    build_kahypar
     placer_config
-    ABKCommon
-    ParquetFP
     placer_utils
 )
 
@@ -175,9 +200,8 @@ target_link_libraries(smt_placer PUBLIC
     defzlib
     lef
     lefzlib
-    ${THIRD_PARTY_LIB}/libkahypar.so
-    ${PARQUET_HOME}/lib/libParquetFP.a
-    ${ABKCOMMON_HOME}/lib/libABKCommon.a
+    ${KAHYPAR_LIBRARIES}
+    ${PARQUET_LIBRARIES}
     pthread
     dl
     placer_utils

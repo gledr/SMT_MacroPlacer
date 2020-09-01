@@ -582,6 +582,7 @@ void Partitioning::hypergraph_partitioning()
  */
 void Partitioning::api_based_partitioning()
 {
+#ifdef ENABLE_KAHYPAR
     m_logger->start_kahypar();
 
     // Redirect Kahypar Output to File
@@ -718,6 +719,9 @@ void Partitioning::api_based_partitioning()
         next_partition->push_up_pins();
         m_components.push_back(next_partition);
     }
+#else 
+    throw PlacerException("Kahypar has not been enabled!");
+#endif
 }
 
 /**
@@ -725,6 +729,7 @@ void Partitioning::api_based_partitioning()
  */
 void Partitioning::file_based_partitioning()
 {
+#ifdef ENABLE_KAHYPAR
     m_logger->start_kahypar();
     m_tree->strip_terminals();
 
@@ -811,6 +816,9 @@ void Partitioning::file_based_partitioning()
     std::cout.rdbuf(coutbuf); //reset to standard output again
 
     m_logger->kahypar_finished();
+#else
+    throw PlacerException("Kahypar has not been enabled!");
+#endif
 }
 
 std::pair<size_t, size_t> Partitioning::find_shape(size_t const _area)

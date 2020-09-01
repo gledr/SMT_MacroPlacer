@@ -20,7 +20,9 @@ using namespace Placer::Utils;
 ParquetFrontend::ParquetFrontend():
     Object()
 {
+#ifdef ENABLE_PARQUET
     m_db = new parquetfp::DB();
+#endif
 }
 
 /**
@@ -28,7 +30,9 @@ ParquetFrontend::ParquetFrontend():
  */
 ParquetFrontend::~ParquetFrontend()
 {
+#ifdef ENABLE_PARQUET
     delete m_db; m_db = nullptr;
+#endif
     m_tree = nullptr;
     m_layout = nullptr;
 }
@@ -82,6 +86,7 @@ void ParquetFrontend::set_layout(Layout* layout)
  */
 void ParquetFrontend::build_db()
 {
+#ifdef ENABLE_PARQUET
     m_layout->set_lx(0);
     m_layout->set_ly(0);
 
@@ -149,6 +154,9 @@ void ParquetFrontend::build_db()
 
     m_nets->updateNodeInfo(*m_nodes);
     m_nodes->updatePinsInfo(*m_nets);
+#else 
+    throw PlacerException("Parquet has not been activated!");
+#endif 
 }
 
 /**
@@ -156,6 +164,7 @@ void ParquetFrontend::build_db()
  */
 void ParquetFrontend::run_parquet()
 {
+#ifdef ENABLE_PARQUET
     MixedBlockInfoTypeFromDB dbBlockInfo(*m_db);
     MixedBlockInfoType* blockInfo = reinterpret_cast<MixedBlockInfoType*> (&dbBlockInfo);
 
@@ -185,6 +194,9 @@ void ParquetFrontend::run_parquet()
         std::cout << std::endl << std::endl;
         std::cout << "ParquetFP Terminated..." << std::endl;
         delete annealer;
+#else 
+    throw PlacerException("Parquet has not been activated!");
+#endif
 }
 
 /**
@@ -192,6 +204,7 @@ void ParquetFrontend::run_parquet()
  */
 void ParquetFrontend::data_from_parquet()
 {
+#ifdef ENABLE_PARQUET
     auto itor_begin = m_nodes->nodesBegin();
     auto itor_end   = m_nodes->nodesEnd();
 
@@ -232,6 +245,9 @@ void ParquetFrontend::data_from_parquet()
     m_layout->set_solution_ux(m_db->getXMax());
     m_layout->set_solution_uy(m_db->getYMax());
     //m_db->plot("parquet", m_layout->get_solution_ux(0)* m_layout->get_solution_uy(0), 0, 1, 0, 0,false, false, true);
+#else 
+    throw PlacerException("Parquet has not been activated!");
+#endif
 }
 
 /**
@@ -253,6 +269,7 @@ Macro* ParquetFrontend::find_macro(std::string const & name)
  */
 void ParquetFrontend::store_bookshelf_results()
 {
+#ifdef ENABLE_PARQUET
     if (!boost::filesystem::exists(this->get_parquet_directory())){
         boost::filesystem::create_directories(this->get_parquet_directory());
     }
@@ -260,4 +277,7 @@ void ParquetFrontend::store_bookshelf_results()
     boost::filesystem::current_path(this->get_parquet_directory());
 
     m_db->save("parquet_result");
+#else
+    throw PlacerException("Parquet has not been activated!");
+#endif
 }

@@ -162,9 +162,9 @@ void Logger::insert_edge(std::string const & from, std::string const & to)
 }
 
 void Logger::min_die_area(double const & area)
-{ 
+{
     std::stringstream msg;
-    msg <<  "Minimum Die Area: " << area << " mm2";
+    msg <<  "Minimum Die Area: " << area << " µm2";
     LOG(eInfo) << msg.str();
 }
 

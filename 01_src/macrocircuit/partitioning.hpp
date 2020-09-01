@@ -13,7 +13,10 @@
 #define PARTITIONING_HPP
 
 #include <z3++.h>
+
+#ifdef ENABLE_KAHYPAR
 #include <libkahypar.h>
+#endif
 #include <cmath>
 #include <memory>
 

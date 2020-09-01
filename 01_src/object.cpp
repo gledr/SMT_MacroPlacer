@@ -572,7 +572,12 @@ std::string Object::get_ini_file() const
 
 void Object::set_ini_file(std::string const & file)
 {
-    m_ini_file = file;
+    std::vector<std::string> token = Utils::Utils::tokenize(file, ".");
+    if (token.size() == 1){ 
+        m_ini_file = file + ".ini";
+    } else {
+        m_ini_file = file;
+    }
 }
 
 std::string Object::get_third_party_bin()

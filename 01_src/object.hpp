@@ -13,6 +13,7 @@
 #define OBJECT_HPP
 
 #include <exception.hpp>
+#include <utils.hpp>
 
 #include <vector>
 #include <string>

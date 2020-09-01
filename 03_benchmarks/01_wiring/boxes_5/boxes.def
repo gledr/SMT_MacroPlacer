@@ -2,7 +2,7 @@ VERSION 5.7 ;
 DIVIDERCHAR "/" ;
 BUSBITCHARS "[]" ;
 DESIGN inverter_chain ;
-UNITS DISTANCE MICRONS 2000 ;
+UNITS DISTANCE MICRONS 200 ;
 DIEAREA ( 0 0 ) ( 0 0 ) ;
 
 ROW ROW_0 CoreSite 0 0 FS DO 236 by 1 STEP 760 0 ;
@@ -29,8 +29,13 @@ END COMPONENTS
 
 
 PINS 2 ;
-- in1_i + NET in1_i + DIRECTION INPUT ;
-- out_o + NET out_o + DIRECTION OUTPUT ;
+- in1_i + NET in1_i + DIRECTION INPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
+        
+- out_o + NET out_o + DIRECTION OUTPUT + USE SIGNAL
+    + PORT
+        + LAYER metal1 ( -25 0 ) ( 25 50 ) ;
 END PINS
 
 NETS 6 ;

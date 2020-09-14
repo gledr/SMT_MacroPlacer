@@ -115,9 +115,6 @@ private:
     size_t m_solutions;
     size_t m_estimated_area;
 
-    //size_t m_layout_x;
-    //size_t m_layout_y;
-
     Layout* m_layout;
 
     double m_standard_cell_height;

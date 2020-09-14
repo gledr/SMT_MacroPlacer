@@ -112,6 +112,7 @@ add_library(placer_utils
     utils/base_database.cpp
     utils/database.cpp
     utils/exception.cpp
+    utils/tcp_client.cpp
 )
 
 target_link_libraries (placer_utils 

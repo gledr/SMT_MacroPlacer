@@ -40,8 +40,8 @@ public:
     size_t microns_to_def(size_t const val)
     {
         if ((val % this->get_def_units()) != 0){
-            //std::cout << "Value: " << val << std::endl;
-            //std::cout << "Unit: " << this->get_def_units() << std::endl;
+            std::cout << "Value: " << val << std::endl;
+            std::cout << "Unit: " << this->get_def_units() << std::endl;
             throw PlacerException ("DEF Units can not be processed without information loss! \nPlease Check Def Units!");
         }
         return val / this->get_def_units();

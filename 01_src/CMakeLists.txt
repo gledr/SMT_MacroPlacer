@@ -134,6 +134,8 @@ add_executable(smt_placer
     macrocircuit/partitioning.cpp
     macrocircuit/parquet.cpp
     macrocircuit/plotter.cpp
+    macrocircuit/hlclient.cpp
+    macrocircuit/smt_placer.pb.cc
     compontents/component.cpp
     compontents/macro.cpp
     compontents/pin.cpp
@@ -168,6 +170,12 @@ add_executable(bookshelf_converter
     compontents/cell.cpp
     compontents/supplementpin.cpp
     compontents/supplementmacro.cpp
+)
+
+add_executable(testbench_tcp_client
+    object.cpp
+    utils/tcp_client.cpp
+    utils/testbench_tcp_client.cpp
 )
 
 add_dependencies(smt_placer
@@ -207,6 +215,7 @@ target_link_libraries(smt_placer PUBLIC
     pthread
     dl
     placer_utils
+    libprotobuf.a
 )
 
 target_include_directories(smt_placer PRIVATE 
@@ -216,6 +225,15 @@ target_include_directories(smt_placer PRIVATE
 )
 
 target_link_libraries(bookshelf_converter
+    ${Boost_LIBRARIES}
+    ${JSONCPP_LIBRARIES}
+    ${Z3_LIBRARIES}
+    pthread
+    dl
+    placer_utils
+)
+
+target_link_libraries(testbench_tcp_client
     ${Boost_LIBRARIES}
     ${JSONCPP_LIBRARIES}
     ${Z3_LIBRARIES}

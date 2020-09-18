@@ -41,6 +41,7 @@ MacroCircuit::MacroCircuit():
     m_parquet = new ParquetFrontend();
     m_plotter = new Plotter();
     m_def_utils = new DefUtils();
+    m_hl_client = new HLClient();
 
     m_circuit = nullptr;
     m_solutions = 0;
@@ -89,6 +90,7 @@ MacroCircuit::~MacroCircuit()
     delete m_db; m_db = nullptr;
     delete m_plotter; m_plotter = nullptr;
     delete m_def_utils; m_def_utils = nullptr;
+    delete m_hl_client; m_hl_client = nullptr;
 
     m_logger = nullptr;
 }
@@ -299,6 +301,8 @@ void MacroCircuit::partitioning()
  */
 void MacroCircuit::encode()
 {
+    bool hl_mode = true;
+    
     if (this->get_minimize_die_mode()){
         std::cout << Utils::Utils::get_bash_string_blink_red("Minimize Die Mode") << std::endl;
     } 
@@ -315,6 +319,8 @@ void MacroCircuit::encode()
 
     if (this->get_parquet_fp()){
         this->encode_parquet();
+    } else if (hl_mode){
+        m_hl_client->connect();
     } else {
         this->encode_smt();
     }
@@ -357,12 +363,16 @@ void MacroCircuit::encode_smt()
 void MacroCircuit::place()
 {
     m_timer->start_timer("total");
+    bool hl_mode = true;
     
     if (this->get_parquet_fp()){
         m_parquet->run_parquet();
         m_parquet->data_from_parquet();
         m_parquet->store_bookshelf_results();
         m_solutions = 1;
+    } else if (hl_mode){
+        m_hl_client->transmit_problem();
+        m_hl_client->solve_problem();
     } else {
         if (this->get_solver_backend() == eZ3){
             if (this->get_z3_shell_mode()){

@@ -27,26 +27,58 @@ TCPClient::~TCPClient()
 
 void TCPClient::connect ()
 {
-    m_socket->connect(boost::asio::ip::tcp::endpoint( boost::asio::ip::address::from_string("127.0.0.1"), 1234 ));
+    bool success = false;
+    using namespace boost::asio::ip;
+
+    do {
+        try {
+            m_socket->connect(tcp::endpoint(address::from_string(this->get_hl_backend_ip()), this->get_hl_backend_port()));
+            success = true;
+        } catch (boost::system::system_error const & exp){
+            std::cout << "Could not connect (" << exp.what() << ")" << std::endl;
+            std::cout << "Retrying in 5 sec..." << std::endl;
+            sleep(5);
+        }
+    } while (!success);
+   
+}
+
+void TCPClient::disconnect()
+{
+    m_socket->shutdown(boost::asio::ip::tcp::socket::shutdown_both, m_error);
+    m_socket->close();
 }
 
 void TCPClient::send(std::string const & data)
 {
     boost::asio::write(*m_socket,
-                       boost::asio::buffer(data),
+                       boost::asio::buffer(this->add_delimiter(data)),
                        m_error );
 }
 
 std::string TCPClient::receive()
 {
-    boost::asio::read(*m_socket,
-                      m_receive_buffer,
-                      boost::asio::transfer_all(),
+    boost::asio::streambuf receive_buffer;
+
+    boost::asio::read_until(*m_socket,
+                      receive_buffer,
+                      DELIMITER,
                       m_error);
 
     if( m_error && m_error != boost::asio::error::eof ) {
         std::cout << "receive failed: " << m_error.message() << std::endl;
     }
 
-    return std::string(boost::asio::buffer_cast<const char*>(m_receive_buffer.data()));
+    std::string retval(boost::asio::buffer_cast<const char*>(receive_buffer.data()));
+    return this->strip_delimiter(retval);
+}
+
+std::string TCPClient::add_delimiter(std::string const & data)
+{
+    return data + DELIMITER;
+}
+
+std::string TCPClient::strip_delimiter(std::string const & data)
+{
+    return data.substr(0, data.size()-1);
 }

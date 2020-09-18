@@ -17,6 +17,11 @@
 #include <boost/asio.hpp>
 
 namespace Placer::Utils {
+    
+    constexpr char DELIMITER = '\n';
+    constexpr char IP[] = "127.0.0.1";
+    constexpr size_t PORT = 1111;
+    
 /**
  * @class TCPClient
  * @brief Simple TCP/IP Client
@@ -29,15 +34,19 @@ public:
 
     void connect();
 
+    void disconnect();
+
     void send(std::string const & data);
 
     std::string receive();
 
 private:
+    std::string strip_delimiter(std::string const & data);
+    std::string add_delimiter(std::string const & data);
+
     boost::asio::io_service* m_io_service;
     boost::asio::ip::tcp::socket* m_socket;
     boost::system::error_code m_error;
-    boost::asio::streambuf m_receive_buffer;
 };
 
 } /* namespace Placer::Utils */

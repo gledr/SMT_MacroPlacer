@@ -30,6 +30,7 @@ std::string Object::m_database_file;
 std::string Object::m_db_to_csv_script;
 std::string Object::m_base_path;
 std::string Object::m_ini_file;
+std::string Object::m_hl_backend_ip;
 eSolverBackend Object::m_solver_backend;
 std::vector<std::string> Object::m_lef;
 bool Object::m_verbose = false;
@@ -63,6 +64,7 @@ size_t Object::m_num_partitions = 1;
 size_t Object::m_key_counter = 0;
 size_t Object::m_def_units = 0;
 size_t Object::m_lef_units = 0;
+size_t Object::m_hl_backend_port;
 eLogic Object::m_logic = eInt;
 
 z3::context Object::m_z3_ctx(init_context());
@@ -648,4 +650,24 @@ eSolverBackend Object::get_solver_backend() const
 void Object::set_solver_backend(eSolverBackend const & backend)
 {
     m_solver_backend = backend;
+}
+
+void Object::set_hl_backend_ip(std::string const & ip)
+{
+    m_hl_backend_ip = ip;
+}
+
+std::string Object::get_hl_backend_ip()
+{
+    return m_hl_backend_ip;
+}
+
+void Object::set_hl_backend_port(size_t const port)
+{
+    m_hl_backend_port = port;
+}
+
+size_t Object::get_hl_backend_port()
+{
+    return m_hl_backend_port;
 }

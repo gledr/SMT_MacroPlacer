@@ -44,6 +44,7 @@
 #include <def_utils.hpp>
 #include <database.hpp>
 #include <plotter.hpp>
+#include <hlclient.hpp>
 
 namespace Placer {
 
@@ -108,6 +109,7 @@ private:
     ParquetFrontend* m_parquet;
     EncodingUtils* m_encode;
     Plotter* m_plotter;
+    HLClient* m_hl_client;
 
     std::map<std::string, Macro*> m_id2macro;
     std::map<std::string, Terminal*> m_id2terminal;

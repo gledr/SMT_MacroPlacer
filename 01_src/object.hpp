@@ -208,6 +208,12 @@ protected:
     void set_solver_backend(eSolverBackend const & backend);
     eSolverBackend get_solver_backend() const;
 
+    void set_hl_backend_ip(std::string const & ip);
+    std::string get_hl_backend_ip();
+
+    void set_hl_backend_port(size_t const port);
+    size_t get_hl_backend_port();
+
     static z3::context m_z3_ctx;
     static size_t m_key_counter;
 
@@ -230,7 +236,9 @@ private:
     static std::string m_database_file;
     static std::string m_db_to_csv_script;
     static std::string m_ini_file;
+    static std::string m_hl_backend_ip;
     static eSolverBackend m_solver_backend;
+    static size_t m_hl_backend_port;
     static size_t m_timeout;
     static size_t m_bitwidth_orientation;
     static size_t m_partition_id;

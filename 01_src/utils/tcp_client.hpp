@@ -13,14 +13,15 @@
 #define TCP_CLIENT_HPP
 
 #include <object.hpp>
+#include <logger.hpp>
+#include <exception.hpp>
 
 #include <boost/asio.hpp>
 
 namespace Placer::Utils {
     
-    constexpr char DELIMITER = '\n';
-    constexpr char IP[] = "127.0.0.1";
-    constexpr size_t PORT = 1111;
+constexpr char DELIMITER[] = "#\n#";
+constexpr size_t DELIMITER_DIGITS = 3;
     
 /**
  * @class TCPClient
@@ -41,6 +42,7 @@ public:
     std::string receive();
 
 private:
+    Logger* m_logger;
     std::string strip_delimiter(std::string const & data);
     std::string add_delimiter(std::string const & data);
 

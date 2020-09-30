@@ -177,6 +177,13 @@ public:
 
     void write_lef(std::string const & filename);
     void write_def(std::string const & filename);
+    
+    void connection_retry();
+    void connect_to_backend(std::string const & ip, int const port);
+    void send(size_t const bytes);
+    
+    void start_serialize();
+    void end_serialize();
 
 private:
     Logger();

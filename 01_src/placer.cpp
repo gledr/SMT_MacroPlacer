@@ -157,7 +157,7 @@ void MacroPlacer::read_configuration()
         this->set_log_name("placer.log");
         this->set_database_file("results.db");
         this->set_db_to_csv_script(this->get_base_path() + "/04_configuration/db_to_csv.sh");
-        this->set_hl_backend_ip("127.0.0.1");
+        this->set_hl_backend_ip("140.78.161.14");
         this->set_hl_backend_port(1111);
 
         fs::create_directories(this->get_results_directory() + "/" + std::to_string(this->get_results_id()));

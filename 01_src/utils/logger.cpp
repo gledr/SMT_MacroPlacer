@@ -612,3 +612,35 @@ void Logger::optimathsat_shell_mode()
 {
     LOG(eInfo) << "Invoke OptiMathSat Solver using Shell";
 }
+
+void Logger::connect_to_backend(std::string const & ip, int const port)
+{
+    std::stringstream msg;
+    msg << "Connection to Backend (" << ip << ":" << std::to_string(port) << ")"; 
+    
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::send(size_t const bytes)
+{
+    std::stringstream msg;
+    msg << "Sending Data (" << bytes << " bytes)";
+    
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::connection_retry()
+{
+    LOG(eInfo) << "Could not connect!"; 
+    LOG(eInfo) << "Retry in 5 sec";
+}
+
+void Logger::start_serialize()
+{
+    LOG(eInfo) << "Starting Google Protobuf Serialization";
+}
+
+void Logger::end_serialize()
+{
+    LOG(eInfo) << "Finished Google Protobuf Serialization";
+}

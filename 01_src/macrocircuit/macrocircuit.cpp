@@ -321,6 +321,7 @@ void MacroCircuit::encode()
         this->encode_parquet();
     } else if (hl_mode){
         m_hl_client->connect();
+        std::cout << "Connected to Server..." << std::endl;
     } else {
         this->encode_smt();
     }
@@ -371,8 +372,12 @@ void MacroCircuit::place()
         m_parquet->store_bookshelf_results();
         m_solutions = 1;
     } else if (hl_mode){
+        m_hl_client->set_macros(m_macros);
+        m_hl_client->set_layout(m_layout);
         m_hl_client->transmit_problem();
         m_hl_client->solve_problem();
+        m_hl_client->get_solution();
+        m_hl_client->disconnect();
     } else {
         if (this->get_solver_backend() == eZ3){
             if (this->get_z3_shell_mode()){

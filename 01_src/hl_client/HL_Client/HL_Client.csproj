@@ -1,8 +1,57 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp3.1</TargetFramework>
   </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Google.Protobuf" Version="3.13.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="HEAL.Attic">
+      <HintPath>..\..\..\..\core\trunk\bin\HEAL.Attic.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Algorithms.GeneticAlgorithm-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Algorithms.GeneticAlgorithm-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Collections-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Collections-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Common-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Common-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Core-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Core-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Data-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Data-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Encodings.IntegerVectorEncoding-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Encodings.IntegerVectorEncoding-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Operators-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Operators-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Optimization-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Optimization-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Optimization.Operators-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Optimization.Operators-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.ParallelEngine-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.ParallelEngine-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Parameters-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.Parameters-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.PluginInfrastructure-3.3">
+      <HintPath>..\..\..\..\core\trunk\bin\HeuristicLab.PluginInfrastructure-3.3.dll</HintPath>
+    </Reference>
+    <Reference Include="HeuristicLab.Problems.LayoutOptimization">
+      <HintPath>..\..\..\..\core\branches\HeuristicLab.Problems.LayoutOptimization\HeuristicLab.Problems.LayoutOptimization\obj\Debug\HeuristicLab.Problems.LayoutOptimization.dll</HintPath>
+    </Reference>
+  </ItemGroup>
 
 </Project>

@@ -2,6 +2,12 @@
 using System.Text;
 using System.Net;
 using System.Net.Sockets;
+using HeuristicLab.Algorithms.GeneticAlgorithm;
+using HeuristicLab.Problems.LayoutOptimization;
+using HeuristicLab.Data;
+using HeuristicLab.ParallelEngine;
+using Google.Protobuf;
+using PlacerProto;
 
 namespace HL_Client
 {
@@ -20,7 +26,7 @@ namespace HL_Client
         private NetworkStream m_stream;
         private enum BackendMode { eInit, eSetProblem, eSolve, eGetSolution, eTerminate };
         private BackendMode m_state;
-
+        PlacerProto.MacroCircuit m_macro_circuit;
         #endregion
 
 
@@ -35,7 +41,6 @@ namespace HL_Client
         {
             m_port = 0;
             m_server = null;
-
         }
 
         public void listen()
@@ -58,14 +63,14 @@ namespace HL_Client
                         break;
 
                     case BackendMode.eSetProblem:
-                        string msg = this.receive(); 
-                        System.Console.WriteLine(msg);
+                        string msg = this.receive();
+                        this.set_problem(msg);
                         m_state = this.next_state();
 
                         break;
 
                     case BackendMode.eSolve:
-
+                        this.solve();
                         m_state = this.next_state();
                         break;
 
@@ -143,9 +148,34 @@ namespace HL_Client
             m_client.Close();
         }
 
-        void set_problem(byte[] data)
+        void set_problem(string data)
         {
+            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
+            m_macro_circuit = MacroCircuit.Parser.ParseFrom(enc.GetBytes(data));
+        }
 
+        void solve()
+        {
+            GeneticAlgorithm algo = new GeneticAlgorithm();
+            LayoutOptimizationProblem prob = new LayoutOptimizationProblem();
+
+            prob.Macros = new IntMatrix(new[,] {
+                { 400, 200 },
+                { 600, 400 },
+                { 300, 100 }
+            });
+
+            algo.Problem = prob;
+            algo.MaximumGenerations.Value = 10;
+            algo.Engine = new ParallelEngine();
+
+            algo.Prepare();
+            algo.Start();
+
+            foreach (var res in algo.Results)
+            {
+                Console.WriteLine($"{res.Name}: {res.Value}");
+            }
         }
 
         void write(string msg)
@@ -156,11 +186,12 @@ namespace HL_Client
 
        string receive()
         {
-            Byte[] bytes = new Byte[256];
+            Byte[] bytes = new Byte[2048];
             int len = m_stream.Read(bytes, 0, bytes.Length);
             String tmp = System.Text.Encoding.ASCII.GetString(bytes, 0, len);
-
-            return this.strip_delimiter(tmp);
+            tmp = this.strip_delimiter(tmp);
+            System.Console.WriteLine("In: {0}", tmp);
+            return tmp;
         }
       
     }

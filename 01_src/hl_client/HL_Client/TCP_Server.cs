@@ -8,6 +8,9 @@ using HeuristicLab.Data;
 using HeuristicLab.ParallelEngine;
 using Google.Protobuf;
 using PlacerProto;
+using System.Data.SqlTypes;
+using System.Collections.Generic;
+using System.Runtime.InteropServices;
 
 namespace HL_Client
 {
@@ -19,6 +22,8 @@ namespace HL_Client
         private readonly string SOLVE_PROBLEM_TAG = "#**#SOLVEPROBLEM#**#";
         private readonly string GET_SOLUTION_TAG = "#**#GETSOLUTION#**#";
         private readonly string TERMINATE_SERVER_TAG = "#**#TERMINATESERVER#**#";
+        private readonly string[] DELIMITER = { "#\n#"};
+        private readonly uint DELIIMITER_DIGITS = 3;
 
         private int m_port;
         private TcpListener m_server;
@@ -26,6 +31,8 @@ namespace HL_Client
         private NetworkStream m_stream;
         private enum BackendMode { eInit, eSetProblem, eSolve, eGetSolution, eTerminate };
         private BackendMode m_state;
+        private List<byte[]> m_traffic_in;
+        private int m_pc;
         PlacerProto.MacroCircuit m_macro_circuit;
         #endregion
 
@@ -35,6 +42,8 @@ namespace HL_Client
             m_port = port;
             m_server = new TcpListener(IPAddress.Any, m_port);
             m_state = BackendMode.eInit;
+            m_traffic_in = new List<byte[]>();
+            m_pc = 0;
         }
 
         ~TCP_Server()
@@ -63,10 +72,9 @@ namespace HL_Client
                         break;
 
                     case BackendMode.eSetProblem:
-                        string msg = this.receive();
+                        byte[] msg = this.receive();
                         this.set_problem(msg);
                         m_state = this.next_state();
-
                         break;
 
                     case BackendMode.eSolve:
@@ -75,7 +83,7 @@ namespace HL_Client
                         break;
 
                     case BackendMode.eGetSolution:
-
+                        this.get_solution();
                         m_state = this.next_state();
                         break;
 
@@ -96,8 +104,9 @@ namespace HL_Client
         }
 
         BackendMode next_state()
-        {
-            string msg = this.receive();      
+        { 
+            byte[] data = this.receive();
+            string msg = System.Text.Encoding.ASCII.GetString(data);
             BackendMode ret_val = BackendMode.eInit;
 
             if (msg == INIT_TAG)
@@ -127,6 +136,7 @@ namespace HL_Client
             }
             else
             {
+                System.Console.WriteLine(msg);
                 throw new NotImplementedException();
             }
 
@@ -148,17 +158,18 @@ namespace HL_Client
             m_client.Close();
         }
 
-        void set_problem(string data)
+        void set_problem(byte[] data)
         {
-            System.Text.ASCIIEncoding enc = new System.Text.ASCIIEncoding();
-            m_macro_circuit = MacroCircuit.Parser.ParseFrom(enc.GetBytes(data));
+            m_macro_circuit = MacroCircuit.Parser.ParseFrom(data);
         }
 
         void solve()
         {
+            System.Console.WriteLine("Solve");
+            
             GeneticAlgorithm algo = new GeneticAlgorithm();
             LayoutOptimizationProblem prob = new LayoutOptimizationProblem();
-
+            
             prob.Macros = new IntMatrix(new[,] {
                 { 400, 200 },
                 { 600, 400 },
@@ -174,25 +185,81 @@ namespace HL_Client
 
             foreach (var res in algo.Results)
             {
-                Console.WriteLine($"{res.Name}: {res.Value}");
+                Console.WriteLine("{0} : {1}", res.Name, res.Value); 
             }
+
+            
+        }
+
+        void get_solution()
+        {
+            System.Console.WriteLine("Get Solution");
+            this.write("ACK#\n#");
         }
 
         void write(string msg)
         {
+            System.Console.WriteLine("Answer {0}", msg);
             byte[] data = Encoding.ASCII.GetBytes(this.add_delimiter(msg));
             m_stream.Write(data, 0, data.Length);
         }
 
-       string receive()
+        byte[] receive()
         {
-            Byte[] bytes = new Byte[2048];
-            int len = m_stream.Read(bytes, 0, bytes.Length);
-            String tmp = System.Text.Encoding.ASCII.GetString(bytes, 0, len);
-            tmp = this.strip_delimiter(tmp);
-            System.Console.WriteLine("In: {0}", tmp);
-            return tmp;
+            // Still Data Availle in the Buffer
+            if ((m_traffic_in.Count > 0) &&  (m_pc < m_traffic_in.Count))
+            {
+                int pos = m_pc;
+                m_pc++;
+                return m_traffic_in[pos];
+            // Check Socket for Data
+            } else
+            {
+                Byte[] bytes = new Byte[2048];
+                int len = m_stream.Read(bytes, 0, bytes.Length);
+                Byte[] bytes_cut = new Byte[len];
+                Array.Copy(bytes, bytes_cut, len);
+
+                byte[] pattern = new byte[] {35, 10, 35 };
+
+                List<int> index = new List<int>();
+
+                for (int i = 0; i < len-2; ++i)
+                {
+                    if (bytes_cut[i] == pattern[0] && bytes_cut[i+1] == pattern[1] && bytes_cut[i+2] == pattern[2])
+                    {
+                        index.Add(i);
+                    }
+                }
+                
+                List<byte[]> data = new List<byte[]>();
+                for (int i = 0; i < index.Count; ++i)
+                {
+                    if (i == 0)
+                    {
+                        int frame_len = index[0];
+                        Byte[] tmp = new Byte[frame_len];
+                        Array.Copy(bytes_cut, tmp, frame_len);
+                        data.Add(tmp);
+                    }
+                    else
+                    {
+                        int frame_len = index[i] - index[i-1] - 3;
+                        Byte[] tmp = new Byte[frame_len];
+                        
+                        Array.Copy(bytes_cut, index[i-1]+3, tmp,0, frame_len);
+                        data.Add(tmp);
+                    }
+                }
+
+                for (int i = 0; i < data.Count; ++i)
+                {
+                    m_traffic_in.Add(data[i]);
+                }
+                int pos = m_pc;
+                m_pc++;
+                return m_traffic_in[pos];
+            }
         }
-      
     }
 }

@@ -1,4 +1,6 @@
 ﻿using System;
+using Google.Protobuf;
+using PlacerProto;
 
 namespace HL_Client
 {

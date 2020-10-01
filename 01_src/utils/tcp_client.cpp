@@ -45,6 +45,7 @@ void TCPClient::connect ()
             m_logger->connect_to_backend(this->get_hl_backend_ip(), this->get_hl_backend_port());
             m_socket->connect(tcp::endpoint(address::from_string(this->get_hl_backend_ip()), this->get_hl_backend_port()));
             success = true;
+            m_logger->connected();
         } catch (boost::system::system_error const & exp){
             m_logger->connection_retry();
             sleep(5);
@@ -85,11 +86,12 @@ std::string TCPClient::receive()
     boost::asio::streambuf receive_buffer;
 
     // Use a Delimiter to identify end of stream
-    boost::asio::read_until(*m_socket,
+    size_t bytes = boost::asio::read_until(*m_socket,
                       receive_buffer,
                       DELIMITER,
                       m_error);
 
+    m_logger->receive(bytes);
     if( m_error && m_error != boost::asio::error::eof) {
         throw PlacerException(m_error.message());
     }

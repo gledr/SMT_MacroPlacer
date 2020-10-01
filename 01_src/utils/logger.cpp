@@ -616,15 +616,28 @@ void Logger::optimathsat_shell_mode()
 void Logger::connect_to_backend(std::string const & ip, int const port)
 {
     std::stringstream msg;
-    msg << "Connection to Backend (" << ip << ":" << std::to_string(port) << ")"; 
+    msg << "Connecting to Backend (" << ip << ":" << std::to_string(port) << ")"; 
     
     LOG(eInfo) << msg.str();
+}
+
+void Logger::connected()
+{
+    LOG(eInfo) << "Connected :)";
 }
 
 void Logger::send(size_t const bytes)
 {
     std::stringstream msg;
     msg << "Sending Data (" << bytes << " bytes)";
+    
+    LOG(eInfo) << msg.str();
+}
+
+void Logger::receive(size_t const bytes)
+{
+    std::stringstream msg;
+    msg << "Receiving Data (" << bytes << " bytes)";
     
     LOG(eInfo) << msg.str();
 }
@@ -643,4 +656,18 @@ void Logger::start_serialize()
 void Logger::end_serialize()
 {
     LOG(eInfo) << "Finished Google Protobuf Serialization";
+}
+
+void Logger::start_deserialize()
+{
+    LOG(eInfo) << "Starting Google Protobuf Deserialization";
+}
+
+void Logger::end_deserialize()
+{
+    LOG(eInfo) << "Finished Google Protobuf Deserialization";
+}
+void Logger::invoke_heuristics_lab()
+{
+    LOG(eInfo) << "Invoking Remote Heuristics Labs ...";
 }

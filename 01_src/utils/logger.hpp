@@ -73,6 +73,7 @@ public:
 
     void solve_optimize();
     void solve_solution();
+    void invoke_heuristics_lab();
 
     void z3_api_mode();
     void z3_shell_mode();
@@ -180,10 +181,16 @@ public:
     
     void connection_retry();
     void connect_to_backend(std::string const & ip, int const port);
+    void connected();
+    
     void send(size_t const bytes);
+    void receive(size_t const bytes);
     
     void start_serialize();
     void end_serialize();
+    
+    void start_deserialize();
+    void end_deserialize();
 
 private:
     Logger();

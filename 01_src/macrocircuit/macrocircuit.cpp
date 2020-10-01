@@ -321,7 +321,6 @@ void MacroCircuit::encode()
         this->encode_parquet();
     } else if (hl_mode){
         m_hl_client->connect();
-        std::cout << "Connected to Server..." << std::endl;
     } else {
         this->encode_smt();
     }

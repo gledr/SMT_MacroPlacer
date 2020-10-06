@@ -95,9 +95,17 @@ std::string TCPClient::receive()
     if( m_error && m_error != boost::asio::error::eof) {
         throw PlacerException(m_error.message());
     }
-
-    std::string retval(boost::asio::buffer_cast<const char*>(receive_buffer.data()));
-    return this->strip_delimiter(retval);
+     std::string retval{
+        buffers_begin(receive_buffer.data()),
+        buffers_begin(receive_buffer.data()) + bytes - DELIMITER_DIGITS};
+          
+    receive_buffer.consume(bytes);
+  
+    if (retval.size() + DELIMITER_DIGITS != bytes){
+            throw PlacerException("TCP/IP Receive Data Failed!");
+    }
+   
+    return retval;
 }
 
 /**

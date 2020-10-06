@@ -20,7 +20,7 @@
 
 namespace Placer::Utils {
     
-constexpr char DELIMITER[] = "#\n#";
+constexpr char DELIMITER[] = "#$#";
 constexpr size_t DELIMITER_DIGITS = 3;
     
 /**

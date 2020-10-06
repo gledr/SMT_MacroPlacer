@@ -19,6 +19,7 @@ using HeuristicLab.Data;
 using HeuristicLab.ParallelEngine;
 using PlacerProto;
 using System.Collections.Generic;
+using Google.Protobuf;
 
 namespace HL_Client
 {
@@ -30,7 +31,7 @@ namespace HL_Client
         private readonly string SOLVE_PROBLEM_TAG = "#**#SOLVEPROBLEM#**#";
         private readonly string GET_SOLUTION_TAG = "#**#GETSOLUTION#**#";
         private readonly string TERMINATE_SERVER_TAG = "#**#TERMINATESERVER#**#";
-        private readonly string[] DELIMITER = { "#\n#"};
+        private readonly string[] DELIMITER = { "#$#"};
 
         private int m_port;
         private TcpListener m_server;
@@ -73,6 +74,7 @@ namespace HL_Client
         public void handle_requests()
         {
             m_server.Start();
+            Console.WriteLine("Listening to port: {0}", m_port);
             Console.Write("Waiting for SMT_MacroPlacer to connect ... ");
             m_client = m_server.AcceptTcpClient();
             Console.WriteLine("Connected!");
@@ -210,7 +212,7 @@ namespace HL_Client
         private void solve()
         {
             System.Console.WriteLine("Invoking Heuristics Lab for Placement");
-            System.Console.WriteLine("Utilizing GenericAlgorithm");
+            System.Console.WriteLine("Utilizing Generic Algorithm");
 
             GeneticAlgorithm algo = new GeneticAlgorithm();
             LayoutOptimizationProblem prob = new LayoutOptimizationProblem();
@@ -273,12 +275,37 @@ namespace HL_Client
                 m.Ly = 42;
             }
 
+            m_macro_circuit.L.Lx = 0;
+            m_macro_circuit.L.Ly = 0;
             m_macro_circuit.L.Ux = 100;
             m_macro_circuit.L.Uy = 100;
 
-            string serial = m_macro_circuit.ToString();
+            this.write(m_macro_circuit.ToByteArray());
+        }
 
-            this.write(serial);
+        /// <summary>
+        /// Write Data over TCP/IP
+        /// </summary>
+        /// <param name="msg"></param>
+        private void write(byte[] msg)
+        {
+            byte[] sendme = Combine(msg, System.Text.Encoding.ASCII.GetBytes(DELIMITER[0]));
+            System.Console.WriteLine("Send Byte Array ({0} Bytes)", sendme.Length);
+            m_stream.Write(sendme, 0, sendme.Length);
+        }
+
+        /// <summary>
+        /// Combine two Byte Arrays
+        /// </summary>
+        /// <param name="first"></param>
+        /// <param name="second"></param>
+        /// <returns></returns>
+        public static byte[] Combine(byte[] first, byte[] second)
+        {
+            byte[] ret = new byte[first.Length + second.Length];
+            Buffer.BlockCopy(first, 0, ret, 0, first.Length);
+            Buffer.BlockCopy(second, 0, ret, first.Length, second.Length);
+            return ret;
         }
 
         /// <summary>
@@ -287,8 +314,10 @@ namespace HL_Client
         /// <param name="msg"></param>
         private void write(string msg)
         {
+            System.Console.WriteLine(msg);
             string tmp = this.add_delimiter(msg);
             byte[] data = Encoding.ASCII.GetBytes(tmp);
+            System.Console.WriteLine(data.Length);
             m_stream.Write(data, 0, data.Length);
         }
 
@@ -309,10 +338,17 @@ namespace HL_Client
             {
                 Byte[] bytes = new Byte[2048];
                 int len = m_stream.Read(bytes, 0, bytes.Length);
+
+                if (len == 0)
+                {
+                    throw new System.InvalidProgramException("Client Socket Closed Unexpected!");
+                }
+
+                System.Console.WriteLine("Received {0} Bytes", len);
                 Byte[] bytes_cut = new Byte[len];
                 Array.Copy(bytes, bytes_cut, len);
 
-                byte[] pattern = new byte[] {35, 10, 35 };
+                byte[] pattern = new byte[] {35, 36, 35 };
 
                 List<int> index = new List<int>();
 
@@ -350,6 +386,7 @@ namespace HL_Client
                 }
                 int pos = m_pc;
                 m_pc++;
+                
                 return m_traffic_in[pos];
             }
         }

@@ -192,6 +192,10 @@ add_dependencies(smt_placer
     build_optimathsat
 )
 
+add_dependencies(bookshelf_converter
+	placer_utils
+)
+
 #add_dependencies(testbench_tcp_client
 #	placer_utils
 #)

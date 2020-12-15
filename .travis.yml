@@ -6,6 +6,7 @@ jobs:
     include:
         - os: linux
           dist: focal
+          UBUNTU=true
           compiler: g++
           addons:
             apt:
@@ -25,6 +26,13 @@ jobs:
                 - libz3-dev
                 - libjsoncpp-dev
                 - libsqlite3-dev
+				- protoc
+				- libprotobuf-dev
+        - os: linux
+          UBUNTU=false
+          services: docker
+          
+        
                 
 install:
   - echo "Install"

@@ -301,8 +301,6 @@ void MacroCircuit::partitioning()
  */
 void MacroCircuit::encode()
 {
-    bool hl_mode = true;
-    
     if (this->get_minimize_die_mode()){
         std::cout << Utils::Utils::get_bash_string_blink_red("Minimize Die Mode") << std::endl;
     } 
@@ -319,7 +317,7 @@ void MacroCircuit::encode()
 
     if (this->get_parquet_fp()){
         this->encode_parquet();
-    } else if (hl_mode){
+    } else if (this->get_solver_backend() == eHeuristicsLab){
         m_hl_client->connect();
     } else {
         this->encode_smt();
@@ -363,14 +361,13 @@ void MacroCircuit::encode_smt()
 void MacroCircuit::place()
 {
     m_timer->start_timer("total");
-    bool hl_mode = true;
     
     if (this->get_parquet_fp()){
         m_parquet->run_parquet();
         m_parquet->data_from_parquet();
         m_parquet->store_bookshelf_results();
         m_solutions = 1;
-    } else if (hl_mode){
+    } else if (this->get_solver_backend() == eHeuristicsLab){
         m_hl_client->set_macros(m_macros);
         m_hl_client->set_layout(m_layout);
         m_hl_client->transmit_problem();

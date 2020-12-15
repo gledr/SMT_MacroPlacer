@@ -26,7 +26,7 @@ namespace Placer {
 enum eRotation {eFixed, e2D, e4D};
 enum eLogic {eInt, eBitVector};
 enum eInputFormat {eLEFDEF, eBookshelf};
-enum eSolverBackend {eZ3, eOptiMathSat};
+enum eSolverBackend {eZ3, eOptiMathSat, eHeuristicsLab};
 
 enum eOrientation {
      eNorth     = 0,

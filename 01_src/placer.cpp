@@ -84,6 +84,8 @@ void MacroPlacer::read_configuration()
             (CMD_SUPPLEMENT,      po::value<std::string>(),                              CMD_SUPPLEMENT_TEXT)
             (CMD_SITE,            po::value<std::string>(),                              CMD_SITE_TEXT)
             (CMD_SOLVER_BACKEND,  po::value<std::string>()->default_value("z3"),         CMD_SOLVER_BACKEND_TEXT)
+            (CMD_HL_IP,           po::value<std::string>()->default_value("127.0.0.1"),  CMD_HL_IP_TEXT)
+            (CMD_HL_PORT,         po::value<size_t>()->default_value(1111),              CMD_HL_PORT_TEXT)
             (CMD_TIMEOUT,         po::value<size_t>()->default_value(60),                CMD_TIMEOUT_TEXT)
             (CMD_SOLUTIONS,       po::value<size_t>()->default_value(1),                 CMD_SOLUTIONS_TEXT)
             (CMD_INI_FILE,        po::value<std::string>()->default_value("config.ini"), CMD_INI_FILE_TEXT);
@@ -282,6 +284,8 @@ void MacroPlacer::handle_configuration()
             this->set_solver_backend(eZ3);
         } else if (input == "optimathsat"){
             this->set_solver_backend(eOptiMathSat);
+        } else if (input == "hl"){
+            this->set_solver_backend(eHeuristicsLab);
         } else {
             throw std::runtime_error("Invalid Solver Backend!");
         }

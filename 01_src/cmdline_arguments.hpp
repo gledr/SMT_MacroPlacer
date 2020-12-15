@@ -67,7 +67,7 @@ namespace Placer {
     constexpr const char CMD_SOLVER_BACKEND[]
         = "solver-backend";
     constexpr const char CMD_SOLVER_BACKEND_TEXT[]
-        = "Select SMT Solving Backend";
+        = "Select Solving Backend";
 
     constexpr const char CMD_PARETO[] 
         = "pareto";
@@ -171,6 +171,16 @@ namespace Placer {
         = "partition-count";
     constexpr const char CMD_PARTITION_COUNT_TEXT[] 
         ="Number of Partitions";
+    
+    constexpr const char CMD_HL_IP[]
+        = "hl-ip";
+    constexpr const char CMD_HL_IP_TEXT[]
+        =   "IP Address of Heuristics Lab Backend";
+        
+    constexpr const char CMD_HL_PORT[]
+        = "hl-port";
+    constexpr const char CMD_HL_PORT_TEXT[]
+        = "Port of Heuristics Lab Backend";
 
 } /* namespace Placer */
 

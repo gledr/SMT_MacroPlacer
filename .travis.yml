@@ -26,13 +26,8 @@ jobs:
                 - libz3-dev
                 - libjsoncpp-dev
                 - libsqlite3-dev
+                - protoc          
 
-        - os: linux
-          UBUNTU=false
-          services: docker
-          
-        
-                
 install:
   - echo "Install"
 

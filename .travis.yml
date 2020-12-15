@@ -27,7 +27,7 @@ jobs:
                 - libjsoncpp-dev
                 - libsqlite3-dev
                 - protoc
-                - libprotobuf-dev
+
         - os: linux
           UBUNTU=false
           services: docker

@@ -1,4 +1,3 @@
-
 find_package(Python2 COMPONENTS Development NumPy)
 
 if(PLACER_ENABLE_PARQUET)
@@ -56,6 +55,12 @@ else (PLACER_BUILD_JSONCPP)
     pkg_check_modules(JSONCPP jsoncpp)
 endif(PLACER_BUILD_JSONCPP)
 
+if(PLACER_BUILD_SQLITE3)
+	set(SQLITE3_LIBRARIES ${THIRD_PARTY_LIB}/libsqlite3.a)
+else (PLACER_BUILD_SQLITE3)
+	set(SQLITE3_LIBRARIES sqlite3)
+endif(PLACER_BUILD_SQLITE3)
+
 add_definitions(-D_CPPUNWIND)
 
 ############################################################
@@ -103,6 +108,7 @@ set_source_files_properties(
 set(CMAKE_BUILD_TYPE Debug)
 set(CMAKE_CXX_FLAGS_DEBUG "-ggdb3")
 set(CMAKE_CXX_FLAGS_RELEASE "-O3")
+set(LIB_PLACER_UTILS ${PROJECT_SOURCE_DIR}/lib/libplacer_utils.a)
 
 add_library(placer_utils
     utils/timer.cpp
@@ -115,8 +121,8 @@ add_library(placer_utils
     utils/tcp_client.cpp
 )
 
-target_link_libraries (placer_utils 
-    ${THIRD_PARTY_LIB}/libsqlite3.a
+target_link_libraries (placer_utils
+      ${SQLITE3_LIBRARIES}
 )
 
 add_executable(smt_placer
@@ -186,6 +192,10 @@ add_dependencies(smt_placer
     build_optimathsat
 )
 
+add_dependencies(testbench_tcp_client
+	placer_utils
+	)
+
 if(PLACER_BUILD_Z3)
     add_dependencies(smt_placer build_z3)
     add_dependencies(bookshelf_converter build_z3)
@@ -201,7 +211,11 @@ if (PLACER_BUILD_JSONCPP)
     add_dependencies(bookshelf_converter build_jsoncpp)
 endif(PLACER_BUILD_JSONCPP)
 
-target_link_libraries(smt_placer PUBLIC
+if (PLACER_BUILD_SQLITE3)
+   add_dependencies(placer_utils build_sqlite3)
+endif(PLACER_BUILD_SQLITE3)
+
+target_link_libraries(smt_placer
     ${Boost_LIBRARIES}
     Python2::Python
     ${JSONCPP_LIBRARIES}
@@ -213,9 +227,10 @@ target_link_libraries(smt_placer PUBLIC
     ${KAHYPAR_LIBRARIES}
     ${PARQUET_LIBRARIES}
     pthread
-    dl
-    placer_utils
-    libprotobuf.a
+    ${LIB_PLACER_UTILS}
+	${SQLITE3_LIBRARIES}
+	dl
+	libprotobuf.a
 )
 
 target_include_directories(smt_placer PRIVATE 
@@ -230,7 +245,7 @@ target_link_libraries(bookshelf_converter
     ${Z3_LIBRARIES}
     pthread
     dl
-    placer_utils
+    ${LIB_PLACER_UTILS}
 )
 
 target_link_libraries(testbench_tcp_client
@@ -239,5 +254,5 @@ target_link_libraries(testbench_tcp_client
     ${Z3_LIBRARIES}
     pthread
     dl
-    placer_utils
+    ${LIB_PLACER_UTILS}
 )

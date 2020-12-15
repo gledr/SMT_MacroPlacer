@@ -7,7 +7,7 @@ set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PROJECT_SOURCE_DIR}/lib)
 
 option(PLACER_BUILD_Z3 
-    "Download and Build Z3 or use System wide installed Z3 version" ON)
+    "Download and Build Z3 or use System wide installed Z3 version" OFF)
 option(PLACER_BUILD_BOOST 
     "Download and Build Boost or use System wide installed Boost version" OFF)
 option(PLACER_BUILD_JSONCPP 
@@ -18,7 +18,7 @@ option(PLACER_BUILD_SQLITE3
 option (PLACER_ENABLE_PARQUET "Build the Parquet Placer" OFF)
 option (PLACER_ENABLE_KAHYPAR "Enable Kahypar Based Partitioning" OFF)
 option (ENABLE_DOXYGEN "Create Doxygen based Documentaation" OFF)
-option (ENABLE_CCACHE "Enable Compiler Cache for faster compilation" OFF)
+option (ENABLE_CCACHE "Enable Compiler Cache for faster compilation" ON)
 
 if (ENABLE_DOXYGEN)
     find_package(Doxygen)

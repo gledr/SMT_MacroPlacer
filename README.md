@@ -30,6 +30,8 @@ In oder to resolve the packages needed for Ubuntu 20.04 LTS, please make sure th
 - z3
 - libz3-dev
 - cmake
+- protoc
+- libprotobuf-dev
 
 If the package manager can not resolve the Python 2 packages, please add the **universe** repository to your system via "apt-add-repository universe".
 

@@ -11,7 +11,7 @@
 #! /bin/bash
 
 python extract_version.py
-
+CURRENT_PATH=$(pwd)
 cd ..
 BASE_PATH=$(pwd)
 INSTALL_PATH=~/.smt_placer
@@ -31,3 +31,6 @@ if [ -d $BASE_PATH/01_src/version.hpp ]; then
 fi
 
 mv $BASE_PATH/04_configuration/version.hpp $BASE_PATH/01_src/
+
+cd $CURRENT_PATH
+protoc --cpp_out=$BASE_PATH/01_src/macrocircuit/ smt_placer.proto 

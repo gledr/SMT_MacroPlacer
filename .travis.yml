@@ -6,7 +6,6 @@ jobs:
     include:
         - os: linux
           dist: focal
-          UBUNTU=true
           compiler: g++
           addons:
             apt:

@@ -25,7 +25,7 @@ jobs:
                 - libz3-dev
                 - libjsoncpp-dev
                 - libsqlite3-dev
-                - protoc          
+                - protobuf-compiler          
 
 install:
   - echo "Install"

@@ -26,7 +26,7 @@ jobs:
                 - libjsoncpp-dev
                 - libsqlite3-dev
                 - protobuf-compiler          
-
+                - libprotobuf-dev
 install:
   - echo "Install"
 

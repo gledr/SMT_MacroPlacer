@@ -26,7 +26,6 @@ jobs:
                 - libz3-dev
                 - libjsoncpp-dev
                 - libsqlite3-dev
-                - protoc
 
         - os: linux
           UBUNTU=false

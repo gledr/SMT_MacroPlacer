@@ -44,7 +44,7 @@ if (PLACER_BUILD_BOOST)
     )
     set (Boost_INCLUDE_DIRS ${THIRD_PARTY_INCLUDE})
 else (PLACER_BUILD_BOOST)
-    find_package(Boost 1.69 REQUIRED COMPONENTS program_options filesystem)
+    find_package(Boost 1.71 REQUIRED COMPONENTS program_options filesystem)
 endif(PLACER_BUILD_BOOST)
 
 if (PLACER_BUILD_JSONCPP)
@@ -178,11 +178,11 @@ add_executable(bookshelf_converter
     compontents/supplementmacro.cpp
 )
 
-add_executable(testbench_tcp_client
-    object.cpp
-    utils/tcp_client.cpp
-    utils/testbench_tcp_client.cpp
-)
+#add_executable(testbench_tcp_client
+#   object.cpp
+#    utils/tcp_client.cpp
+#   utils/testbench_tcp_client.cpp
+#)
 
 add_dependencies(smt_placer
     def
@@ -192,9 +192,9 @@ add_dependencies(smt_placer
     build_optimathsat
 )
 
-add_dependencies(testbench_tcp_client
-	placer_utils
-	)
+#add_dependencies(testbench_tcp_client
+#	placer_utils
+#)
 
 if(PLACER_BUILD_Z3)
     add_dependencies(smt_placer build_z3)
@@ -248,11 +248,11 @@ target_link_libraries(bookshelf_converter
     ${LIB_PLACER_UTILS}
 )
 
-target_link_libraries(testbench_tcp_client
-    ${Boost_LIBRARIES}
-    ${JSONCPP_LIBRARIES}
-    ${Z3_LIBRARIES}
-    pthread
-    dl
-    ${LIB_PLACER_UTILS}
-)
+#target_link_libraries(testbench_tcp_client
+#   ${Boost_LIBRARIES}
+#  ${JSONCPP_LIBRARIES}
+# ${Z3_LIBRARIES}
+#    pthread
+#   dl
+#    ${LIB_PLACER_UTILS}
+#)

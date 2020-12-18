@@ -126,9 +126,6 @@ void HLClient::transmit_problem()
     this->serialize();
     this->configure_server(eSetProblem);
     std::string data = m_proto->SerializeAsString();
-    std::ofstream tmp("out.txt");
-    tmp << data;
-    tmp.close();
     m_tcp_client->send(data);
 
     this->configure_server(eInit);
@@ -231,3 +228,29 @@ Layout* HLClient::get_layout()
 {
     return m_layout;
 }
+
+/**
+ * @brief ...
+ * 
+ * @param filename p_filename:...
+ */
+void HLClient::export_as_file(std::string const & filename)
+{
+    std::cout << "Writing Protobuf Content to " << filename << std::endl;
+    this->serialize();
+    std::string data = m_proto->SerializeAsString();
+    std::ofstream export_file(filename);
+    export_file << data;
+    export_file.close();
+}
+
+/**
+ * @brief ...
+ * 
+ * @param filename p_filename:...
+ */
+void HLClient::read_from_file(std::string const & filename)
+{
+    notimplemented_check();
+}
+

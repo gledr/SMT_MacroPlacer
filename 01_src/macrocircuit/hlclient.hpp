@@ -56,8 +56,12 @@ public:
     void configure_server(eBackendMode const mode);
 
     void transmit_problem();
-
+    
+    void export_as_file(std::string const & filename);
+  
     void get_solution();
+    
+    void read_from_file(std::string const & filename);
 
     void solve_problem();
 

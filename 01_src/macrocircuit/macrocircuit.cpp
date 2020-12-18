@@ -353,6 +353,10 @@ void MacroCircuit::encode_smt()
     }
 
     this->run_encoding();
+    m_hl_client->set_macros(m_macros);
+    m_hl_client->set_layout(m_layout);
+
+    m_hl_client->export_as_file(this->get_design_name() + "_proto.bin");
 }
 
 /**
